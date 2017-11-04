@@ -3,6 +3,7 @@
   width: 1200px;
   margin: 0 auto;
   line-height: 0;
+  position: relative;
 
   .background-row {
     .background-tile {
@@ -18,5 +19,15 @@
         background-color: green;
       }
     }
+  }
+
+  .hero {
+    height: 32px;
+    width: 32px;
+    background-color: pink;
+    position: absolute;
+    z-index: 1;
+
+    transition: top .15s linear, left .15s linear;
   }
 }

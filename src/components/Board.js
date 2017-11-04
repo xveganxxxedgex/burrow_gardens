@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import Tile1 from 'Maps/Tile1';
+import Hero from 'components/Characters/Hero';
 
 import 'less/Board.less';
 
@@ -16,7 +17,7 @@ class Board extends Component {
 
   createBackground(tile, tileIndex) {
     const backgroundClass = this.backgrounds[tile];
-    return <div className={`background-tile ${backgroundClass}`} key={`tile-${tileIndex}`}></div>;
+    return <div className={`background-tile ${backgroundClass}`} key={`tile-${tileIndex}`} />;
   }
 
   render() {
@@ -29,6 +30,7 @@ class Board extends Component {
             </div>
           );
         })}
+        <Hero />
       </div>
     )
   }
