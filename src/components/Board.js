@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import Tile1 from 'Maps/Tile1';
+import Tile1 from 'Maps/Tile1-1';
 
 import 'less/Board.less';
 
@@ -10,7 +10,8 @@ class Board extends Component {
 
     this.backgrounds = {
       B0: 'dirt',
-      B1: 'grass'
+      B1: 'grass',
+      B2: 'bush',
     };
   }
 
