@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" id="burrow_gardens_html_tag">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>Burrow Gardens</title>
+
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+
+  <% htmlWebpackPlugin.files.css.forEach(function(cssFile) { %>
+  <link href="<%= cssFile %>" rel="stylesheet">
+  <% }) %>
+</head>
+<body>
+  <div id="root"></div>
+  <% htmlWebpackPlugin.files.js.forEach(function(jsFile) { %>
+  <script src="<%= jsFile %>"></script>
+  <% }) %>
+</body>
+</html>
