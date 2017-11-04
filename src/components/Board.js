@@ -14,18 +14,18 @@ class Board extends Component {
     };
   }
 
-  createBackground(tile) {
+  createBackground(tile, tileIndex) {
     const backgroundClass = this.backgrounds[tile];
-    return <div className={`background-tile ${backgroundClass}`}></div>;
+    return <div className={`background-tile ${backgroundClass}`} key={`tile-${tileIndex}`}></div>;
   }
 
   render() {
     return (
       <div className="board">
-        {Tile1.map(row => {
+        {Tile1.map((row, rowIndex) => {
           return (
-            <div className="background-row">
-              {row.map(tile => this.createBackground(tile))}
+            <div className="background-row" key={`row-${rowIndex}`}>
+              {row.map((tile, tileIndex) => this.createBackground(tile, tileIndex))}
             </div>
           );
         })}
