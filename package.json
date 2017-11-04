@@ -36,6 +36,7 @@
     "babel-preset-react": "^6.22.0",
     "babel-preset-stage-0": "^6.22.0",
     "core-js": "^2.5.1",
+    "cross-env": "^5.1.1",
     "css-loader": "^0.28.7",
     "eslint": "^4.8.0",
     "eslint-plugin-import": "^2.6.1",
@@ -74,7 +75,7 @@
     "build": "npm run webpack",
     "builddev": "NODE_ENV=development npm run webpack",
     "lint": "eslint ./src",
-    "start": "NODE_ENV=development npm run dev-server",
+    "start": "cross-env NODE_ENV=development npm run dev-server",
     "startprod": "npm run dev-server",
     "dev-server": "node dev-server ./webpack/config",
     "webpack": "webpack --colors --progress --config ./webpack/config --bail"
