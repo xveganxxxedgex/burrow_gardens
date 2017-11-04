@@ -40,7 +40,11 @@ var config = {
     extensions: ['.js', '.json', '.jsx'],
     alias: {
       'moment$': 'moment/moment',
-    }
+    },
+    modules: [
+      'node_modules',
+      'src'
+    ]
   },
   devServer: {
     contentBase: path.resolve(pkg.config.buildDir),
