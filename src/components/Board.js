@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { branch } from 'baobab-react/higher-order';
 
 import Tile1 from 'Maps/Tile1-1';
 import Hero from 'components/Characters/Hero';
@@ -22,6 +23,7 @@ class Board extends Component {
   }
 
   render() {
+    const { tooltip } = this.props;
     return (
       <div className="board">
         {Tile1.map((row, rowIndex) => {

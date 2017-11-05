@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
+import { Overlay, Tooltip } from 'react-bootstrap';
+import { findDOMNode } from 'react-dom';
 import { branch } from 'baobab-react/higher-order';
 
 import Bunny from 'components/Characters/Bunny';
 
-import { updateHeroPosition } from 'actions';
+import { updateHeroPosition, setTooltip } from 'actions';
 
 @branch({
-  heroPosition: ['heroPosition']
+  heroPosition: ['heroPosition'],
+  tooltip: ['tooltip']
 })
 class Hero extends Component {
   constructor(props, context) {
@@ -14,7 +17,7 @@ class Hero extends Component {
 
     this.movePixels = 5;
 
-    this.directions = {
+    this.keyboardEvents = {
       // Direction keys
       38: 'up',
       40: 'down',
@@ -24,7 +27,9 @@ class Hero extends Component {
       87: 'up',
       83: 'down',
       65: 'left',
-      68: 'right'
+      68: 'right',
+      // Space Bar
+      32: 'space'
     };
 
     this.oppositeDirections = {
@@ -70,17 +75,17 @@ class Hero extends Component {
 
   getDirection(e) {
     const keycode = e.keyCode;
-    return this.directions[keycode];
+    return this.keyboardEvents[keycode];
   }
 
   setKeyDown(e) {
-    console.log(e.keyCode);
+    e.preventDefault();
     const { moving } = this.state;
     const direction = this.getDirection(e);
 
     if (direction == 'space') {
       // call space action method
-      // this.callAction();
+      this.callAction();
     } else {
       const oppositeDirection = this.oppositeDirections[direction];
       const directionIndex = moving.indexOf(direction);
@@ -151,15 +156,23 @@ class Hero extends Component {
 
   callAction() {
     // What to do when user hits space?
+    setTooltip("Space bar pressed");
   }
 
   render() {
-    const { heroPosition: { x, y, } } = this.props;
+    const { heroPosition: { x, y }, tooltip } = this.props;
+    console.log(tooltip, this.hero);
     return (
-      <Bunny
-        name="hero"
-        style={{ top: y + 'px', left: x + 'px' }}
-      />
+      <div style={{ position: 'absolute' }}>
+        <Bunny
+          name="hero"
+          style={{ top: y + 'px', left: x + 'px' }}
+          ref={(hero) => { this.hero = hero }}
+        />
+        <Overlay placement='top' show={!!tooltip} container={this} target={() => findDOMNode(this.hero)}>
+          <Tooltip id="heroToolTip" className="in">{ tooltip }</Tooltip>
+        </Overlay>
+      </div>
     );
   }
 }
