@@ -1,4 +1,5 @@
 import tree from 'state';
+let tooltipTimeout;
 
 export function updateHeroPosition(newPos) {
   const cursor = tree.select('heroPosition');
@@ -8,10 +9,13 @@ export function updateHeroPosition(newPos) {
 export function setTooltip(text, duration = 3000) {
   const cursor = tree.select('tooltip');
   cursor.set(text);
+  tree.commit();
 
   if (text) {
-    setTimeout(() => {
+    tooltipTimeout = setTimeout(() => {
       setTooltip(null);
     }, duration);
+  } else {
+    clearTimeout(tooltipTimeout);
   }
 }
