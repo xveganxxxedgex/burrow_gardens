@@ -15,10 +15,16 @@ class Hero extends Component {
     this.movePixels = 5;
 
     this.directions = {
+      // Direction keys
       38: 'up',
       40: 'down',
       37: 'left',
-      39: 'right'
+      39: 'right',
+      // WASD keys
+      87: 'up',
+      83: 'down',
+      65: 'left',
+      68: 'right'
     };
 
     this.oppositeDirections = {
@@ -32,6 +38,7 @@ class Hero extends Component {
     this.getDirection = this.getDirection.bind(this);
     this.setKeyDown = this.setKeyDown.bind(this);
     this.setKeyUp = this.setKeyUp.bind(this);
+    this.callAction = this.callAction.bind(this);
 
     this.state = {
       moving: []
@@ -52,6 +59,11 @@ class Hero extends Component {
     }
   }
 
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.setKeyDown);
+    document.removeEventListener('keyup', this.setKeyUp);
+  }
+
   getPosNumber(pos) {
     return Number(pos.replace('px', ''));
   }
@@ -62,19 +74,26 @@ class Hero extends Component {
   }
 
   setKeyDown(e) {
+    console.log(e.keyCode);
     const { moving } = this.state;
     const direction = this.getDirection(e);
-    const oppositeDirection = this.oppositeDirections[direction];
-    const directionIndex = moving.indexOf(direction);
-    const oppositeDirectionIndex = moving.indexOf(oppositeDirection);
 
-    if (directionIndex == -1 && oppositeDirectionIndex == -1) {
-      this.setState({
-        moving: [...moving, direction]
-      });
+    if (direction == 'space') {
+      // call space action method
+      // this.callAction();
+    } else {
+      const oppositeDirection = this.oppositeDirections[direction];
+      const directionIndex = moving.indexOf(direction);
+      const oppositeDirectionIndex = moving.indexOf(oppositeDirection);
 
-      if (!this.movingTimeout) {
-        this.movePlayer();
+      if (directionIndex == -1 && oppositeDirectionIndex == -1) {
+        this.setState({
+          moving: [...moving, direction]
+        });
+
+        if (!this.movingTimeout) {
+          this.movePlayer();
+        }
       }
     }
   }
@@ -128,6 +147,10 @@ class Hero extends Component {
     updateHeroPosition({ x: newX, y: newY });
 
     this.movingTimeout = setTimeout(this.movePlayer, 50);
+  }
+
+  callAction() {
+    // What to do when user hits space?
   }
 
   render() {
