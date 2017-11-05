@@ -6,12 +6,14 @@ class Bunny extends Component {
   }
 
   render() {
-    const { name, style } = this.props;
+    const { name, style, children } = this.props;
     return (
       <div
         className={`bunny ${name}`}
         style={style || {}}
-      />
+      >
+        {children}
+      </div>
     );
   }
 }

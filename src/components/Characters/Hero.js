@@ -161,18 +161,22 @@ class Hero extends Component {
 
   render() {
     const { heroPosition: { x, y }, tooltip } = this.props;
-    console.log(tooltip, this.hero);
     return (
-      <div style={{ position: 'absolute' }}>
-        <Bunny
-          name="hero"
-          style={{ top: y + 'px', left: x + 'px' }}
-          ref={(hero) => { this.hero = hero }}
-        />
-        <Overlay placement='top' show={!!tooltip} container={this} target={() => findDOMNode(this.hero)}>
+      <Bunny
+        name="hero"
+        style={{ top: y + 'px', left: x + 'px' }}
+        ref={(hero) => { this.hero = hero }}
+      >
+        <Overlay
+          placement='top'
+          show={!!tooltip}
+          animation={false}
+          container={this} 
+          target={() => findDOMNode(this.hero)}
+        >
           <Tooltip id="heroToolTip" className="in">{ tooltip }</Tooltip>
         </Overlay>
-      </div>
+      </Bunny>
     );
   }
 }

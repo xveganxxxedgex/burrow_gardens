@@ -9,7 +9,9 @@ export function setTooltip(text, duration = 3000) {
   const cursor = tree.select('tooltip');
   cursor.set(text);
 
-  setTimeout(() => {
-    cursor.set();
-  }, duration);
+  if (text) {
+    setTimeout(() => {
+      setTooltip(null);
+    }, duration);
+  }
 }
