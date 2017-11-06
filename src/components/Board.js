@@ -5,8 +5,7 @@ import { branch } from 'baobab-react/higher-order';
 import Hero from 'components/Characters/Hero';
 import Scenery from 'components/Scenery';
 
-import { setBoardDimensions } from 'actions';
-import { getTile } from 'Maps';
+import { setBoardDimensions, getTile } from 'actions';
 
 import 'less/Board.less';
 

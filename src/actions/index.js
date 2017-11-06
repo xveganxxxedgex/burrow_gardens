@@ -1,4 +1,6 @@
 import tree from 'state';
+import * as Tiles from 'Maps';
+
 let tooltipTimeout;
 
 export function updateHeroPosition(newPos) {
@@ -44,4 +46,8 @@ export function setBoardDimensions(board) {
 
   const cursor = tree.select('boardDimensions');
   cursor.set(newDimensions);
+}
+
+export function getTile(x, y) {
+  return Tiles[`Tile${x}_${y}`];
 }

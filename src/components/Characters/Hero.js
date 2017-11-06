@@ -164,16 +164,16 @@ class Hero extends Component {
     for (let m = 0; m < moving.length; m++) {
       switch(moving[m]) {
         case 'up':
-          newY = Math.max(0, (newY - this.movePixels));
+          newY = Math.max((0 - (heroRect.height / 2)), (newY - this.movePixels));
           break;
         case 'down':
-          newY = Math.min((height - heroRect.height), (newY + this.movePixels));
+          newY = Math.min((height - (heroRect.height / 2)), (newY + this.movePixels));
           break;
         case 'left':
-          newX = Math.max(0, (newX - this.movePixels));
+          newX = Math.max((0 - (heroRect.width / 2)), (newX - this.movePixels));
           break;
         case 'right':
-          newX = Math.min((width - heroRect.width), (newX + this.movePixels));
+          newX = Math.min((width - (heroRect.width / 2)), (newX + this.movePixels));
           break;
       }
     }
