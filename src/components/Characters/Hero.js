@@ -45,6 +45,7 @@ class Hero extends Component {
     this.setKeyDown = this.setKeyDown.bind(this);
     this.setKeyUp = this.setKeyUp.bind(this);
     this.callAction = this.callAction.bind(this);
+    this.unsetTooltip = this.unsetTooltip.bind(this);
 
     this.state = {
       moving: []
@@ -83,10 +84,17 @@ class Hero extends Component {
     e.preventDefault();
     const { moving } = this.state;
     const direction = this.getDirection(e);
+    const { tooltip } = this.props;
+
+    if (!direction) {
+      return;
+    }
 
     if (direction == 'space') {
-      // call space action method
-      this.callAction();
+      if (!tooltip && !moving.length) {
+        // call space action method
+        this.callAction();
+      }
     } else {
       const oppositeDirection = this.oppositeDirections[direction];
       const directionIndex = moving.indexOf(direction);
@@ -106,6 +114,11 @@ class Hero extends Component {
 
   setKeyUp(e) {
     const direction = this.getDirection(e);
+
+    if (!direction) {
+      return;
+    }
+
     const directionIndex = this.state.moving.indexOf(direction);
     const newMoving = this.state.moving.filter((value, index) => { return index != directionIndex });
 
@@ -125,14 +138,25 @@ class Hero extends Component {
     }
   }
 
+  unsetTooltip() {
+    const { tooltip } = this.props;
+
+    if (tooltip) {
+      setTooltip(null);
+    }
+  }
+
   movePlayer() {
     const { moving } = this.state;
     const {
       heroPosition: { x, y },
       boardDimensions: {
         height, width
-      }
+      },
+      tooltip
     } = this.props;
+
+    this.unsetTooltip();
     let newX = x;
     let newY = y;
     const heroRect = findDOMNode(this).getBoundingClientRect();
