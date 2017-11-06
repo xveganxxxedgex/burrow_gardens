@@ -10,7 +10,8 @@ import { updateHeroPosition, setTooltip } from 'actions';
 @branch({
   heroPosition: ['heroPosition'],
   tooltip: ['tooltip'],
-  boardDimensions: ['boardDimensions']
+  boardDimensions: ['boardDimensions'],
+  tile: ['tile']
 })
 class Hero extends Component {
   constructor(props, context) {
@@ -46,6 +47,7 @@ class Hero extends Component {
     this.setKeyUp = this.setKeyUp.bind(this);
     this.callAction = this.callAction.bind(this);
     this.unsetTooltip = this.unsetTooltip.bind(this);
+    this.checkSceneryCollision = this.checkSceneryCollision.bind(this);
 
     this.state = {
       moving: []
@@ -146,6 +148,14 @@ class Hero extends Component {
     }
   }
 
+  checkSceneryCollision(x, y) {
+    const { tile: { scenery } } = this.props;
+
+    console.log(x, y, scenery);
+
+
+  }
+
   movePlayer() {
     const { moving } = this.state;
     const {
@@ -160,6 +170,7 @@ class Hero extends Component {
     let newX = x;
     let newY = y;
     const heroRect = findDOMNode(this).getBoundingClientRect();
+    this.checkSceneryCollision(newX, newY);
 
     for (let m = 0; m < moving.length; m++) {
       switch(moving[m]) {

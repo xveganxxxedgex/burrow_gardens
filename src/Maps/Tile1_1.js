@@ -20,7 +20,9 @@ const Tile = {
     { type: 'bush', position: { x: 300, y: 60 } },
     { type: 'bush', position: { x: 336, y: 60 } },
     { type: 'bush', position: { x: 372, y: 60 } }
-  ]
+  ],
+  x: 1,
+  y: 1
 };
 
 export default Tile;

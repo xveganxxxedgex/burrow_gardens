@@ -5,7 +5,7 @@ import { branch } from 'baobab-react/higher-order';
 import Hero from 'components/Characters/Hero';
 import Scenery from 'components/Scenery';
 
-import { setBoardDimensions, getTile } from 'actions';
+import { setBoardDimensions, setActiveTile } from 'actions';
 
 import 'less/Board.less';
 
@@ -23,6 +23,10 @@ class Board extends Component {
       B1: 'grass',
       B2: 'bush',
     };
+  }
+
+  componentWillMount() {
+    setActiveTile();
   }
 
   componentDidMount() {
@@ -47,18 +51,22 @@ class Board extends Component {
   }
 
   render() {
-    const { tooltip, tile: { x, y } } = this.props;
-    const Tile = getTile(x, y);
+    const { tooltip, tile } = this.props;
+
+    if (!Object.keys(tile).length) {
+      return <div>Loading...</div>;
+    }
+
     return (
       <div className="board" ref={(board) => { this.board = board }}>
-        {Tile.background.map((row, rowIndex) => {
+        {tile.background.map((row, rowIndex) => {
           return (
             <div className="background-row" key={`row-${rowIndex}`}>
               {row.map((tile, tileIndex) => this.createBackground(tile, tileIndex))}
             </div>
           );
         })}
-        {Tile.scenery.map((item, itemIndex) => {
+        {tile.scenery.map((item, itemIndex) => {
           return (
             <Scenery item={item} key={`scenery-${itemIndex}`} />
           );

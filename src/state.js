@@ -6,10 +6,7 @@ const state = new Baobab({
     y: 60
   },
   tooltip: null,
-  tile: {
-    x: 1,
-    y: 1
-  },
+  tile: {},
   boardDimensions: {}
 });
 
