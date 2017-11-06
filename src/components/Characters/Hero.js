@@ -5,7 +5,7 @@ import { branch } from 'baobab-react/higher-order';
 
 import Bunny from 'components/Characters/Bunny';
 
-import { updateHeroPosition, setTooltip } from 'actions';
+import { updateHeroPosition, setTooltip, setActiveTile } from 'actions';
 
 @branch({
   heroPosition: ['heroPosition'],
@@ -163,7 +163,8 @@ class Hero extends Component {
       boardDimensions: {
         height, width
       },
-      tooltip
+      tooltip,
+      tile: { x: tileX, y: tileY }
     } = this.props;
 
     this.unsetTooltip();
@@ -172,19 +173,56 @@ class Hero extends Component {
     const heroRect = findDOMNode(this).getBoundingClientRect();
     this.checkSceneryCollision(newX, newY);
 
+    const minTop = 0 - (heroRect.height / 2);
+    const maxBottom = height - (heroRect.height / 2);
+    const minLeft = 0 - (heroRect.width / 2);
+    const maxRight = width - (heroRect.width / 2);
+
     for (let m = 0; m < moving.length; m++) {
       switch(moving[m]) {
         case 'up':
-          newY = Math.max((0 - (heroRect.height / 2)), (newY - this.movePixels));
+          const tempUpY = newY - this.movePixels;
+          if (tempUpY < minTop && tileX > 1) {
+            //move tile
+            setActiveTile(tileX - 1, tileY);
+            //Set player coordinate to max bottom
+            newY = maxBottom;
+            break;
+          }
+          newY = Math.max(minTop, tempUpY);
           break;
         case 'down':
-          newY = Math.min((height - (heroRect.height / 2)), (newY + this.movePixels));
+          const tempDownY = newY + this.movePixels;
+          if (tempDownY > maxBottom && tileX < 2) {
+            //move tile
+            setActiveTile(tileX + 1, tileY);
+            //Set player coordinate to max bottom
+            newY = minTop;
+            break;
+          }
+          newY = Math.min(maxBottom, tempDownY);
           break;
         case 'left':
-          newX = Math.max((0 - (heroRect.width / 2)), (newX - this.movePixels));
+          const tempLeftX = newX - this.movePixels;
+          if (tempLeftX < minLeft && tileY > 1) {
+            //move tile
+            setActiveTile(tileX, tileY - 1);
+            //Set player coordinate to max bottom
+            newX = maxRight;
+            break;
+          }
+          newX = Math.max(minLeft, tempLeftX);
           break;
         case 'right':
-          newX = Math.min((width - (heroRect.width / 2)), (newX + this.movePixels));
+          const tempRightX = newX + this.movePixels;
+          if (tempRightX > maxRight && tileY < 2) {
+            //move tile
+            setActiveTile(tileX, tileY + 1);
+            //Set player coordinate to max bottom
+            newX = minLeft;
+            break;
+          }
+          newX = Math.min(maxRight, tempRightX);
           break;
       }
     }
