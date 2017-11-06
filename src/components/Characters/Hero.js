@@ -9,7 +9,8 @@ import { updateHeroPosition, setTooltip } from 'actions';
 
 @branch({
   heroPosition: ['heroPosition'],
-  tooltip: ['tooltip']
+  tooltip: ['tooltip'],
+  boardDimensions: ['boardDimensions']
 })
 class Hero extends Component {
   constructor(props, context) {
@@ -125,26 +126,30 @@ class Hero extends Component {
   }
 
   movePlayer() {
+    const { moving } = this.state;
     const {
-      moving
-    } = this.state;
-    const { heroPosition: { x, y } } = this.props;
+      heroPosition: { x, y },
+      boardDimensions: {
+        height, width
+      }
+    } = this.props;
     let newX = x;
     let newY = y;
+    const heroRect = findDOMNode(this).getBoundingClientRect();
 
     for (let m = 0; m < moving.length; m++) {
       switch(moving[m]) {
         case 'up':
-          newY -= this.movePixels;
+          newY = Math.max(0, (newY - this.movePixels));
           break;
         case 'down':
-          newY += this.movePixels;
+          newY = Math.min((height - heroRect.height), (newY + this.movePixels));
           break;
         case 'left':
-          newX -= this.movePixels;
+          newX = Math.max(0, (newX - this.movePixels));
           break;
         case 'right':
-          newX += this.movePixels;
+          newX = Math.min((width - heroRect.width), (newX + this.movePixels));
           break;
       }
     }
@@ -171,10 +176,10 @@ class Hero extends Component {
           placement='top'
           show={!!tooltip}
           animation={false}
-          container={this} 
+          container={this}
           target={() => findDOMNode(this.hero)}
         >
-          <Tooltip id="heroToolTip" className="in">{ tooltip }</Tooltip>
+          <Tooltip id="heroToolTip">{ tooltip }</Tooltip>
         </Overlay>
       </Bunny>
     );

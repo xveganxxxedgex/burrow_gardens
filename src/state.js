@@ -5,7 +5,12 @@ const state = new Baobab({
     x: 60,
     y: 60
   },
-  tooltip: null
+  tooltip: null,
+  tile: {
+    x: 1,
+    y: 1
+  },
+  boardDimensions: {}
 });
 
 export default state;

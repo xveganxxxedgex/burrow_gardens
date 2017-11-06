@@ -15,3 +15,29 @@ export function setTooltip(text, duration = 3000) {
     }, duration);
   }
 }
+
+function assignDimensionProperties(dimensions, properties) {
+  properties = properties || [
+    'top',
+    'bottom',
+    'left',
+    'right',
+    'height',
+    'width'
+  ];
+  const newDimensions = {};
+
+  properties.map(property => {
+    newDimensions[property] = dimensions[property];
+  });
+
+  return newDimensions;
+}
+
+export function setBoardDimensions(board) {
+  const boardRect = board.getBoundingClientRect();
+  const newDimensions = assignDimensionProperties(boardRect);
+
+  const cursor = tree.select('boardDimensions');
+  cursor.set(newDimensions);
+}

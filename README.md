@@ -2,6 +2,7 @@
 
 Create general movement/action functionality (arrow keys + space)
 Create hitbox detection
+Create logic for getting map bounds (so player can't move into the whitespace)
 Create logic for going between different maps
 Create basic map template
 Create characters

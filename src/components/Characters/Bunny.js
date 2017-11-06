@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import 'less/Characters.less';
+
 class Bunny extends Component {
   constructor(props, context) {
     super(props, context);
