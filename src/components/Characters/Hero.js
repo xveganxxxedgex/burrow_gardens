@@ -17,7 +17,7 @@ class Hero extends Component {
   constructor(props, context) {
     super(props, context);
 
-    this.movePixels = 5;
+    this.movePixels = 20;
 
     this.keyboardEvents = {
       // Direction keys
@@ -148,12 +148,51 @@ class Hero extends Component {
     }
   }
 
-  checkSceneryCollision(x, y) {
-    const { tile: { scenery } } = this.props;
+  checkSceneryCollision(x, y, direction) {
+    const {
+      tile: { scenery },
+      boardDimensions: {
+        left: boardX, top: boardY
+      }
+    } = this.props;
+    const heroRect = findDOMNode(this).getBoundingClientRect();
+    const heroLeft = x + boardX;
+    const heroRight = heroLeft + heroRect.width;
+    const heroTop = y + boardY;
+    const heroBottom = heroTop + heroRect.height;
+    let maxValue = ['up', 'down'].indexOf(direction) > -1 ? y : x;
 
-    console.log(x, y, scenery);
+    for (let s = 0; s < scenery.length; s++) {
+      const sceneryElement = document.querySelector(`.scenery_index_${s}`).getBoundingClientRect();
+      const sceneryBottom = sceneryElement.top + sceneryElement.height;
+      const sceneryRight = sceneryElement.left + sceneryElement.width;
+      const hitPlayerRight = heroRight > sceneryElement.left;
+      const hitPlayerBottom = heroBottom > sceneryElement.top;
+      const hitPlayerLeft = heroLeft < sceneryRight;
+      const hitPlayerTop = heroTop < sceneryBottom;
+      const isBetweenY = hitPlayerTop && hitPlayerBottom;
+      const isBetweenX = hitPlayerLeft && hitPlayerRight;
+      const isColliding = isBetweenY && isBetweenX;
 
+      if (isColliding) {
+        switch(direction) {
+          case 'up':
+            maxValue = Math.max(maxValue, (sceneryBottom - boardY));
+            break;
+          case 'down':
+            maxValue = Math.min(maxValue, (sceneryElement.top - boardY - heroRect.height));
+            break;
+          case 'left':
+            maxValue = Math.max(maxValue, (sceneryRight - boardX));
+            break;
+          case 'right':
+            maxValue = Math.min(maxValue, (sceneryElement.left - boardX - heroRect.width));
+            break;
+        }
+      }
+    }
 
+    return maxValue;
   }
 
   movePlayer() {
@@ -171,7 +210,6 @@ class Hero extends Component {
     let newX = x;
     let newY = y;
     const heroRect = findDOMNode(this).getBoundingClientRect();
-    this.checkSceneryCollision(newX, newY);
 
     const minTop = 0 - (heroRect.height / 2);
     const maxBottom = height - (heroRect.height / 2);
@@ -189,7 +227,11 @@ class Hero extends Component {
             newY = maxBottom;
             break;
           }
-          newY = Math.max(minTop, tempUpY);
+
+          // Ensure new position isn't colliding with any entities
+          const sceneryMaxBottom = this.checkSceneryCollision(newX, tempUpY, moving[m]);
+
+          newY = Math.max(minTop, Math.max(tempUpY, sceneryMaxBottom));
           break;
         case 'down':
           const tempDownY = newY + this.movePixels;
@@ -200,7 +242,11 @@ class Hero extends Component {
             newY = minTop;
             break;
           }
-          newY = Math.min(maxBottom, tempDownY);
+
+          // Ensure new position isn't colliding with any entities
+          const sceneryMaxTop = this.checkSceneryCollision(newX, tempDownY, moving[m]);
+
+          newY = Math.min(maxBottom, Math.min(tempDownY, sceneryMaxTop));
           break;
         case 'left':
           const tempLeftX = newX - this.movePixels;
@@ -211,7 +257,11 @@ class Hero extends Component {
             newX = maxRight;
             break;
           }
-          newX = Math.max(minLeft, tempLeftX);
+
+          // Ensure new position isn't colliding with any entities
+          const sceneryMaxRight = this.checkSceneryCollision(tempLeftX, newY, moving[m]);
+
+          newX = Math.max(minLeft, Math.max(tempLeftX, sceneryMaxRight));
           break;
         case 'right':
           const tempRightX = newX + this.movePixels;
@@ -222,7 +272,11 @@ class Hero extends Component {
             newX = minLeft;
             break;
           }
-          newX = Math.min(maxRight, tempRightX);
+
+          // Ensure new position isn't colliding with any entities
+          const sceneryMaxLeft = this.checkSceneryCollision(tempRightX, newY, moving[m]);
+
+          newX = Math.min(maxRight, Math.min(tempRightX, sceneryMaxLeft));
           break;
       }
     }
@@ -245,6 +299,7 @@ class Hero extends Component {
         style={{ top: y + 'px', left: x + 'px' }}
         ref={(hero) => { this.hero = hero }}
       >
+        { /* <img src="" /> */ }
         <Overlay
           placement='top'
           show={!!tooltip}

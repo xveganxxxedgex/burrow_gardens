@@ -68,7 +68,7 @@ class Board extends Component {
         })}
         {tile.scenery.map((item, itemIndex) => {
           return (
-            <Scenery item={item} key={`scenery-${itemIndex}`} />
+            <Scenery item={item} key={`scenery-${itemIndex}`} index={itemIndex} />
           );
         })}
         <Hero />

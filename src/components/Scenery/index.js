@@ -8,7 +8,13 @@ class Scenery extends Component {
   }
 
   render() {
-    const { type, position: { x, y } } = this.props.item;
+    const {
+      item: {
+        type,
+        position: { x, y }
+      },
+      index
+    } = this.props;
     const style = {
       top: y + 'px',
       left: x + 'px'
@@ -16,7 +22,7 @@ class Scenery extends Component {
 
     return (
       <div
-        className={`scenery ${type}`}
+        className={`scenery ${type} scenery_index_${index}`}
         style={style}
       />
     )
