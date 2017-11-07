@@ -39,11 +39,11 @@ class Bunny extends Component {
   }
 
   render() {
-    const { name, style, children } = this.props;
+    const { name, style, children, direction } = this.props;
     const { moveTransition } = this.state;
     return (
       <div
-        className={`bunny ${name} ${moveTransition ? '' : 'no-transition'}`}
+        className={`bunny ${name} ${moveTransition ? '' : 'no-transition'} ${direction}`}
         style={style || {}}
       >
         {children}

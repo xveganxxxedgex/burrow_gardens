@@ -7,6 +7,9 @@ import Bunny from 'components/Characters/Bunny';
 
 import { updateHeroPosition, setTooltip, setActiveTile } from 'actions';
 
+import bunnyImg from 'images/bunny1.png';
+import bunnyGif from 'images/bunnygif2.gif';
+
 @branch({
   heroPosition: ['heroPosition'],
   tooltip: ['tooltip'],
@@ -50,7 +53,8 @@ class Hero extends Component {
     this.checkSceneryCollision = this.checkSceneryCollision.bind(this);
 
     this.state = {
-      moving: []
+      moving: [],
+      lastDirection: 'right'
     };
   }
 
@@ -61,6 +65,11 @@ class Hero extends Component {
 
   componentWillUpdate(nextProps, nextState) {
     if (nextState.moving != this.state.moving) {
+      const lastDirection = nextState.moving.length ? nextState.moving[nextState.moving.length - 1] : this.state.lastDirection;
+
+      if (lastDirection != this.state.lastDirection) {
+        this.setState({ lastDirection });
+      }
       if (nextState || !nextState.moving.length) {
         clearTimeout(this.movingTimeout);
         this.movingTimeout = null;
@@ -223,7 +232,7 @@ class Hero extends Component {
           if (tempUpY < minTop && tileX > 1) {
             //move tile
             setActiveTile(tileX - 1, tileY);
-            //Set player coordinate to max bottom
+            //Set player coordinate to bottom of new tile
             newY = maxBottom;
             break;
           }
@@ -238,7 +247,7 @@ class Hero extends Component {
           if (tempDownY > maxBottom && tileX < 2) {
             //move tile
             setActiveTile(tileX + 1, tileY);
-            //Set player coordinate to max bottom
+            //Set player coordinate to top of new tile
             newY = minTop;
             break;
           }
@@ -253,7 +262,7 @@ class Hero extends Component {
           if (tempLeftX < minLeft && tileY > 1) {
             //move tile
             setActiveTile(tileX, tileY - 1);
-            //Set player coordinate to max bottom
+            //Set player coordinate to right of new tile
             newX = maxRight;
             break;
           }
@@ -268,7 +277,7 @@ class Hero extends Component {
           if (tempRightX > maxRight && tileY < 2) {
             //move tile
             setActiveTile(tileX, tileY + 1);
-            //Set player coordinate to max bottom
+            //Set player coordinate to left of new tile
             newX = minLeft;
             break;
           }
@@ -298,8 +307,9 @@ class Hero extends Component {
         name="hero"
         style={{ top: y + 'px', left: x + 'px' }}
         ref={(hero) => { this.hero = hero }}
+        direction={this.state.lastDirection}
       >
-        { /* <img src="" /> */ }
+        <img src={this.state.moving.length ? bunnyGif : bunnyImg} />
         <Overlay
           placement='top'
           show={!!tooltip}

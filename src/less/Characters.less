@@ -4,14 +4,18 @@
   position: absolute;
   z-index: 1;
 
-  transition: top .15s linear, left .15s linear;
+  transition: top .10s linear, left .10s linear;
 
   &.hero {
-    background-color: pink;
+    // background-color: pink;
   }
 
   &.no-transition {
     transition: none;
+  }
+
+  &.right {
+    transform: scaleX(-1);
   }
 
   img {

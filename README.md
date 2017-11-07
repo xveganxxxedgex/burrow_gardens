@@ -18,6 +18,8 @@ Create full map templates, using different screens
 Create character art
 Create background art
 Create food art
+Create menu/options components
+Create way for user to see their inventory/active quest/current friends
 Rotate images depending on which direction player is moving/facing
 Add sprite/gif images as backgrounds upon character move (or possibly even on idle)
 Add event sound effects
