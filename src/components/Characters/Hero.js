@@ -211,24 +211,82 @@ class Hero extends Component {
     return maxValue;
   }
 
-  movePlayerX() {
+  // Handle forward movements, ie moving down or right
+  movePlayerForward(axis, newX, newY, direction) {
+    const {
+      boardDimensions: {
+        height: boardHeight, width: boardWidth
+      },
+      tile
+    } = this.props;
+    const { moving } = this.state;
+    const isXAxis = axis == 'x';
+    const heroRect = findDOMNode(this).getBoundingClientRect();
+    const minLimit = 0 - ((isXAxis ? heroRect.width : heroRect.height) / 2);
+    const maxLimit = isXAxis ? boardWidth - (heroRect.width / 2) : boardHeight - (heroRect.height / 2);
+    const checkTile = this.props.tile[isXAxis ? 'y' : 'x'];
+    let value = (isXAxis ? newX : newY) + this.movePixels;
 
-  }
-
-  movePlayerY() {
-    const tempUpY = newY - this.movePixels;
-    if (tempUpY < minTop && tileX > 1) {
-      //move tile
-      setActiveTile(tileX - 1, tileY);
-      //Set player coordinate to bottom of new tile
-      newY = maxBottom;
-      // break;
+    if (value > maxLimit && checkTile < 2) {
+      const tileX = tile.x + (isXAxis ? 0 : 1);
+      const tileY = tile.y + (isXAxis ? 1 : 0);
+      // Move to next tile
+      setActiveTile(tileX, tileY);
+      //Set player coordinate to start of next tile
+      return {
+        value: minLimit,
+        changeTile: true
+      };
     }
 
-    // Ensure new position isn't colliding with any entities
-    const sceneryMaxBottom = this.checkCollision(newX, tempUpY, moving[m]);
+    const useX = isXAxis ? value : newX;
+    const useY = isXAxis ? newY : value;
 
-    newY = Math.max(minTop, Math.max(tempUpY, sceneryMaxBottom));
+    // Ensure new position isn't colliding with any entities
+    const sceneryLimit = this.checkCollision(useX, useY, direction);
+
+    return {
+      value: Math.min(maxLimit, Math.min(value, sceneryLimit))
+    };
+  }
+
+  // Handle forward movements, ie moving up or left
+  movePlayerBack(axis, newX, newY, direction) {
+    const {
+      boardDimensions: {
+        height: boardHeight, width: boardWidth
+      },
+      tile
+    } = this.props;
+    const { moving } = this.state;
+    const isXAxis = axis == 'x';
+    const heroRect = findDOMNode(this).getBoundingClientRect();
+    const minLimit = 0 - ((isXAxis ? heroRect.width : heroRect.height) / 2);
+    const maxLimit = isXAxis ? boardWidth - (heroRect.width / 2) : boardHeight - (heroRect.height / 2);
+    const checkTile = this.props.tile[isXAxis ? 'y' : 'x'];
+    let value = (isXAxis ? newX : newY) - this.movePixels;
+
+    if (value < minLimit && checkTile > 1) {
+      const tileX = tile.x - (isXAxis ? 0 : 1);
+      const tileY = tile.y - (isXAxis ? 1 : 0);
+      // Move to previous tile
+      setActiveTile(tileX, tileY);
+      //Set player coordinate to end of previous tile
+      return {
+        value: maxLimit,
+        changeTile: true
+      };
+    }
+
+    const useX = isXAxis ? value : newX;
+    const useY = isXAxis ? newY : value;
+
+    // Ensure new position isn't colliding with any entities
+    const sceneryLimit = this.checkCollision(useX, useY, direction);
+
+    return {
+      value: Math.max(minLimit, Math.max(value, sceneryLimit))
+    };
   }
 
   movePlayer() {
@@ -245,74 +303,24 @@ class Hero extends Component {
     this.unsetTooltip();
     let newX = x;
     let newY = y;
-    const heroRect = findDOMNode(this).getBoundingClientRect();
-
-    const minTop = 0 - (heroRect.height / 2);
-    const maxBottom = height - (heroRect.height / 2);
-    const minLeft = 0 - (heroRect.width / 2);
-    const maxRight = width - (heroRect.width / 2);
 
     for (let m = 0; m < moving.length; m++) {
       switch(moving[m]) {
         case 'up':
-          const tempUpY = newY - this.movePixels;
-          if (tempUpY < minTop && tileX > 1) {
-            //move tile
-            setActiveTile(tileX - 1, tileY);
-            //Set player coordinate to bottom of new tile
-            newY = maxBottom;
-            break;
-          }
-
-          // Ensure new position isn't colliding with any entities
-          const sceneryMaxBottom = this.checkCollision(newX, tempUpY, moving[m]);
-
-          newY = Math.max(minTop, Math.max(tempUpY, sceneryMaxBottom));
+          const movePlayerUp = this.movePlayerBack('y', newX, newY, moving[m]);
+          newY = movePlayerUp.value;
           break;
         case 'down':
-          const tempDownY = newY + this.movePixels;
-          if (tempDownY > maxBottom && tileX < 2) {
-            //move tile
-            setActiveTile(tileX + 1, tileY);
-            //Set player coordinate to top of new tile
-            newY = minTop;
-            break;
-          }
-
-          // Ensure new position isn't colliding with any entities
-          const sceneryMaxTop = this.checkCollision(newX, tempDownY, moving[m]);
-
-          newY = Math.min(maxBottom, Math.min(tempDownY, sceneryMaxTop));
+          const movePlayerDown = this.movePlayerForward('y', newX, newY, moving[m]);
+          newY = movePlayerDown.value;
           break;
         case 'left':
-          const tempLeftX = newX - this.movePixels;
-          if (tempLeftX < minLeft && tileY > 1) {
-            //move tile
-            setActiveTile(tileX, tileY - 1);
-            //Set player coordinate to right of new tile
-            newX = maxRight;
-            break;
-          }
-
-          // Ensure new position isn't colliding with any entities
-          const sceneryMaxRight = this.checkCollision(tempLeftX, newY, moving[m]);
-
-          newX = Math.max(minLeft, Math.max(tempLeftX, sceneryMaxRight));
+          const movePlayerLeft = this.movePlayerBack('x', newX, newY, moving[m]);
+          newX = movePlayerLeft.value;
           break;
         case 'right':
-          const tempRightX = newX + this.movePixels;
-          if (tempRightX > maxRight && tileY < 2) {
-            //move tile
-            setActiveTile(tileX, tileY + 1);
-            //Set player coordinate to left of new tile
-            newX = minLeft;
-            break;
-          }
-
-          // Ensure new position isn't colliding with any entities
-          const sceneryMaxLeft = this.checkCollision(tempRightX, newY, moving[m]);
-
-          newX = Math.min(maxRight, Math.min(tempRightX, sceneryMaxLeft));
+          const movePlayerRight = this.movePlayerForward('x', newX, newY, moving[m]);
+          newX = movePlayerRight.value;
           break;
       }
     }
