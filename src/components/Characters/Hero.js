@@ -7,8 +7,12 @@ import Bunny from 'components/Characters/Bunny';
 
 import { updateHeroPosition, setTooltip, setActiveTile } from 'actions';
 
-import bunnyImg from 'images/bunny1.png';
-import bunnyGif from 'images/bunnygif2.gif';
+import bunnyLeftImg from 'images/bunny1.png';
+import bunnyUpImg from 'images/bunnyup1.png';
+import bunnyDownImg from 'images/bunnydown1.png';
+import bunnyLeftGif from 'images/bunnygif.gif';
+import bunnyUpGif from 'images/bunnyupgif.gif';
+import bunnyDownGif from 'images/bunnydowngif.gif';
 
 @branch({
   heroPosition: ['heroPosition'],
@@ -302,6 +306,14 @@ class Hero extends Component {
 
   render() {
     const { heroPosition: { x, y }, tooltip } = this.props;
+    let bunnyImage = this.state.moving.length ? bunnyLeftGif : bunnyLeftImg;
+
+    if (this.state.lastDirection == 'up') {
+      bunnyImage = this.state.moving.length ? bunnyUpGif : bunnyUpImg;
+    } else if (this.state.lastDirection == 'down') {
+      bunnyImage = this.state.moving.length ? bunnyDownGif : bunnyDownImg;
+    }
+
     return (
       <Bunny
         name="hero"
@@ -309,7 +321,7 @@ class Hero extends Component {
         ref={(hero) => { this.hero = hero }}
         direction={this.state.lastDirection}
       >
-        <img src={this.state.moving.length ? bunnyGif : bunnyImg} />
+        <img src={bunnyImage} />
         <Overlay
           placement='top'
           show={!!tooltip}
