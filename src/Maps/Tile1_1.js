@@ -21,6 +21,9 @@ const Tile = {
     { type: 'bush', position: { x: 336, y: 60 } },
     { type: 'bush', position: { x: 372, y: 60 } }
   ],
+  food: [
+    { type: 'carrot', position: { x: 50, y: 100 } }
+  ],
   x: 1,
   y: 1
 };

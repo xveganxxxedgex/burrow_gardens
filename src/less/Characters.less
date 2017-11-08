@@ -1,13 +1,12 @@
 .bunny {
-  height: 32px;
-  width: 32px;
+  height: 40px;
+  width: 40px;
   position: absolute;
   z-index: 1;
 
   transition: top .12s linear, left .12s linear;
 
   &.hero {
-    // background-color: pink;
   }
 
   &.no-transition {
@@ -15,7 +14,9 @@
   }
 
   &.right {
-    transform: scaleX(-1);
+    img {
+      transform: scaleX(-1);
+    }
   }
 
   img {

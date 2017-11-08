@@ -54,7 +54,7 @@ class Hero extends Component {
     this.setKeyUp = this.setKeyUp.bind(this);
     this.callAction = this.callAction.bind(this);
     this.unsetTooltip = this.unsetTooltip.bind(this);
-    this.checkSceneryCollision = this.checkSceneryCollision.bind(this);
+    this.checkCollision = this.checkCollision.bind(this);
 
     this.state = {
       moving: [],
@@ -74,6 +74,7 @@ class Hero extends Component {
       if (lastDirection != this.state.lastDirection) {
         this.setState({ lastDirection });
       }
+
       if (nextState || !nextState.moving.length) {
         clearTimeout(this.movingTimeout);
         this.movingTimeout = null;
@@ -110,19 +111,21 @@ class Hero extends Component {
         // call space action method
         this.callAction();
       }
-    } else {
-      const oppositeDirection = this.oppositeDirections[direction];
-      const directionIndex = moving.indexOf(direction);
-      const oppositeDirectionIndex = moving.indexOf(oppositeDirection);
 
-      if (directionIndex == -1 && oppositeDirectionIndex == -1) {
-        this.setState({
-          moving: [...moving, direction]
-        });
+      return;
+    }
 
-        if (!this.movingTimeout) {
-          this.movePlayer();
-        }
+    const oppositeDirection = this.oppositeDirections[direction];
+    const directionIndex = moving.indexOf(direction);
+    const oppositeDirectionIndex = moving.indexOf(oppositeDirection);
+
+    if (directionIndex == -1 && oppositeDirectionIndex == -1) {
+      this.setState({
+        moving: [...moving, direction]
+      });
+
+      if (!this.movingTimeout) {
+        this.movePlayer();
       }
     }
   }
@@ -161,7 +164,7 @@ class Hero extends Component {
     }
   }
 
-  checkSceneryCollision(x, y, direction) {
+  checkCollision(x, y, direction) {
     const {
       tile: { scenery },
       boardDimensions: {
@@ -208,6 +211,26 @@ class Hero extends Component {
     return maxValue;
   }
 
+  movePlayerX() {
+
+  }
+
+  movePlayerY() {
+    const tempUpY = newY - this.movePixels;
+    if (tempUpY < minTop && tileX > 1) {
+      //move tile
+      setActiveTile(tileX - 1, tileY);
+      //Set player coordinate to bottom of new tile
+      newY = maxBottom;
+      // break;
+    }
+
+    // Ensure new position isn't colliding with any entities
+    const sceneryMaxBottom = this.checkCollision(newX, tempUpY, moving[m]);
+
+    newY = Math.max(minTop, Math.max(tempUpY, sceneryMaxBottom));
+  }
+
   movePlayer() {
     const { moving } = this.state;
     const {
@@ -242,7 +265,7 @@ class Hero extends Component {
           }
 
           // Ensure new position isn't colliding with any entities
-          const sceneryMaxBottom = this.checkSceneryCollision(newX, tempUpY, moving[m]);
+          const sceneryMaxBottom = this.checkCollision(newX, tempUpY, moving[m]);
 
           newY = Math.max(minTop, Math.max(tempUpY, sceneryMaxBottom));
           break;
@@ -257,7 +280,7 @@ class Hero extends Component {
           }
 
           // Ensure new position isn't colliding with any entities
-          const sceneryMaxTop = this.checkSceneryCollision(newX, tempDownY, moving[m]);
+          const sceneryMaxTop = this.checkCollision(newX, tempDownY, moving[m]);
 
           newY = Math.min(maxBottom, Math.min(tempDownY, sceneryMaxTop));
           break;
@@ -272,7 +295,7 @@ class Hero extends Component {
           }
 
           // Ensure new position isn't colliding with any entities
-          const sceneryMaxRight = this.checkSceneryCollision(tempLeftX, newY, moving[m]);
+          const sceneryMaxRight = this.checkCollision(tempLeftX, newY, moving[m]);
 
           newX = Math.max(minLeft, Math.max(tempLeftX, sceneryMaxRight));
           break;
@@ -287,7 +310,7 @@ class Hero extends Component {
           }
 
           // Ensure new position isn't colliding with any entities
-          const sceneryMaxLeft = this.checkSceneryCollision(tempRightX, newY, moving[m]);
+          const sceneryMaxLeft = this.checkCollision(tempRightX, newY, moving[m]);
 
           newX = Math.min(maxRight, Math.min(tempRightX, sceneryMaxLeft));
           break;
@@ -296,7 +319,7 @@ class Hero extends Component {
 
     updateHeroPosition({ x: newX, y: newY });
 
-    this.movingTimeout = setTimeout(this.movePlayer, 50);
+    this.movingTimeout = setTimeout(this.movePlayer, 120);
   }
 
   callAction() {
