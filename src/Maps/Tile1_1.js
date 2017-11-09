@@ -22,7 +22,7 @@ const Tile = {
     { type: 'bush', position: { x: 372, y: 60 } }
   ],
   food: [
-    { type: 'carrot', position: { x: 50, y: 100 } }
+    { type: 'BuriedCarrot', position: { x: 80, y: 130 } }
   ],
   x: 1,
   y: 1

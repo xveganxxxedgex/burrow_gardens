@@ -1,5 +1,8 @@
 import tree from 'state';
+import _capitalize from 'lodash/capitalize';
+
 import * as Tiles from 'Maps';
+import * as FoodItems from 'components/Food';
 
 let tooltipTimeout;
 
@@ -53,4 +56,8 @@ export function setActiveTile(x = 1, y = 1) {
   const cursor = tree.select('tile');
   cursor.set(tile);
   tree.commit();
+}
+
+export function getFoodItem(type) {
+  return FoodItems[type];
 }

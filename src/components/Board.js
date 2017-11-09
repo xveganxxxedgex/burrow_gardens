@@ -5,7 +5,7 @@ import { branch } from 'baobab-react/higher-order';
 import Hero from 'components/Characters/Hero';
 import Scenery from 'components/Scenery';
 
-import { setBoardDimensions, setActiveTile } from 'actions';
+import { setBoardDimensions, setActiveTile, getFoodItem } from 'actions';
 
 import 'less/Board.less';
 
@@ -69,6 +69,12 @@ class Board extends Component {
         {tile.scenery.map((item, itemIndex) => {
           return (
             <Scenery item={item} key={`scenery-${itemIndex}`} index={itemIndex} />
+          );
+        })}
+        {tile.food.map((item, itemIndex) => {
+          const FoodItem = getFoodItem(item.type);
+          return (
+            <FoodItem item={item} key={`food-${itemIndex}`} index={itemIndex} />
           );
         })}
         <Hero />
