@@ -14,6 +14,13 @@ import bunnyLeftGif from 'images/bunnygif.gif';
 import bunnyUpGif from 'images/bunnyupgif.gif';
 import bunnyDownGif from 'images/bunnydowngif.gif';
 
+import lopBunnyLeftImg from 'images/lopbunny1.png';
+import lopBunnyUpImg from 'images/lopbunnyup1.png';
+import lopBunnyDownImg from 'images/lopbunnydown1.png';
+import lopBunnyLeftGif from 'images/lopbunnygif.gif';
+import lopBunnyUpGif from 'images/lopbunnyupgif.gif';
+import lopBunnyDownGif from 'images/lopbunnydowngif.gif';
+
 @branch({
   heroPosition: ['heroPosition'],
   tooltip: ['tooltip'],
@@ -343,6 +350,16 @@ class Hero extends Component {
       bunnyImage = this.state.moving.length ? bunnyUpGif : bunnyUpImg;
     } else if (this.state.lastDirection == 'down') {
       bunnyImage = this.state.moving.length ? bunnyDownGif : bunnyDownImg;
+    }
+
+    if (true || isLop) {
+      bunnyImage = this.state.moving.length ? lopBunnyLeftGif : lopBunnyLeftImg;
+
+      if (this.state.lastDirection == 'up') {
+        bunnyImage = this.state.moving.length ? lopBunnyUpGif : lopBunnyUpImg;
+      } else if (this.state.lastDirection == 'down') {
+        bunnyImage = this.state.moving.length ? lopBunnyDownGif : lopBunnyDownImg;
+      }
     }
 
     return (
