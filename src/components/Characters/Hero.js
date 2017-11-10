@@ -14,6 +14,11 @@ import bunnyLeftGif from 'images/bunnygif.gif';
 import bunnyUpGif from 'images/bunnyupgif.gif';
 import bunnyDownGif from 'images/bunnydowngif.gif';
 import bunnyLoafImg from 'images/bunnyloaf.png';
+import bunnyLoafUpImg from 'images/bunnyuploaf.png';
+import bunnyLoafDownImg from 'images/bunnydownloaf.png';
+import bunnyFlopImg from 'images/bunnyflop.png';
+import bunnyFlopUpImg from 'images/bunnyupflop.png';
+import bunnyFlopDownImg from 'images/bunnydownflop.png';
 
 import lopBunnyLeftImg from 'images/lopbunny1.png';
 import lopBunnyUpImg from 'images/lopbunnyup1.png';
@@ -64,6 +69,7 @@ class Hero extends Component {
     this.unsetTooltip = this.unsetTooltip.bind(this);
     this.checkCollision = this.checkCollision.bind(this);
     this.setHeroIdleStatus = this.setHeroIdleStatus.bind(this);
+    this.getBunnyImage = this.getBunnyImage.bind(this);
 
     this.state = {
       moving: [],
@@ -131,25 +137,30 @@ class Hero extends Component {
     const directionIndex = moving.indexOf(direction);
     const oppositeDirectionIndex = moving.indexOf(oppositeDirection);
     const newState = {};
+    let updateIdleState = false;
 
     if (this.state.isLoaf) {
       newState.isLoaf = false;
+      updateIdleState = true;
     }
 
     if (this.state.isFlopped) {
       newState.isFlopped = false;
+      updateIdleState = true;
+    }
+
+    if (updateIdleState) {
+      this.setState(newState);
     }
 
     if (directionIndex == -1 && oppositeDirectionIndex == -1) {
-      newState.moving = [...moving, direction];
+      this.setState({
+        moving: [...moving, direction]
+      });
 
       if (!this.movingTimeout) {
-        this.movePlayer(newState.moving);
+        this.movePlayer();
       }
-    }
-
-    if (Object.keys(newState).length > -1) {
-      this.setState(newState);
     }
   }
 
@@ -173,6 +184,7 @@ class Hero extends Component {
       });
     }
 
+    // If player is no longer moving, clear moving timeout and set idle timeout
     if (!newMoving.length) {
       clearTimeout(this.movingTimeout);
       this.movingTimeout = null;
@@ -181,9 +193,18 @@ class Hero extends Component {
   }
 
   setHeroIdleStatus(type, value) {
-    this.setState({
+    const newState = {
       [type]: value || !this.state[type]
-    });
+    };
+
+    // Flop bunny after loaf status
+    if (type == 'isLoaf') {
+      this.idleTimeout = setTimeout(this.setHeroIdleStatus.bind(this, 'isFlopped'), 5000);
+    } else if (type == 'isFlopped') {
+      newState.isLoaf = false;
+    }
+
+    this.setState(newState);
   }
 
   unsetTooltip() {
@@ -319,9 +340,8 @@ class Hero extends Component {
     };
   }
 
-  movePlayer(moving) {
-    moving = moving || this.state.moving;
-    // const { moving } = this.state;
+  movePlayer() {
+    const { moving } = this.state;
     const {
       heroPosition: { x, y },
       boardDimensions: {
@@ -358,7 +378,7 @@ class Hero extends Component {
 
     updateHeroPosition({ x: newX, y: newY });
 
-    this.movingTimeout = setTimeout(this.movePlayer.bind(this, moving), 120);
+    this.movingTimeout = setTimeout(this.movePlayer, 120);
   }
 
   callAction() {
@@ -366,17 +386,9 @@ class Hero extends Component {
     setTooltip("Space bar pressed");
   }
 
-  render() {
-    const { heroPosition: { x, y }, tooltip } = this.props;
+  getBunnyImage(isLop) {
     let bunnyImage = this.state.moving.length ? bunnyLeftGif : bunnyLeftImg;
 
-    if (this.state.lastDirection == 'up') {
-      bunnyImage = this.state.moving.length ? bunnyUpGif : bunnyUpImg;
-    } else if (this.state.lastDirection == 'down') {
-      bunnyImage = this.state.moving.length ? bunnyDownGif : bunnyDownImg;
-    }
-
-    const isLop = false;
     if (isLop) {
       bunnyImage = this.state.moving.length ? lopBunnyLeftGif : lopBunnyLeftImg;
 
@@ -385,11 +397,44 @@ class Hero extends Component {
       } else if (this.state.lastDirection == 'down') {
         bunnyImage = this.state.moving.length ? lopBunnyDownGif : lopBunnyDownImg;
       }
+
+      return bunnyImage;
     }
 
-    if (this.state.isLoaf) {
+    if (this.state.isFlopped) {
+      bunnyImage = bunnyFlopImg;
+
+      if (this.state.lastDirection == 'up') {
+        bunnyImage = bunnyFlopUpImg;
+      } else if (this.state.lastDirection == 'down') {
+        bunnyImage = bunnyFlopDownImg;
+      }
+
+      return bunnyImage;
+    } else if (this.state.isLoaf) {
       bunnyImage = bunnyLoafImg;
+
+      if (this.state.lastDirection == 'up') {
+        bunnyImage = bunnyLoafUpImg;
+      } else if (this.state.lastDirection == 'down') {
+        bunnyImage = bunnyLoafDownImg;
+      }
+
+      return bunnyImage;
     }
+
+    if (this.state.lastDirection == 'up') {
+      bunnyImage = this.state.moving.length ? bunnyUpGif : bunnyUpImg;
+    } else if (this.state.lastDirection == 'down') {
+      bunnyImage = this.state.moving.length ? bunnyDownGif : bunnyDownImg;
+    }
+
+    return bunnyImage;
+  }
+
+  render() {
+    const { heroPosition: { x, y }, tooltip } = this.props;
+    const bunnyImage = this.getBunnyImage();
 
     return (
       <Bunny
@@ -397,6 +442,7 @@ class Hero extends Component {
         style={{ top: y + 'px', left: x + 'px' }}
         ref={(hero) => { this.hero = hero }}
         direction={this.state.lastDirection}
+        isFlopped={this.state.isFlopped}
       >
         <img src={bunnyImage} />
         <Overlay
