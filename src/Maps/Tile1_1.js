@@ -41,7 +41,7 @@ const Tile = {
     { type: 'horizontal-bush', position: { x: 800, y: 564 } }
   ],
   food: [
-    { type: 'BuriedCarrot', position: { x: 80, y: 130 } }
+    { type: 'BuriedCarrot', position: { x: 80, y: 130 }, action: 'collectBuriedCarrot' }
   ],
   x: 1,
   y: 1

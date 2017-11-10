@@ -1,25 +1,24 @@
 import React, { Component } from 'react';
+import { branch } from 'baobab-react/higher-order';
 
 import 'less/Backgrounds.less';
 
+@branch({
+  backgrounds: ['backgrounds']
+})
 class BackgroundCell extends Component {
   constructor(props, context) {
     super(props, context);
-
-    this.backgrounds = {
-      B0: 'dirt',
-      B1: 'grass',
-      B2: 'bush',
-    };
   }
 
   render() {
     const {
       tile,
       index,
-      children
+      children,
+      backgrounds
     } = this.props;
-    const backgroundClass = this.backgrounds[tile];
+    const backgroundClass = backgrounds[tile];
 
     return (
       <div className={`background-tile ${backgroundClass}`} key={`tile-${index}`}>

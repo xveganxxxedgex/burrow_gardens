@@ -7,7 +7,12 @@ const state = new Baobab({
   },
   tooltip: null,
   tile: {},
-  boardDimensions: {}
+  boardDimensions: {},
+  backgrounds: {
+    B0: 'Dirt',
+    B1: 'Grass',
+    B2: 'Mud',
+  }
 });
 
 export default state;

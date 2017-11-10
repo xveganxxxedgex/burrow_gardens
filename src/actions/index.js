@@ -3,6 +3,7 @@ import _capitalize from 'lodash/capitalize';
 
 import * as Tiles from 'Maps';
 import * as FoodItems from 'components/Food';
+import * as Backgrounds from 'components/Backgrounds';
 
 let tooltipTimeout;
 
@@ -60,4 +61,14 @@ export function setActiveTile(x = 1, y = 1) {
 
 export function getFoodItem(type) {
   return FoodItems[type];
+}
+
+export function getBackgroundCell(cell) {
+  const backgrounds = tree.get('backgrounds');
+  const type = backgrounds[cell];
+  return Backgrounds[type];
+}
+
+export function collectBuriedCarrot() {
+  console.log('collectBuriedCarrot');
 }

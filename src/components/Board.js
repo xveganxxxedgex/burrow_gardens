@@ -7,7 +7,7 @@ import Hero from 'components/Characters/Hero';
 import Scenery from 'components/Scenery';
 import grassImage from 'images/grass.png';
 
-import { setBoardDimensions, setActiveTile, getFoodItem } from 'actions';
+import { setBoardDimensions, setActiveTile, getFoodItem, getBackgroundCell } from 'actions';
 
 import 'less/Board.less';
 
@@ -19,12 +19,6 @@ class Board extends Component {
     super(props, context);
 
     this.getBoardBounds = this.getBoardBounds.bind(this);
-
-    this.backgrounds = {
-      B0: 'dirt',
-      B1: 'grass',
-      B2: 'bush',
-    };
   }
 
   componentWillMount() {
@@ -39,19 +33,6 @@ class Board extends Component {
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.getBoardBounds);
-  }
-
-  createBackground(tile, tileIndex) {
-    const backgroundClass = this.backgrounds[tile];
-    // TODO: use background images
-    return (
-      <div className={`background-tile ${backgroundClass}`} key={`tile-${tileIndex}`}>
-        <img src={grassImage} />
-      </div>
-    );
-    // return (
-    //   <div className={`background-tile ${backgroundClass}`} key={`tile-${tileIndex}`} />
-    // );
   }
 
   getBoardBounds() {
@@ -72,9 +53,12 @@ class Board extends Component {
         {tile.background.map((row, rowIndex) => {
           return (
             <div className="background-row" key={`row-${rowIndex}`}>
-              // Stop returning this createBackground method and instead call the correct background class
-              // (in this case it would be Grass.js)
-              {row.map((tile, tileIndex) => this.createBackground(tile, tileIndex))}
+              {row.map((tile, tileIndex) => {
+                const BackgroundItem = getBackgroundCell(tile);
+                return (
+                  <BackgroundItem tile={tile} key={`background-${tileIndex}`} index={tileIndex} />
+                );
+              })}
             </div>
           );
         })}
