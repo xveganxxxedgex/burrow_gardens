@@ -53,6 +53,8 @@ const Tile = {
     { type: 'bush', position: { x: 692, y: 564 } },
     { type: 'horizontal-bush', position: { x: 800, y: 564 } }
   ],
+  food: [
+  ],
   x: 1,
   y: 2
 };

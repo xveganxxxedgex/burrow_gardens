@@ -1,9 +1,11 @@
+
 import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
 import { branch } from 'baobab-react/higher-order';
 
 import Hero from 'components/Characters/Hero';
 import Scenery from 'components/Scenery';
+import grassImage from 'images/grass.png';
 
 import { setBoardDimensions, setActiveTile, getFoodItem } from 'actions';
 
@@ -41,7 +43,15 @@ class Board extends Component {
 
   createBackground(tile, tileIndex) {
     const backgroundClass = this.backgrounds[tile];
-    return <div className={`background-tile ${backgroundClass}`} key={`tile-${tileIndex}`} />;
+    // TODO: use background images
+    return (
+      <div className={`background-tile ${backgroundClass}`} key={`tile-${tileIndex}`}>
+        <img src={grassImage} />
+      </div>
+    );
+    // return (
+    //   <div className={`background-tile ${backgroundClass}`} key={`tile-${tileIndex}`} />
+    // );
   }
 
   getBoardBounds() {
