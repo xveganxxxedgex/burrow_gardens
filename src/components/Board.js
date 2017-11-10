@@ -72,6 +72,8 @@ class Board extends Component {
         {tile.background.map((row, rowIndex) => {
           return (
             <div className="background-row" key={`row-${rowIndex}`}>
+              // Stop returning this createBackground method and instead call the correct background class
+              // (in this case it would be Grass.js)
               {row.map((tile, tileIndex) => this.createBackground(tile, tileIndex))}
             </div>
           );
