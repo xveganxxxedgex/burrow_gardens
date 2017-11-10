@@ -80,6 +80,9 @@ class Hero extends Component {
   componentDidMount() {
     document.addEventListener('keydown', this.setKeyDown);
     document.addEventListener('keyup', this.setKeyUp);
+
+    // Set idle status when player doesn't move within 5 seconds
+    this.idleTimeout = setTimeout(this.setHeroIdleStatus.bind(this, 'isLoaf'), 5000);
   }
 
   componentWillUpdate(nextProps, nextState) {
