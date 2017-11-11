@@ -1,3 +1,33 @@
+let left1 = [];
+for (let i = 0; i < 760; i = i + 40) {
+  left1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: 0, y: i } });
+}
+
+let right1 = [];
+for (let i = 0; i < 200; i = i + 40) {
+  right1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: 1160, y: i } });
+}
+
+let right2 = [];
+for (let i = 400; i < 560; i = i + 40) {
+  right2.push({ type: 'Bush', sceneryClass: 'bush', position: { x: 1160, y: i } });
+}
+
+let top1 = [];
+for (let i = 0; i < 1160; i = i + 40) {
+  top1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: i, y: 0 } });
+}
+
+let bottom1 = [];
+for (let i = 40; i < 220; i = i + 40) {
+  bottom1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: i, y: 560 } });
+}
+
+let bottom2 = [];
+for (let i = 640; i < 1200; i = i + 40) {
+  bottom2.push({ type: 'Bush', sceneryClass: 'bush', position: { x: i, y: 560 } });
+}
+
 const Tile = {
   background: [
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
@@ -17,28 +47,13 @@ const Tile = {
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1']
   ],
   scenery: [
-    { type: 'vertical-bush', position: { x: 0, y: 0 } },
-    { type: 'vertical-bush', position: { x: 0, y: 200 } },
-    { type: 'vertical-bush', position: { x: 0, y: 400 } },
-
-    { type: 'horizontal-bush', position: { x: 0, y: 0 } },
-    { type: 'horizontal-bush', position: { x: 400, y: 0 } },
-    { type: 'horizontal-bush', position: { x: 800, y: 0 } },
-
-    { type: 'vertical-bush', position: { x: 1164, y: 0 } },
-    { type: 'vertical-bush', position: { x: 1164, y: 400 } },
-
-    { type: 'bush', position: { x: 36, y: 564 } },
-    { type: 'bush', position: { x: 72, y: 564 } },
-    { type: 'bush', position: { x: 108, y: 564 } },
-    { type: 'bush', position: { x: 144, y: 564 } },
-    { type: 'bush', position: { x: 180, y: 564 } },
-    { type: 'bush', position: { x: 764, y: 564 } },
-    { type: 'bush', position: { x: 728, y: 564 } },
-    { type: 'bush', position: { x: 692, y: 564 } },
-    { type: 'bush', position: { x: 656, y: 564 } },
-    { type: 'bush', position: { x: 620, y: 564 } },
-    { type: 'horizontal-bush', position: { x: 800, y: 564 } }
+    ...left1,
+    ...right1,
+    ...right2,
+    ...top1,
+    ...bottom1,
+    ...bottom2
+    // { type: 'Bush', sceneryClass: 'horizontal', position: { x: 800, y: 564 } }
   ],
   food: [
     {

@@ -1,3 +1,34 @@
+let left1 = [];
+for (let i = 0; i < 200; i = i + 40) {
+  left1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: 0, y: i } });
+}
+
+let left2 = [];
+for (let i = 400; i < 560; i = i + 40) {
+  left2.push({ type: 'Bush', sceneryClass: 'bush', position: { x: 0, y: i } });
+}
+
+let right1 = [];
+for (let i = 0; i < 560; i = i + 40) {
+  right1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: 1160, y: i } });
+}
+
+let top1 = [];
+for (let i = 0; i < 1160; i = i + 40) {
+  top1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: i, y: 0 } });
+}
+
+let bottom1 = [];
+for (let i = 0; i < 460; i = i + 40) {
+  bottom1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: i, y: 560 } });
+}
+
+let bottom2 = [];
+for (let i = 720; i < 1200; i = i + 40) {
+  bottom2.push({ type: 'Bush', sceneryClass: 'bush', position: { x: i, y: 560 } });
+}
+
+
 const Tile = {
   background: [
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
@@ -17,41 +48,12 @@ const Tile = {
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1']
   ],
   scenery: [
-    { type: 'bush', position: { x: 436, y: 164 } },
-    { type: 'bush', position: { x: 436, y: 200 } },
-    { type: 'bush', position: { x: 436, y: 236 } },
-    { type: 'bush', position: { x: 436, y: 272 } },
-    { type: 'bush', position: { x: 436, y: 308 } },
-    { type: 'bush', position: { x: 472, y: 308 } },
-    { type: 'bush', position: { x: 508, y: 308 } },
-    { type: 'bush', position: { x: 544, y: 308 } },
-    { type: 'bush', position: { x: 580, y: 164 } },
-    { type: 'bush', position: { x: 580, y: 200 } },
-    { type: 'bush', position: { x: 580, y: 236 } },
-    { type: 'bush', position: { x: 580, y: 272 } },
-    { type: 'bush', position: { x: 580, y: 308 } },
-    { type: 'bush', position: { x: 580, y: 308 } },
-
-    { type: 'vertical-bush', position: { x: 0, y: 0 } },
-    { type: 'vertical-bush', position: { x: 0, y: 400 } },
-
-    { type: 'horizontal-bush', position: { x: 0, y: 0 } },
-    { type: 'horizontal-bush', position: { x: 400, y: 0 } },
-    { type: 'horizontal-bush', position: { x: 800, y: 0 } },
-
-    { type: 'vertical-bush', position: { x: 1164, y: 0 } },
-    { type: 'vertical-bush', position: { x: 1164, y: 200 } },
-    { type: 'vertical-bush', position: { x: 1164, y: 400 } },
-
-    { type: 'horizontal-bush', position: { x: 0, y: 564 } },
-    { type: 'bush', position: { x: 400, y: 564 } },
-    { type: 'bush', position: { x: 436, y: 564 } },
-    { type: 'bush', position: { x: 472, y: 564 } },
-    { type: 'bush', position: { x: 72, y: 564 } },
-    { type: 'bush', position: { x: 764, y: 564 } },
-    { type: 'bush', position: { x: 728, y: 564 } },
-    { type: 'bush', position: { x: 692, y: 564 } },
-    { type: 'horizontal-bush', position: { x: 800, y: 564 } }
+    ...left1,
+    ...left2,
+    ...right1,
+    ...top1,
+    ...bottom1,
+    ...bottom2
   ],
   food: [
   ],

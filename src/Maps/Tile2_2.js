@@ -1,3 +1,28 @@
+let left1 = [];
+for (let i = 0; i < 480; i = i + 40) {
+  left1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: 0, y: i } });
+}
+
+let right1 = [];
+for (let i = 0; i < 560; i = i + 40) {
+  right1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: 1160, y: i } });
+}
+
+let top1 = [];
+for (let i = 0; i < 460; i = i + 40) {
+  top1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: i, y: 0 } });
+}
+
+let top2 = [];
+for (let i = 720; i < 1200; i = i + 40) {
+  top2.push({ type: 'Bush', sceneryClass: 'bush', position: { x: i, y: 0 } });
+}
+
+let bottom1 = [];
+for (let i = 0; i < 1200; i = i + 40) {
+  bottom1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: i, y: 560 } });
+}
+
 const Tile = {
   background: [
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
@@ -17,28 +42,11 @@ const Tile = {
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1']
   ],
   scenery: [
-    { type: 'vertical-bush', position: { x: 0, y: 0 } },
-    { type: 'vertical-bush', position: { x: 0, y: 200 } },
-    { type: 'bush', position: { x: 0, y: 400 } },
-    { type: 'bush', position: { x: 0, y: 436 } },
-
-    { type: 'horizontal-bush', position: { x: 0, y: 0 } },
-    { type: 'bush', position: { x: 400, y: 0 } },
-    { type: 'bush', position: { x: 436, y: 0 } },
-    { type: 'bush', position: { x: 472, y: 0 } },
-    { type: 'bush', position: { x: 72, y: 0 } },
-    { type: 'bush', position: { x: 764, y: 0 } },
-    { type: 'bush', position: { x: 728, y: 0 } },
-    { type: 'bush', position: { x: 692, y: 0 } },
-    { type: 'horizontal-bush', position: { x: 800, y: 0 } },
-
-    { type: 'vertical-bush', position: { x: 1164, y: 0 } },
-    { type: 'vertical-bush', position: { x: 1164, y: 200 } },
-    { type: 'vertical-bush', position: { x: 1164, y: 400 } },
-
-    { type: 'horizontal-bush', position: { x: 0, y: 564 } },
-    { type: 'horizontal-bush', position: { x: 400, y: 564 } },
-    { type: 'horizontal-bush', position: { x: 800, y: 564 } }
+    ...left1,
+    ...right1,
+    ...top1,
+    ...top2,
+    ...bottom1
   ],
   food: [
   ],
