@@ -1,18 +1,18 @@
 # TODO:
 
--Create general movement/action functionality (arrow keys + space)-
+~~Create general movement/action functionality (arrow keys + space)~~
 
--Create logic for getting map bounds (so player can't move into the whitespace)-
+~~Create logic for getting map bounds (so player can't move into the whitespace)~~
 
--Create logic for going between different maps-
+~~Create logic for going between different maps~~
 
--Create basic map template-
+~~Create basic map template~~
 
--Create hitbox detection-
+~~Create hitbox detection~~
 
--Fix hitbox detection going diagonal issue-
+~~Fix hitbox detection going diagonal issue~~
 
--Rotate images depending on which direction player is moving/facing-
+~~Rotate images depending on which direction player is moving/facing~~
 
 Create characters
 

@@ -1,9 +1,12 @@
 import Baobab from 'baobab';
 
 const state = new Baobab({
-  heroPosition: {
-    x: 60,
-    y: 60
+  hero: {
+    position: {
+      x: 60,
+      y: 60
+    },
+    abilities: []
   },
   popover: null,
   tile: {},

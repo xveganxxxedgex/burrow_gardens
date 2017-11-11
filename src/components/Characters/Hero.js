@@ -27,7 +27,7 @@ import lopBunnyUpGif from 'images/lopbunnyupgif.gif';
 import lopBunnyDownGif from 'images/lopbunnydowngif.gif';
 
 @branch({
-  heroPosition: ['heroPosition'],
+  hero: ['hero'],
   boardDimensions: ['boardDimensions'],
   tile: ['tile']
 })
@@ -120,7 +120,9 @@ class Hero extends Component {
     } = this.state;
     const direction = this.getDirection(e);
     const {
-      heroPosition: { x, y }
+      hero: {
+        position: { x, y }
+      }
     } = this.props;
 
     if (!direction) {
@@ -358,7 +360,9 @@ class Hero extends Component {
   movePlayer() {
     const { moving } = this.state;
     const {
-      heroPosition: { x, y },
+      hero: {
+        position: { x, y }
+      },
       boardDimensions: {
         height, width
       },
@@ -441,7 +445,11 @@ class Hero extends Component {
   }
 
   render() {
-    const { heroPosition: { x, y } } = this.props;
+    const {
+      hero: {
+        position: { x, y }
+      }
+    } = this.props;
     const bunnyImage = this.getBunnyImage();
 
     return (

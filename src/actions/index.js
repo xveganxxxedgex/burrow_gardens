@@ -9,7 +9,7 @@ import * as Backgrounds from 'components/Backgrounds';
 let popoverTimeout;
 
 export function updateHeroPosition(newPos) {
-  const cursor = tree.select('heroPosition');
+  const cursor = tree.select(['hero', 'position']);
   cursor.set(newPos);
 }
 
@@ -72,11 +72,23 @@ export function getBackgroundCell(cell) {
 
 export function collectItem(type, itemId) {
   const items = tree.get(['tile', type]);
+  const heroAbilities = tree.get(['hero', 'abilities']);
   const itemIndex = _findIndex(items, item => item.id == itemId);
+
+  if (items[itemIndex].needsAbility && heroAbilities.indexOf(items[itemIndex].needsAbility) == -1) {
+    setPopover({
+      title: 'Skill Needed',
+      text: `You must learn a new skill to collect this item.`,
+      popoverClass: 'info'
+    });
+    return;
+  }
+
   const itemDisplay = items[itemIndex].display || items[itemIndex].type;
   tree.select(['tile', type, itemIndex, 'collected']).set(true);
   setPopover({
     title: 'Item Added',
-    text: `You picked up: ${itemDisplay}`
+    text: `You picked up: ${itemDisplay}`,
+    popoverClass: 'info'
   });
 }

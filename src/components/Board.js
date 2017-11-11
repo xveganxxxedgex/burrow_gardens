@@ -57,7 +57,7 @@ class Board extends Component {
             title={popover.title}
             placement="left"
             positionTop={20}
-            className="right-alert"
+            className={`right-alert ${popover.popoverClass}`}
           >
             {popover.text}
           </Popover>
