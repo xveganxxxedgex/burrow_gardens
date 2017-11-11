@@ -7,7 +7,7 @@ import Hero from 'components/Characters/Hero';
 import Scenery from 'components/Scenery';
 import grassImage from 'images/grass.png';
 
-import { setBoardDimensions, setActiveTile, getFoodItem, getBackgroundCell } from 'actions';
+import { setBoardDimensions, setActiveTile, getFoodItem, getBackgroundCell, getSceneryItem } from 'actions';
 
 import 'less/Board.less';
 
@@ -75,8 +75,9 @@ class Board extends Component {
           );
         })}
         {tile.scenery.map((item, itemIndex) => {
+          const SceneryItem = getSceneryItem(item.type);
           return (
-            <Scenery item={item} key={`scenery-${itemIndex}`} index={itemIndex} />
+            <SceneryItem item={item} key={`scenery-${itemIndex}`} index={itemIndex} />
           );
         })}
         {tile.food.map((item, itemIndex) => {
