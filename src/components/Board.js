@@ -1,7 +1,7 @@
-
 import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
 import { branch } from 'baobab-react/higher-order';
+import { Popover } from 'react-bootstrap';
 
 import Hero from 'components/Characters/Hero';
 import Scenery from 'components/Scenery';
@@ -12,7 +12,8 @@ import { setBoardDimensions, setActiveTile, getFoodItem, getBackgroundCell } fro
 import 'less/Board.less';
 
 @branch({
-  tile: ['tile']
+  tile: ['tile'],
+  popover: ['popover']
 })
 class Board extends Component {
   constructor(props, context) {
@@ -42,7 +43,7 @@ class Board extends Component {
   }
 
   render() {
-    const { tooltip, tile } = this.props;
+    const { popover, tile } = this.props;
 
     if (!Object.keys(tile).length) {
       return <div>Loading...</div>;
@@ -50,6 +51,17 @@ class Board extends Component {
 
     return (
       <div className="board" ref={(board) => { this.board = board }}>
+        {popover &&
+          <Popover
+            id="board-popover"
+            title={popover.title}
+            placement="left"
+            positionTop={20}
+            className="right-alert"
+          >
+            {popover.text}
+          </Popover>
+        }
         {tile.background.map((row, rowIndex) => {
           return (
             <div className="background-row" key={`row-${rowIndex}`}>

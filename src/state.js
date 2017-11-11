@@ -5,7 +5,7 @@ const state = new Baobab({
     x: 60,
     y: 60
   },
-  tooltip: null,
+  popover: null,
   tile: {},
   boardDimensions: {},
   backgrounds: {

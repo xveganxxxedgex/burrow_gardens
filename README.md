@@ -14,8 +14,6 @@
 
 -Rotate images depending on which direction player is moving/facing-
 
-Fix issue with overflow hidden (so char can go halfway to next screen) blocking tooltip when action happens near board edge
-
 Create characters
 
 Create food items

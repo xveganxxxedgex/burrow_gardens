@@ -1,28 +1,29 @@
 import tree from 'state';
 import _capitalize from 'lodash/capitalize';
+import _findIndex from 'lodash/findIndex';
 
 import * as Tiles from 'Maps';
 import * as FoodItems from 'components/Food';
 import * as Backgrounds from 'components/Backgrounds';
 
-let tooltipTimeout;
+let popoverTimeout;
 
 export function updateHeroPosition(newPos) {
   const cursor = tree.select('heroPosition');
   cursor.set(newPos);
 }
 
-export function setTooltip(text, duration = 3000) {
-  const cursor = tree.select('tooltip');
-  cursor.set(text);
+export function setPopover(popoverObj, duration = 3000) {
+  const cursor = tree.select('popover');
+  cursor.set(popoverObj);
   tree.commit();
 
-  if (text) {
-    tooltipTimeout = setTimeout(() => {
-      setTooltip(null);
+  if (popoverObj) {
+    popoverTimeout = setTimeout(() => {
+      setPopover(null);
     }, duration);
   } else {
-    clearTimeout(tooltipTimeout);
+    clearTimeout(popoverTimeout);
   }
 }
 
@@ -69,6 +70,13 @@ export function getBackgroundCell(cell) {
   return Backgrounds[type];
 }
 
-export function collectBuriedCarrot() {
-  console.log('collectBuriedCarrot');
+export function collectItem(type, itemId) {
+  const items = tree.get(['tile', type]);
+  const itemIndex = _findIndex(items, item => item.id == itemId);
+  const itemDisplay = items[itemIndex].display || items[itemIndex].type;
+  tree.select(['tile', type, itemIndex, 'collected']).set(true);
+  setPopover({
+    title: 'Item Added',
+    text: `You picked up: ${itemDisplay}`
+  });
 }

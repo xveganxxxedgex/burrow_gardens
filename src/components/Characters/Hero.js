@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
-import { Overlay, Tooltip } from 'react-bootstrap';
 import { findDOMNode } from 'react-dom';
 import { branch } from 'baobab-react/higher-order';
 
 import Bunny from 'components/Characters/Bunny';
 
-import { updateHeroPosition, setTooltip, setActiveTile } from 'actions';
+import { updateHeroPosition, setActiveTile, collectItem } from 'actions';
 
 import bunnyLeftImg from 'images/bunny1.png';
 import bunnyUpImg from 'images/bunnyup1.png';
@@ -29,7 +28,6 @@ import lopBunnyDownGif from 'images/lopbunnydowngif.gif';
 
 @branch({
   heroPosition: ['heroPosition'],
-  tooltip: ['tooltip'],
   boardDimensions: ['boardDimensions'],
   tile: ['tile']
 })
@@ -65,9 +63,9 @@ class Hero extends Component {
     this.getDirection = this.getDirection.bind(this);
     this.setKeyDown = this.setKeyDown.bind(this);
     this.setKeyUp = this.setKeyUp.bind(this);
-    this.callAction = this.callAction.bind(this);
-    this.unsetTooltip = this.unsetTooltip.bind(this);
     this.checkCollision = this.checkCollision.bind(this);
+    this.checkSceneryCollision = this.checkSceneryCollision.bind(this);
+    this.checkFoodCollision = this.checkFoodCollision.bind(this);
     this.setHeroIdleStatus = this.setHeroIdleStatus.bind(this);
     this.getBunnyImage = this.getBunnyImage.bind(this);
 
@@ -116,9 +114,14 @@ class Hero extends Component {
 
   setKeyDown(e) {
     e.preventDefault();
-    const { moving } = this.state;
+    const {
+      moving,
+      lastDirection
+    } = this.state;
     const direction = this.getDirection(e);
-    const { tooltip } = this.props;
+    const {
+      heroPosition: { x, y }
+    } = this.props;
 
     if (!direction) {
       return;
@@ -128,9 +131,8 @@ class Hero extends Component {
     this.idleTimeout = null;
 
     if (direction == 'space') {
-      if (!tooltip && !moving.length) {
-        // call space action method
-        this.callAction();
+      if (!moving.length) {
+        this.checkFoodCollision(x, y);
       }
 
       return;
@@ -210,17 +212,9 @@ class Hero extends Component {
     this.setState(newState);
   }
 
-  unsetTooltip() {
-    const { tooltip } = this.props;
-
-    if (tooltip) {
-      setTooltip(null);
-    }
-  }
-
-  checkCollision(x, y, direction) {
+  checkCollision(x, y, direction, type) {
     const {
-      tile: { scenery },
+      tile,
       boardDimensions: {
         left: boardX, top: boardY
       }
@@ -230,39 +224,55 @@ class Hero extends Component {
     const heroRight = heroLeft + heroRect.width;
     const heroTop = y + boardY;
     const heroBottom = heroTop + heroRect.height;
-    let maxValue = ['up', 'down'].indexOf(direction) > -1 ? y : x;
+    const uncollectedItems = tile[type].filter(item => !item.collected);
+    let maxValue = direction && (['up', 'down'].indexOf(direction) > -1 ? y : x);
 
-    for (let s = 0; s < scenery.length; s++) {
-      const sceneryElement = document.querySelector(`.scenery_index_${s}`).getBoundingClientRect();
-      const sceneryBottom = sceneryElement.top + sceneryElement.height;
-      const sceneryRight = sceneryElement.left + sceneryElement.width;
-      const hitPlayerRight = heroRight > sceneryElement.left;
-      const hitPlayerBottom = heroBottom > sceneryElement.top;
-      const hitPlayerLeft = heroLeft < sceneryRight;
-      const hitPlayerTop = heroTop < sceneryBottom;
+    for (let t = 0; t < uncollectedItems.length; t++) {
+      const elementId = uncollectedItems[t].id;
+      const checkElement = document.querySelector(`.${type}_index_${elementId || t}`).getBoundingClientRect();
+      const elementBottom = checkElement.top + checkElement.height;
+      const elementRight = checkElement.left + checkElement.width;
+      const hitPlayerRight = direction ? heroRight > checkElement.left : heroRight >= checkElement.left;
+      const hitPlayerBottom = direction ? heroBottom > checkElement.top : heroBottom >= checkElement.top;
+      const hitPlayerLeft = direction ? heroLeft < elementRight : heroLeft <= elementRight;
+      const hitPlayerTop = direction ? heroTop < elementBottom : heroTop <= elementBottom;
       const isBetweenY = hitPlayerTop && hitPlayerBottom;
       const isBetweenX = hitPlayerLeft && hitPlayerRight;
       const isColliding = isBetweenY && isBetweenX;
 
       if (isColliding) {
-        switch(direction) {
-          case 'up':
-            maxValue = Math.max(maxValue, (sceneryBottom - boardY));
-            break;
-          case 'down':
-            maxValue = Math.min(maxValue, (sceneryElement.top - boardY - heroRect.height));
-            break;
-          case 'left':
-            maxValue = Math.max(maxValue, (sceneryRight - boardX));
-            break;
-          case 'right':
-            maxValue = Math.min(maxValue, (sceneryElement.left - boardX - heroRect.width));
-            break;
+        if (type == 'food' && !direction) {
+          collectItem('food', elementId);
+        }
+
+        if (direction) {
+          switch(direction) {
+            case 'up':
+              maxValue = Math.max(maxValue, (elementBottom - boardY));
+              break;
+            case 'down':
+              maxValue = Math.min(maxValue, (checkElement.top - boardY - heroRect.height));
+              break;
+            case 'left':
+              maxValue = Math.max(maxValue, (elementRight - boardX));
+              break;
+            case 'right':
+              maxValue = Math.min(maxValue, (checkElement.left - boardX - heroRect.width));
+              break;
+          }
         }
       }
     }
 
     return maxValue;
+  }
+
+  checkFoodCollision(x, y, direction) {
+    return this.checkCollision(x, y, direction, 'food');
+  }
+
+  checkSceneryCollision(x, y, direction) {
+    return this.checkCollision(x, y, direction, 'scenery');
   }
 
   // Handle forward movements, ie moving down or right
@@ -297,10 +307,11 @@ class Hero extends Component {
     const useY = isXAxis ? newY : value;
 
     // Ensure new position isn't colliding with any entities
-    const sceneryLimit = this.checkCollision(useX, useY, direction);
+    const sceneryLimit = this.checkSceneryCollision(useX, useY, direction);
+    const foodLimit = this.checkFoodCollision(useX, useY, direction);
 
     return {
-      value: Math.min(maxLimit, Math.min(value, sceneryLimit))
+      value: Math.min(maxLimit, Math.min(value, Math.min(sceneryLimit, foodLimit)))
     };
   }
 
@@ -336,10 +347,11 @@ class Hero extends Component {
     const useY = isXAxis ? newY : value;
 
     // Ensure new position isn't colliding with any entities
-    const sceneryLimit = this.checkCollision(useX, useY, direction);
+    const sceneryLimit = this.checkSceneryCollision(useX, useY, direction);
+    const foodLimit = this.checkFoodCollision(useX, useY, direction);
 
     return {
-      value: Math.max(minLimit, Math.max(value, sceneryLimit))
+      value: Math.max(minLimit, Math.max(value, Math.max(sceneryLimit, foodLimit)))
     };
   }
 
@@ -350,11 +362,9 @@ class Hero extends Component {
       boardDimensions: {
         height, width
       },
-      tooltip,
       tile: { x: tileX, y: tileY }
     } = this.props;
 
-    this.unsetTooltip();
     let newX = x;
     let newY = y;
 
@@ -382,11 +392,6 @@ class Hero extends Component {
     updateHeroPosition({ x: newX, y: newY });
 
     this.movingTimeout = setTimeout(this.movePlayer, 120);
-  }
-
-  callAction() {
-    // What to do when user hits space?
-    setTooltip("Space bar pressed");
   }
 
   getBunnyImage(isLop) {
@@ -436,7 +441,7 @@ class Hero extends Component {
   }
 
   render() {
-    const { heroPosition: { x, y }, tooltip } = this.props;
+    const { heroPosition: { x, y } } = this.props;
     const bunnyImage = this.getBunnyImage();
 
     return (
@@ -448,15 +453,6 @@ class Hero extends Component {
         isFlopped={this.state.isFlopped}
       >
         <img src={bunnyImage} />
-        <Overlay
-          placement='top'
-          show={!!tooltip}
-          animation={false}
-          container={this}
-          target={() => findDOMNode(this.hero)}
-        >
-          <Tooltip id="heroToolTip">{ tooltip }</Tooltip>
-        </Overlay>
       </Bunny>
     );
   }

@@ -11,7 +11,9 @@ class FoodItem extends Component {
     const {
       item: {
         type,
-        position: { x, y }
+        position: { x, y },
+        collected,
+        id
       },
       index,
       children
@@ -21,9 +23,13 @@ class FoodItem extends Component {
       left: x + 'px'
     };
 
+    if (collected) {
+      return <span />;
+    }
+
     return (
       <div
-        className={`food ${type} food_index_${index}`}
+        className={`food ${type} food_index_${id}`}
         style={style}
       >
         {children}
