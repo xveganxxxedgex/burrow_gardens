@@ -54,7 +54,7 @@ export function setBoardDimensions(board) {
   cursor.set(newDimensions);
 }
 
-export function setActiveTile(x = 2, y = 1) {
+export function setActiveTile(x = 1, y = 1) {
   const tile = Tiles[`Tile${x}_${y}`];
   const cursor = tree.select('tile');
   cursor.set(tile);

@@ -14,13 +14,15 @@
 
 ~~Rotate images depending on which direction player is moving/facing~~
 
+~~Create logic to handle actions based on colliding entities~~
+
+~~Add sprite/gif images as backgrounds upon character move (or possibly even on idle)~~
+
 Create characters
 
 Create food items
 
 Create abilities that can only be done once certain characters join the group
-
-Create logic to handle actions based on colliding entities
 
 Create inventory state/logic
 
@@ -39,8 +41,6 @@ Create food art
 Create menu/options components
 
 Create way for user to see their inventory/active quest/current friends
-
-Add sprite/gif images as backgrounds upon character move (or possibly even on idle)
 
 Add event sound effects
 
