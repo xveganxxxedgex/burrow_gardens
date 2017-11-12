@@ -1,12 +1,13 @@
 .board {
-  height: 600px;
+  @boardHeight: 600px;
+  height: @boardHeight;
   width: 1200px;
   margin: 0 auto;
-  line-height: 0;
   position: relative;
   overflow: hidden;
 
   .background-row {
+    line-height: 0;
   }
 
   .popover {
@@ -36,10 +37,30 @@
     }
   }
 
+  .inventory-modal {
+    height: 100%;
+    overflow: hidden;
+
+    .modal-dialog {
+      height: calc(~'100% - 60px');
+      width: 800px;
+
+      .modal-content {
+        height: 100%;
+
+        .modal-body {
+          height: calc(~'100% - 55px');
+          overflow: auto;
+        }
+      }
+    }
+  }
+
   &.modal-container {
     position: relative;
     padding: 0 !important;
   }
+
   &.modal-container .modal, &.modal-container .modal-backdrop {
     position: absolute;
   }
