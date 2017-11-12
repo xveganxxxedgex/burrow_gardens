@@ -5,6 +5,7 @@ import { Popover } from 'react-bootstrap';
 
 import Hero from 'components/Characters/Hero';
 import Scenery from 'components/Scenery';
+import InventoryModal from 'components/InventoryModal';
 import grassImage from 'images/grass.png';
 
 import { setBoardDimensions, setActiveTile, getFoodItem, getBackgroundCell, getSceneryItem } from 'actions';
@@ -50,7 +51,7 @@ class Board extends Component {
     }
 
     return (
-      <div className="board" ref={(board) => { this.board = board }}>
+      <div className="board modal-container" ref={(board) => { this.board = board }}>
         {popover &&
           <Popover
             id="board-popover"
@@ -61,6 +62,9 @@ class Board extends Component {
           >
             {popover.text}
           </Popover>
+        }
+        {showInventory &&
+          <InventoryModal />
         }
         {tile.background.map((row, rowIndex) => {
           return (

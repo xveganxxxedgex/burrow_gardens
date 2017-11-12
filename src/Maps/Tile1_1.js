@@ -53,7 +53,6 @@ const Tile = {
     ...top1,
     ...bottom1,
     ...bottom2
-    // { type: 'Bush', sceneryClass: 'horizontal', position: { x: 800, y: 564 } }
   ],
   food: [
     {

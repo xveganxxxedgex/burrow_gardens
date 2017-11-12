@@ -55,9 +55,8 @@ export function setBoardDimensions(board) {
 }
 
 export function setActiveTile(x = 1, y = 1) {
-  const tile = Tiles[`Tile${x}_${y}`];
-  const cursor = tree.select('tile');
-  cursor.set(tile);
+  const cursor = tree.select('activeTile');
+  cursor.set({ x, y });
   tree.commit();
 }
 
@@ -85,13 +84,30 @@ export function collectItem(type, itemId) {
     return;
   }
 
-  const itemDisplay = items[itemIndex].display || items[itemIndex].type;
-  tree.select(['tile', type, itemIndex, 'collected']).set(true);
+  const item = items[itemIndex];
+  const itemDisplay = item.display || item.type;
+  const activeTile = tree.get('tile');
+  const collectedFoodCursor = tree.select(['hero', 'collectedFood']);
+  const foodIndex = _findIndex(collectedFoodCursor.get(), foodItem => foodItem.name == itemDisplay);
+  tree.select(['tiles', `${activeTile.x}_${activeTile.y}`, type, itemIndex, 'collected']).set(true);
+
+  const collectedObj = collectedFoodCursor.get(foodIndex);
+  if (!collectedObj.hasCollected) {
+    collectedFoodCursor.set([foodIndex, 'hasCollected'], true);
+  }
+
+  collectedFoodCursor.set([foodIndex, 'count'], collectedObj.count + 1);
+
   setPopover({
     title: 'Item Added',
     text: `You picked up: ${itemDisplay}`,
     popoverClass: 'info'
   });
+
+  // Repopulate item after a timeout
+  setTimeout(() => {
+    tree.select(['tiles', `${activeTile.x}_${activeTile.y}`, type, itemIndex, 'collected']).set(false);
+  }, 5000);
 }
 
 export function getSceneryItem(type) {
