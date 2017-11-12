@@ -1,0 +1,105 @@
+.bunny {
+  height: 40px;
+  width: 40px;
+  position: absolute;
+  z-index: 1;
+  -webkit-transition: top .12s linear, left .12s linear;
+  transition: top .12s linear, left .12s linear;
+}
+.bunny.no-transition {
+  -webkit-transition: none;
+  transition: none;
+}
+.bunny.right img {
+  -webkit-transform: scaleX(-1);
+          transform: scaleX(-1);
+}
+.bunny:not(.up):not(.down).isFlopped {
+  height: 36px;
+  width: 44px;
+}
+.bunny img {
+  height: 100%;
+  width: 100%;
+}
+.food {
+  position: absolute;
+  z-index: 1;
+}
+.food.Carrot {
+  height: 20px;
+  width: 20px;
+}
+.food.BuriedCarrot {
+  height: 24px;
+  width: 24px;
+}
+.food img {
+  height: 100%;
+  width: 100%;
+}
+.background-tile {
+  height: 40px;
+  width: 40px;
+  display: inline-block;
+}
+.background-tile.dirt {
+  background-color: #571E12;
+}
+.background-tile.grass {
+  background-color: green;
+}
+.background-tile.bush {
+  background-color: darkgreen;
+}
+.background-tile img {
+  height: 100%;
+  width: 100%;
+}
+.scenery {
+  position: absolute;
+  z-index: 1;
+}
+.scenery.Bush {
+  height: 40px;
+  width: 40px;
+}
+.scenery.Bush img {
+  height: 100%;
+  width: 100%;
+}
+.board {
+  height: 600px;
+  width: 1200px;
+  margin: 0 auto;
+  line-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+.board .popover.right-alert {
+  right: 20px;
+  left: initial;
+}
+.board .popover.info .popover-title,
+.board .popover.success .popover-title {
+  color: #fff;
+}
+.board .popover.info .popover-title {
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+.board .popover.success .popover-title {
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+}
+html,
+body {
+  height: 100%;
+}
+* {
+  margin: 0;
+  padding: 0;
+}
+.app {
+  padding: 40px 0;
+}
