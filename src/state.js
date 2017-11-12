@@ -74,6 +74,7 @@ const state = new Baobab({
     collectedBunnies: []
   },
   popover: null,
+  showInventory: false,
   tiles,
   tile: monkey({
     cursors: {

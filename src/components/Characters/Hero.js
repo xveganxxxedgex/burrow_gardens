@@ -4,7 +4,7 @@ import { branch } from 'baobab-react/higher-order';
 
 import Bunny from 'components/Characters/Bunny';
 
-import { updateHeroPosition, setActiveTile, collectItem } from 'actions';
+import { updateHeroPosition, setActiveTile, collectItem, toggleShowInventory } from 'actions';
 
 import bunnyLeftImg from 'images/bunny1.png';
 import bunnyUpImg from 'images/bunnyup1.png';
@@ -29,7 +29,8 @@ import lopBunnyDownGif from 'images/lopbunnydowngif.gif';
 @branch({
   hero: ['hero'],
   boardDimensions: ['boardDimensions'],
-  tile: ['tile']
+  tile: ['tile'],
+  showInventory: ['showInventory']
 })
 class Hero extends Component {
   constructor(props, context) {
@@ -49,7 +50,9 @@ class Hero extends Component {
       65: 'left',
       68: 'right',
       // Space Bar
-      32: 'space'
+      32: 'space',
+      // i key
+      73: 'inventory'
     };
 
     this.oppositeDirections = {
@@ -122,7 +125,8 @@ class Hero extends Component {
     const {
       hero: {
         position: { x, y }
-      }
+      },
+      showInventory
     } = this.props;
 
     if (!direction) {
@@ -131,6 +135,15 @@ class Hero extends Component {
 
     clearTimeout(this.idleTimeout);
     this.idleTimeout = null;
+
+    if (direction == 'inventory') {
+      toggleShowInventory();
+      return;
+    }
+
+    if (showInventory) {
+      return;
+    }
 
     if (direction == 'space') {
       if (!moving.length) {

@@ -113,3 +113,8 @@ export function collectItem(type, itemId) {
 export function getSceneryItem(type) {
   return SceneryItems[type];
 }
+
+export function toggleShowInventory() {
+  const cursor = tree.select('showInventory');
+  cursor.set(!cursor.get());
+}

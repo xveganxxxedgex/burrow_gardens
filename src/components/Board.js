@@ -8,13 +8,14 @@ import Scenery from 'components/Scenery';
 import InventoryModal from 'components/InventoryModal';
 import grassImage from 'images/grass.png';
 
-import { setBoardDimensions, setActiveTile, getFoodItem, getBackgroundCell, getSceneryItem } from 'actions';
+import { setBoardDimensions, setActiveTile, getFoodItem, getBackgroundCell, getSceneryItem, showInventory } from 'actions';
 
 import 'less/Board.less';
 
 @branch({
   tile: ['tile'],
-  popover: ['popover']
+  popover: ['popover'],
+  showInventory: ['showInventory']
 })
 class Board extends Component {
   constructor(props, context) {
@@ -44,7 +45,7 @@ class Board extends Component {
   }
 
   render() {
-    const { popover, tile } = this.props;
+    const { popover, tile, showInventory } = this.props;
 
     if (!Object.keys(tile).length) {
       return <div>Loading...</div>;
@@ -64,7 +65,7 @@ class Board extends Component {
           </Popover>
         }
         {showInventory &&
-          <InventoryModal />
+          <InventoryModal container={this} />
         }
         {tile.background.map((row, rowIndex) => {
           return (
