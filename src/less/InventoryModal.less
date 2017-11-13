@@ -1,8 +1,64 @@
 .inventory-modal {
   overflow: auto;
 
-  .food {
-    display: block;
-    position: initial;
+  .inventory-modal-content {
+    height: 100%;
+
+    .collected-section {
+      height: 100%;
+      width: 50%;
+      margin-left: 10px;
+
+      &:first-of-type {
+        margin-left: 0;
+      }
+
+      .inventory-list {
+        overflow-y: auto;
+        height: 100%;
+        align-content: flex-start;
+
+        .inventory-item-cell {
+          padding: 5px;
+          height: 75px;
+
+          &.disabled {
+            .inventory-item-cell-content {
+              background-color: #ececec;
+            }
+          }
+
+          .inventory-item-cell-content {
+            border: 1px solid #ccc;
+            padding: 5px;
+
+            .inventory-item-cell-image {
+              padding: 5px;
+              align-items: center;
+              justify-content: center;
+              position: relative;
+
+              .inventory-item-stock {
+                position: absolute;
+                right: 5px;
+                top: 5px;
+              }
+            }
+
+            .inventory-item-cell-details {
+              text-align: center;
+              font-size: 12px;
+            }
+          }
+        }
+
+        .food {
+          display: block;
+          position: initial;
+          height: 30px;
+          width: 30px;
+        }
+      }
+    }
   }
 }

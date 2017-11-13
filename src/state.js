@@ -71,7 +71,68 @@ const state = new Baobab({
         hasCollected: false
       }
     }),
-    collectedBunnies: []
+    collectedBunnies: [
+      {
+        name: 'Simba',
+        giveSkill: 'dig',
+        hasCollected: false
+      },
+      {
+        name: 'November',
+        giveSkill: 'ball',
+        hasCollected: false
+      },
+      {
+        name: 'Cloud',
+        giveSkill: 'binky',
+        hasCollected: false
+      },
+      {
+        name: 'Spence',
+        giveSkill: 'groom',
+        hasCollected: false
+      },
+      {
+        name: 'Giant',
+        giveSkill: 'climb',
+        hasCollected: false
+      },
+      {
+        name: 'Unknown 1',
+        giveSkill: 'zoom',
+        hasCollected: false
+      },
+      {
+        name: 'Unknown 2',
+        giveSkill: 'jump',
+        hasCollected: false
+      },
+      {
+        name: 'Unknown 3',
+        giveSkill: 'stomp',
+        hasCollected: false
+      },
+      {
+        name: 'No Skill',
+        hasCollected: false
+      },
+      {
+        name: 'No Skill',
+        hasCollected: false
+      },
+      {
+        name: 'No Skill',
+        hasCollected: false
+      },
+      {
+        name: 'No Skill',
+        hasCollected: false
+      },
+      {
+        name: 'No Skill',
+        hasCollected: false
+      },
+    ]
   },
   popover: null,
   showInventory: false,

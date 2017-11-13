@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { branch } from 'baobab-react/higher-order';
-import { Modal } from 'react-bootstrap';
+import { Modal, Grid, Row, Col, Thumbnail, Label } from 'react-bootstrap';
+import _orderBy from 'lodash/orderBy';
 
 import { getFoodItem } from 'actions';
 
@@ -17,12 +18,44 @@ class InventoryModal extends Component {
 
   render() {
     const { collectedFood, collectedBunnies, container } = this.props;
-    const foodItems = collectedFood.map((food, index) => {
+    const foodItems = _orderBy(collectedFood, ['hasCollected', 'name'], ['desc', 'asc']).map((food, index) => {
       const FoodItem = getFoodItem('Carrot');
       return (
-        <div key={`food_${index}`}>
-          <FoodItem inMenu={true} item={{ type: 'Carrot', id: index }} />
-          {food.name} : {food.count}
+        <div key={`food_${index}`} className={`inventory-item-cell grid-cell ${food.hasCollected ? '' : 'disabled'}`}>
+          <div className="inventory-item-cell-content flex flex-grow">
+            {food.hasCollected &&
+              <div className="flex flex-grow flex-column">
+                <div className="inventory-item-cell-image flex">
+                  <FoodItem inMenu={true} item={{ type: 'Carrot', id: index }} />
+                  <Label bsStyle={food.count ? 'primary' : 'default'} className="inventory-item-stock">
+                    {food.count}
+                  </Label>
+                </div>
+                <div className="inventory-item-cell-details">
+                  {food.name}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      )
+    });
+    const bunnies = collectedBunnies.map((bunny, index) => {
+      // TODO: use actual bunny images
+      return (
+        <div key={`bunny_${index}`} className={`inventory-item-cell grid-cell ${bunny.hasCollected ? '' : 'disabled'}`}>
+          <div className="inventory-item-cell-content flex flex-grow">
+            {bunny.hasCollected &&
+              <div className="flex flex-grow flex-column">
+                <div className="inventory-item-cell-image flex">
+                  <img />
+                </div>
+                <div className="inventory-item-cell-details">
+                  {bunny.name}
+                </div>
+              </div>
+            }
+          </div>
         </div>
       )
     });
@@ -35,8 +68,19 @@ class InventoryModal extends Component {
       >
         <Modal.Header>Inventory</Modal.Header>
         <Modal.Body>
-          <div>
-            {foodItems}
+          <div className="flex inventory-modal-content">
+            <div className="flex flex-column collected-section food-inventory">
+              <div className="h3 flex">Collected Food Items</div>
+              <div className="inventory-list flex-grid grid-third flex-wrap">
+                {foodItems}
+              </div>
+            </div>
+            <div className="flex flex-column collected-section bunnies-inventory">
+              <div className="h3 flex">Bunny Friends</div>
+              <div className="inventory-list flex-grid grid-third flex-wrap">
+                {bunnies}
+              </div>
+            </div>
           </div>
         </Modal.Body>
       </Modal>

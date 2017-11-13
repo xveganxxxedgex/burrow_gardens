@@ -10,3 +10,317 @@ html, body {
 .app {
   padding: 40px 0;
 }
+
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+/** FLEX GRID **/
+.flex-grid {
+  display: flex;
+
+  .grid-cell {
+    display: flex;
+    padding-bottom: 15px;
+    max-width: 100%;
+  }
+
+  &.grid-fit {
+    & > .grid-cell {
+      flex: 1;
+    }
+  }
+
+  &.grid-full {
+    & > .grid-cell {
+      width: 100%;
+      flex: 0 0 100%;
+    }
+  }
+
+  &.grid-half {
+    & > .grid-cell {
+      width: 50%;
+      flex: 0 0 50%;
+    }
+  }
+
+  &.grid-third {
+    & > .grid-cell {
+      width: 33.3333%;
+      flex: 0 0 33.3333%;
+    }
+  }
+
+  &.grid-quarter {
+    & > .grid-cell {
+      width: 25%;
+      flex: 0 0 25%;
+    }
+  }
+
+  & > .min-full-cell {
+    width: 100%;
+    flex: 0 0 100%;
+  }
+
+  & > .min-half-cell {
+    width: 100%;
+    flex: 0 0 100%;
+  }
+
+  & > .min-third-cell {
+    width: 100%;
+    flex: 0 0 100%;
+  }
+
+  & > .min-quarter-cell {
+    width: 100%;
+    flex: 0 0 100%;
+  }
+
+  /* Small screens */
+  @media (min-width: 24em) {
+    &:not(.small-grid-full) {
+      & > .grid-cell {
+        padding: 10px;
+      }
+    }
+
+    &.small-grid-fit {
+      & > .grid-cell {
+        flex: 1;
+      }
+    }
+
+    &.small-grid-full {
+      & > .grid-cell {
+        width: 100%;
+        flex: 0 0 100%;
+      }
+    }
+
+    &.small-grid-half {
+      & > .grid-cell {
+        width: 50%;
+        flex: 0 0 50%;
+      }
+    }
+
+    &.small-grid-third {
+      & > .grid-cell {
+        width: 33.3333%;
+        flex: 0 0 33.3333%;
+      }
+    }
+
+    &.small-grid-quarter {
+      & > .grid-cell {
+        width: 25%;
+        flex: 0 0 25%;
+      }
+    }
+
+    & > .min-full-cell {
+      width: 100%;
+      flex: 0 0 100%;
+    }
+  }
+
+  /* Medium screens */
+  @media (min-width: 36em) {
+    &:not(.small-grid-full) {
+      & > .grid-cell {
+        padding: 10px;
+      }
+    }
+
+    &.medium-grid-fit {
+      & > .grid-cell {
+        flex: 1;
+      }
+    }
+
+    &.medium-grid-full {
+      & > .grid-cell {
+        width: 100%;
+        flex: 0 0 100%;
+      }
+    }
+
+    &.medium-grid-half {
+      & > .grid-cell {
+        width: 50%;
+        flex: 0 0 50%;
+      }
+    }
+
+    &.medium-grid-third {
+      & > .grid-cell {
+        width: 33.3333%;
+        flex: 0 0 33.3333%;
+      }
+    }
+
+    &.medium-grid-quarter {
+      & > .grid-cell {
+        width: 25%;
+        flex: 0 0 25%;
+      }
+    }
+
+    & > .min-full-cell {
+      width: 100%;
+      flex: 0 0 100%;
+    }
+
+    & > .min-third-cell {
+      width: 50%;
+      flex: 1 0 50%;
+    }
+
+    & > .min-quarter-cell {
+      width: 33.3333%;
+      flex: 0 0 33.3333%;
+    }
+  }
+
+  /* Large screens */
+  @media (min-width: 48em) {
+    &:not(.small-grid-full) {
+      & > .grid-cell {
+        padding: 10px;
+      }
+    }
+
+    &.large-grid-fit {
+      & > .grid-cell {
+        flex: 1;
+      }
+    }
+
+    &.large-grid-full {
+      & > .grid-cell {
+        width: 100%;
+        flex: 0 0 100%;
+      }
+    }
+
+    &.large-grid-half {
+      & > .grid-cell {
+        width: 50%;
+        flex: 0 0 50%;
+      }
+    }
+
+    &.large-grid-third {
+      & > .grid-cell {
+        width: 33.3333%;
+        flex: 0 0 33.3333%;
+      }
+    }
+
+    &.large-grid-quarter {
+      & > .grid-cell {
+        width: 25%;
+        flex: 0 0 25%;
+      }
+    }
+
+    & > .min-full-cell {
+      width: 100%;
+      flex: 0 0 100%;
+    }
+  }
+
+  /* Extra-Large screens */
+  @media (min-width: 72em) {
+    &:not(.small-grid-full) {
+      & > .grid-cell {
+        padding: 10px;
+      }
+    }
+
+    &.xl-grid-fit {
+      & > .grid-cell {
+        flex: 1;
+      }
+    }
+
+    &.xl-grid-full {
+      & > .grid-cell {
+        width: 100%;
+        flex: 0 0 100%;
+      }
+    }
+
+    &.xl-grid-half {
+      & > .grid-cell {
+        width: 50%;
+        flex: 0 0 50%;
+      }
+    }
+
+    &.xl-grid-third {
+      & > .grid-cell {
+        width: 33.3333%;
+        flex: 0 0 33.3333%;
+      }
+    }
+
+    &.xl-grid-quarter {
+      & > .grid-cell {
+        width: 25%;
+        flex: 0 0 25%;
+      }
+    }
+
+    & > .min-quarter-cell {
+      width: 25%;
+      flex: 1 0 25%;
+    }
+
+    & > .min-third-cell {
+      width: 33.3333%;
+      flex: 1 0 33.3333%;
+    }
+
+    & > .min-half-cell {
+      width: 50%;
+      flex: 1 0 50%;
+    }
+
+    & > .min-full-cell {
+      width: 100% !important;
+      flex: 0 0 100% !important;
+    }
+  }
+}
+
+.relative {
+  position: relative;
+}
+
+.full-absolute {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+}
