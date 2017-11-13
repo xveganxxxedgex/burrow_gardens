@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { branch } from 'baobab-react/higher-order';
-import { Modal, Grid, Row, Col, Thumbnail, Label } from 'react-bootstrap';
+import { Modal, Grid, Row, Col, Thumbnail, Label, Glyphicon } from 'react-bootstrap';
 import _orderBy from 'lodash/orderBy';
 
 import { getFoodItem } from 'actions';
@@ -36,6 +36,11 @@ class InventoryModal extends Component {
                 </div>
               </div>
             }
+            {!food.hasCollected &&
+              <div className="unlock-icon flex flex-grow">
+                <Glyphicon glyph="question-sign" />
+              </div>
+            }
           </div>
         </div>
       )
@@ -53,6 +58,11 @@ class InventoryModal extends Component {
                 <div className="inventory-item-cell-details">
                   {bunny.name}
                 </div>
+              </div>
+            }
+            {!bunny.hasCollected &&
+              <div className="unlock-icon flex flex-grow">
+                <Glyphicon glyph="question-sign" />
               </div>
             }
           </div>
@@ -76,7 +86,7 @@ class InventoryModal extends Component {
               </div>
             </div>
             <div className="flex flex-column collected-section bunnies-inventory">
-              <div className="h3 flex">Bunny Friends</div>
+              <div className="h3 flex">Friends</div>
               <div className="inventory-list flex-grid grid-third flex-wrap">
                 {bunnies}
               </div>
