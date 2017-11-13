@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import { branch } from 'baobab-react/higher-order';
 import { Modal } from 'react-bootstrap';
 
-// import 'less/InventoryModal.less';
+import { getFoodItem } from 'actions';
+
+import 'less/InventoryModal.less';
 
 @branch({
   collectedFood: ['hero', 'collectedFood'],
@@ -16,8 +18,12 @@ class InventoryModal extends Component {
   render() {
     const { collectedFood, collectedBunnies, container } = this.props;
     const foodItems = collectedFood.map((food, index) => {
+      const FoodItem = getFoodItem('Carrot');
       return (
-        <div key={`food_${index}`}>{food.name} : {food.count}</div>
+        <div key={`food_${index}`}>
+          <FoodItem inMenu={true} item={{ type: 'Carrot', id: index }} />
+          {food.name} : {food.count}
+        </div>
       )
     });
 
