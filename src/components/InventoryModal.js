@@ -80,7 +80,7 @@ class InventoryModal extends Component {
         <Modal.Body>
           <div className="flex inventory-modal-content">
             <div className="flex flex-column collected-section food-inventory">
-              <div className="h3 flex">Collected Food Items</div>
+              <div className="h3 flex">Collected Food</div>
               <div className="inventory-list flex-grid grid-third flex-wrap">
                 {foodItems}
               </div>

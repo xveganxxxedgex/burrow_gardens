@@ -18,7 +18,11 @@
 
 ~~Add sprite/gif images as backgrounds upon character move (or possibly even on idle)~~
 
+~~Create way for user to see their inventory/active quest/current friends~~
+
 Create characters
+
+Create AI logic so characters randomly move on the map
 
 Create food items
 
@@ -39,8 +43,6 @@ Create background art
 Create food art
 
 Create menu/options components
-
-Create way for user to see their inventory/active quest/current friends
 
 Add event sound effects
 
