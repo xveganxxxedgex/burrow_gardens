@@ -4,7 +4,14 @@ import { branch } from 'baobab-react/higher-order';
 
 import Bunny from 'components/Characters/Bunny';
 
-import { updateHeroPosition, setActiveTile, collectItem, toggleShowInventory } from 'actions';
+import {
+  updateHeroPosition,
+  setActiveTile,
+  collectItem,
+  toggleShowInventory,
+  checkSceneryCollision,
+  checkFoodCollision
+} from 'actions';
 
 import bunnyLeftImg from 'images/bunny1.png';
 import bunnyUpImg from 'images/bunnyup1.png';
@@ -30,13 +37,12 @@ import lopBunnyDownGif from 'images/lopbunnydowngif.gif';
   hero: ['hero'],
   boardDimensions: ['boardDimensions'],
   tile: ['tile'],
-  showInventory: ['showInventory']
+  showInventory: ['showInventory'],
+  movePixels: ['movePixels']
 })
 class Hero extends Component {
   constructor(props, context) {
     super(props, context);
-
-    this.movePixels = 20;
 
     this.keyboardEvents = {
       // Direction keys
@@ -66,11 +72,22 @@ class Hero extends Component {
     this.getDirection = this.getDirection.bind(this);
     this.setKeyDown = this.setKeyDown.bind(this);
     this.setKeyUp = this.setKeyUp.bind(this);
-    this.checkCollision = this.checkCollision.bind(this);
-    this.checkSceneryCollision = this.checkSceneryCollision.bind(this);
-    this.checkFoodCollision = this.checkFoodCollision.bind(this);
     this.setHeroIdleStatus = this.setHeroIdleStatus.bind(this);
-    this.getBunnyImage = this.getBunnyImage.bind(this);
+
+    this.bunnyImages = {
+      left: bunnyLeftImg,
+      up: bunnyUpImg,
+      down: bunnyDownImg,
+      leftGif: bunnyLeftGif,
+      upGif: bunnyUpGif,
+      downGif: bunnyDownGif,
+      loaf: bunnyLoafImg,
+      loafUp: bunnyLoafUpImg,
+      loafDown: bunnyLoafDownImg,
+      flop: bunnyFlopImg,
+      flopUp: bunnyFlopUpImg,
+      flopDown: bunnyFlopDownImg
+    }
 
     this.state = {
       moving: [],
@@ -104,10 +121,6 @@ class Hero extends Component {
   componentWillUnmount() {
     document.removeEventListener('keydown', this.setKeyDown);
     document.removeEventListener('keyup', this.setKeyUp);
-  }
-
-  getPosNumber(pos) {
-    return Number(pos.replace('px', ''));
   }
 
   getDirection(e) {
@@ -147,7 +160,7 @@ class Hero extends Component {
 
     if (direction == 'space') {
       if (!moving.length) {
-        this.checkFoodCollision(x, y);
+        checkFoodCollision(this, x, y);
       }
 
       return;
@@ -227,84 +240,22 @@ class Hero extends Component {
     this.setState(newState);
   }
 
-  checkCollision(x, y, direction, type) {
-    const {
-      tile,
-      boardDimensions: {
-        left: boardX, top: boardY
-      }
-    } = this.props;
-    const heroRect = findDOMNode(this).getBoundingClientRect();
-    const heroLeft = x + boardX;
-    const heroRight = heroLeft + heroRect.width;
-    const heroTop = y + boardY;
-    const heroBottom = heroTop + heroRect.height;
-    const uncollectedItems = tile[type].filter(item => !item.collected);
-    let maxValue = direction && (['up', 'down'].indexOf(direction) > -1 ? y : x);
-
-    for (let t = 0; t < uncollectedItems.length; t++) {
-      const elementId = uncollectedItems[t].id;
-      const checkElement = document.querySelector(`.${type}_index_${elementId || t}`).getBoundingClientRect();
-      const elementBottom = checkElement.top + checkElement.height;
-      const elementRight = checkElement.left + checkElement.width;
-      const hitPlayerRight = direction ? heroRight > checkElement.left : heroRight >= checkElement.left;
-      const hitPlayerBottom = direction ? heroBottom > checkElement.top : heroBottom >= checkElement.top;
-      const hitPlayerLeft = direction ? heroLeft < elementRight : heroLeft <= elementRight;
-      const hitPlayerTop = direction ? heroTop < elementBottom : heroTop <= elementBottom;
-      const isBetweenY = hitPlayerTop && hitPlayerBottom;
-      const isBetweenX = hitPlayerLeft && hitPlayerRight;
-      const isColliding = isBetweenY && isBetweenX;
-
-      if (isColliding) {
-        if (type == 'food' && !direction) {
-          collectItem('food', elementId);
-        }
-
-        if (direction) {
-          switch(direction) {
-            case 'up':
-              maxValue = Math.max(maxValue, (elementBottom - boardY));
-              break;
-            case 'down':
-              maxValue = Math.min(maxValue, (checkElement.top - boardY - heroRect.height));
-              break;
-            case 'left':
-              maxValue = Math.max(maxValue, (elementRight - boardX));
-              break;
-            case 'right':
-              maxValue = Math.min(maxValue, (checkElement.left - boardX - heroRect.width));
-              break;
-          }
-        }
-      }
-    }
-
-    return maxValue;
-  }
-
-  checkFoodCollision(x, y, direction) {
-    return this.checkCollision(x, y, direction, 'food');
-  }
-
-  checkSceneryCollision(x, y, direction) {
-    return this.checkCollision(x, y, direction, 'scenery');
-  }
-
   // Handle forward movements, ie moving down or right
   movePlayerForward(axis, newX, newY, direction) {
     const {
       boardDimensions: {
         height: boardHeight, width: boardWidth
       },
-      tile
+      tile,
+      movePixels
     } = this.props;
     const { moving } = this.state;
     const isXAxis = axis == 'x';
-    const heroRect = findDOMNode(this).getBoundingClientRect();
-    const minLimit = 0 - ((isXAxis ? heroRect.width : heroRect.height) / 2);
-    const maxLimit = isXAxis ? boardWidth - (heroRect.width / 2) : boardHeight - (heroRect.height / 2);
+    const bunnyRect = findDOMNode(this).getBoundingClientRect();
+    const minLimit = 0 - ((isXAxis ? bunnyRect.width : bunnyRect.height) / 2);
+    const maxLimit = isXAxis ? boardWidth - (bunnyRect.width / 2) : boardHeight - (bunnyRect.height / 2);
     const checkTile = this.props.tile[isXAxis ? 'y' : 'x'];
-    let value = (isXAxis ? newX : newY) + this.movePixels;
+    let value = (isXAxis ? newX : newY) + movePixels;
 
     if (value > maxLimit && checkTile < 2) {
       const tileX = tile.x + (isXAxis ? 0 : 1);
@@ -322,8 +273,8 @@ class Hero extends Component {
     const useY = isXAxis ? newY : value;
 
     // Ensure new position isn't colliding with any entities
-    const sceneryLimit = this.checkSceneryCollision(useX, useY, direction);
-    const foodLimit = this.checkFoodCollision(useX, useY, direction);
+    const sceneryLimit = checkSceneryCollision(this, useX, useY, direction);
+    const foodLimit = checkFoodCollision(this, useX, useY, direction);
 
     return {
       value: Math.min(maxLimit, Math.min(value, Math.min(sceneryLimit, foodLimit)))
@@ -336,15 +287,16 @@ class Hero extends Component {
       boardDimensions: {
         height: boardHeight, width: boardWidth
       },
-      tile
+      tile,
+      movePixels
     } = this.props;
     const { moving } = this.state;
     const isXAxis = axis == 'x';
-    const heroRect = findDOMNode(this).getBoundingClientRect();
-    const minLimit = 0 - ((isXAxis ? heroRect.width : heroRect.height) / 2);
-    const maxLimit = isXAxis ? boardWidth - (heroRect.width / 2) : boardHeight - (heroRect.height / 2);
+    const bunnyRect = findDOMNode(this).getBoundingClientRect();
+    const minLimit = 0 - ((isXAxis ? bunnyRect.width : bunnyRect.height) / 2);
+    const maxLimit = isXAxis ? boardWidth - (bunnyRect.width / 2) : boardHeight - (bunnyRect.height / 2);
     const checkTile = this.props.tile[isXAxis ? 'y' : 'x'];
-    let value = (isXAxis ? newX : newY) - this.movePixels;
+    let value = (isXAxis ? newX : newY) - movePixels;
 
     if (value < minLimit && checkTile > 1) {
       const tileX = tile.x - (isXAxis ? 0 : 1);
@@ -362,8 +314,8 @@ class Hero extends Component {
     const useY = isXAxis ? newY : value;
 
     // Ensure new position isn't colliding with any entities
-    const sceneryLimit = this.checkSceneryCollision(useX, useY, direction);
-    const foodLimit = this.checkFoodCollision(useX, useY, direction);
+    const sceneryLimit = checkSceneryCollision(this, useX, useY, direction);
+    const foodLimit = checkFoodCollision(this, useX, useY, direction);
 
     return {
       value: Math.max(minLimit, Math.max(value, Math.max(sceneryLimit, foodLimit)))
@@ -411,59 +363,12 @@ class Hero extends Component {
     this.movingTimeout = setTimeout(this.movePlayer, 120);
   }
 
-  getBunnyImage(isLop) {
-    let bunnyImage = this.state.moving.length ? bunnyLeftGif : bunnyLeftImg;
-
-    if (isLop) {
-      bunnyImage = this.state.moving.length ? lopBunnyLeftGif : lopBunnyLeftImg;
-
-      if (this.state.lastDirection == 'up') {
-        bunnyImage = this.state.moving.length ? lopBunnyUpGif : lopBunnyUpImg;
-      } else if (this.state.lastDirection == 'down') {
-        bunnyImage = this.state.moving.length ? lopBunnyDownGif : lopBunnyDownImg;
-      }
-
-      return bunnyImage;
-    }
-
-    if (this.state.isFlopped) {
-      bunnyImage = bunnyFlopImg;
-
-      if (this.state.lastDirection == 'up') {
-        bunnyImage = bunnyFlopUpImg;
-      } else if (this.state.lastDirection == 'down') {
-        bunnyImage = bunnyFlopDownImg;
-      }
-
-      return bunnyImage;
-    } else if (this.state.isLoaf) {
-      bunnyImage = bunnyLoafImg;
-
-      if (this.state.lastDirection == 'up') {
-        bunnyImage = bunnyLoafUpImg;
-      } else if (this.state.lastDirection == 'down') {
-        bunnyImage = bunnyLoafDownImg;
-      }
-
-      return bunnyImage;
-    }
-
-    if (this.state.lastDirection == 'up') {
-      bunnyImage = this.state.moving.length ? bunnyUpGif : bunnyUpImg;
-    } else if (this.state.lastDirection == 'down') {
-      bunnyImage = this.state.moving.length ? bunnyDownGif : bunnyDownImg;
-    }
-
-    return bunnyImage;
-  }
-
   render() {
     const {
       hero: {
         position: { x, y }
       }
     } = this.props;
-    const bunnyImage = this.getBunnyImage();
 
     return (
       <Bunny
@@ -472,9 +377,9 @@ class Hero extends Component {
         ref={(hero) => { this.hero = hero }}
         direction={this.state.lastDirection}
         isFlopped={this.state.isFlopped}
-      >
-        <img src={bunnyImage} />
-      </Bunny>
+        isLoaf={this.state.isLoaf}
+        isMoving={this.state.moving.length}
+        bunnyImages={this.bunnyImages} />
     );
   }
 }

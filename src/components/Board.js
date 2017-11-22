@@ -8,14 +8,23 @@ import Scenery from 'components/Scenery';
 import InventoryModal from 'components/InventoryModal';
 import grassImage from 'images/grass.png';
 
-import { setBoardDimensions, setActiveTile, getFoodItem, getBackgroundCell, getSceneryItem, showInventory } from 'actions';
+import {
+  setBoardDimensions,
+  setActiveTile,
+  getCharacter,
+  getFoodItem,
+  getBackgroundCell,
+  getSceneryItem,
+  showInventory
+} from 'actions';
 
 import 'less/Board.less';
 
 @branch({
   tile: ['tile'],
   popover: ['popover'],
-  showInventory: ['showInventory']
+  showInventory: ['showInventory'],
+  bunniesOnTile: ['bunniesOnTile']
 })
 class Board extends Component {
   constructor(props, context) {
@@ -45,7 +54,7 @@ class Board extends Component {
   }
 
   render() {
-    const { popover, tile, showInventory } = this.props;
+    const { popover, tile, showInventory, bunniesOnTile } = this.props;
 
     if (!Object.keys(tile).length) {
       return <div>Loading...</div>;
@@ -89,6 +98,12 @@ class Board extends Component {
           const FoodItem = getFoodItem(item.type);
           return (
             <FoodItem item={item} key={`food-${itemIndex}`} index={itemIndex} />
+          );
+        })}
+        {bunniesOnTile.map((item, itemIndex) => {
+          const BunnyItem = getCharacter(item.name);
+          return (
+            <BunnyItem item={item} key={`bunny-${itemIndex}`} index={itemIndex} />
           );
         })}
         <Hero />

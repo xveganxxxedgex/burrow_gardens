@@ -1,4 +1,5 @@
 import Baobab, { monkey } from 'baobab';
+import _filter from 'lodash/filter';
 
 import * as Tiles from 'Maps';
 
@@ -20,7 +21,6 @@ for (let r = 1; r <= 2; r++) {
 
 const vegetables = [
   'Alfalfa Hay',
-  'Apple',
   'Arugula',
   'Basil',
   'Bok Choy',
@@ -50,7 +50,7 @@ const fruits = [
   'Melon',
   'Papaya',
   'Peach',
-  'Pears',
+  'Pear',
   'Raspberry',
   'Strawberry'
 ];
@@ -64,76 +64,181 @@ const state = new Baobab({
       y: 60
     },
     abilities: [],
-    collectedFood: foodItems.map(foodItem => {
-      return {
-        name: foodItem,
-        count: 0,
-        hasCollected: false
-      }
-    }),
-    collectedBunnies: [
-      {
-        name: 'Simba',
-        giveSkill: 'dig',
-        hasCollected: false
-      },
-      {
-        name: 'November',
-        giveSkill: 'ball',
-        hasCollected: false
-      },
-      {
-        name: 'Cloud',
-        giveSkill: 'binky',
-        hasCollected: false
-      },
-      {
-        name: 'Spence',
-        giveSkill: 'groom',
-        hasCollected: false
-      },
-      {
-        name: 'Giant',
-        giveSkill: 'climb',
-        hasCollected: false
-      },
-      {
-        name: 'Unknown 1',
-        giveSkill: 'zoom',
-        hasCollected: false
-      },
-      {
-        name: 'Unknown 2',
-        giveSkill: 'jump',
-        hasCollected: false
-      },
-      {
-        name: 'Unknown 3',
-        giveSkill: 'stomp',
-        hasCollected: false
-      },
-      {
-        name: 'No Skill',
-        hasCollected: false
-      },
-      {
-        name: 'No Skill',
-        hasCollected: false
-      },
-      {
-        name: 'No Skill',
-        hasCollected: false
-      },
-      {
-        name: 'No Skill',
-        hasCollected: false
-      },
-      {
-        name: 'No Skill',
-        hasCollected: false
-      },
-    ]
   },
+  collectedFood: foodItems.map(foodItem => {
+    return {
+      name: foodItem,
+      count: 0,
+      hasCollected: false
+    }
+  }),
+  collectedBunnies: [
+    {
+      name: 'Simba',
+      giveSkill: 'dig',
+      hasCollected: false,
+      position: {
+        x: 300,
+        y: 230
+      },
+      onTile: {
+        x: 1,
+        y: 1
+      }
+    },
+    {
+      name: 'November',
+      giveSkill: 'ball',
+      hasCollected: false,
+      position: {
+        x: 60,
+        y: 60
+      },
+      onTile: {
+        x: 1,
+        y: 5
+      }
+    },
+    {
+      name: 'Cloud',
+      giveSkill: 'binky',
+      hasCollected: false,
+      position: {
+        x: 60,
+        y: 60
+      },
+      onTile: {
+        x: 1,
+        y: 5
+      }
+    },
+    {
+      name: 'Spencer',
+      giveSkill: 'groom',
+      hasCollected: false,
+      position: {
+        x: 60,
+        y: 60
+      },
+      onTile: {
+        x: 1,
+        y: 5
+      }
+    },
+    {
+      name: 'Giant',
+      giveSkill: 'climb',
+      hasCollected: false,
+      position: {
+        x: 60,
+        y: 60
+      },
+      onTile: {
+        x: 1,
+        y: 5
+      }
+    },
+    {
+      name: 'Unknown 1',
+      giveSkill: 'zoom',
+      hasCollected: false,
+      position: {
+        x: 60,
+        y: 60
+      },
+      onTile: {
+        x: 1,
+        y: 5
+      }
+    },
+    {
+      name: 'Unknown 2',
+      giveSkill: 'jump',
+      hasCollected: false,
+      position: {
+        x: 60,
+        y: 60
+      },
+      onTile: {
+        x: 1,
+        y: 5
+      }
+    },
+    {
+      name: 'Unknown 3',
+      giveSkill: 'stomp',
+      hasCollected: false,
+      position: {
+        x: 60,
+        y: 60
+      },
+      onTile: {
+        x: 1,
+        y: 5
+      }
+    },
+    {
+      name: 'No Skill',
+      hasCollected: false,
+      position: {
+        x: 60,
+        y: 60
+      },
+      onTile: {
+        x: 1,
+        y: 5
+      }
+    },
+    {
+      name: 'No Skill',
+      hasCollected: false,
+      position: {
+        x: 60,
+        y: 60
+      },
+      onTile: {
+        x: 1,
+        y: 5
+      }
+    },
+    {
+      name: 'No Skill',
+      hasCollected: false,
+      position: {
+        x: 60,
+        y: 60
+      },
+      onTile: {
+        x: 1,
+        y: 5
+      }
+    },
+    {
+      name: 'No Skill',
+      hasCollected: false,
+      position: {
+        x: 60,
+        y: 60
+      },
+      onTile: {
+        x: 1,
+        y: 5
+      }
+    },
+    {
+      name: 'No Skill',
+      hasCollected: false,
+      position: {
+        x: 60,
+        y: 60
+      },
+      onTile: {
+        x: 1,
+        y: 5
+      }
+    },
+  ],
+  movePixels: 20,
   popover: null,
   showInventory: false,
   tiles,
@@ -144,6 +249,17 @@ const state = new Baobab({
     },
     get: function({ activeTile, tiles }) {
       return tiles[`${activeTile.x}_${activeTile.y}`];
+    }
+  }),
+  bunniesOnTile: monkey({
+    cursors: {
+      activeTile: ['activeTile'],
+      bunnies: ['collectedBunnies']
+    },
+    get: function({ activeTile, bunnies }) {
+      return _filter(bunnies, bunny => {
+        return bunny.onTile.x == activeTile.x && bunny.onTile.y == activeTile.y;
+      });
     }
   }),
   activeTile: {

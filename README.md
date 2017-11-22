@@ -1,4 +1,20 @@
-# TODO:
+# Overview
+
+This is a 2d game built with ReactJS.
+
+The objective is to collect all of the unique kinds of produce in the Burrow Gardens realm, as well as befriend all possible bunnies.
+
+Some produce can only be obtained after learning skills from bunny friends.
+
+## How To Play/Controls
+
+Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring up your inventory/info menu.
+
+## Demo
+
+[A live demo can be found here](https://xveganxxxedgex.github.io/burrow_gardens/), but the game is still under development and far from finished
+
+## TODO
 
 ~~Create general movement/action functionality (arrow keys + space)~~
 
@@ -19,6 +35,8 @@
 ~~Add sprite/gif images as backgrounds upon character move (or possibly even on idle)~~
 
 ~~Create way for user to see their inventory/active quest/current friends~~
+
+Add collision detection for other bunnies
 
 Create characters
 

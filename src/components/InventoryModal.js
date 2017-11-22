@@ -8,8 +8,8 @@ import { getFoodItem } from 'actions';
 import 'less/InventoryModal.less';
 
 @branch({
-  collectedFood: ['hero', 'collectedFood'],
-  collectedBunnies: ['hero', 'collectedBunnies']
+  collectedFood: ['collectedFood'],
+  collectedBunnies: ['collectedBunnies']
 })
 class InventoryModal extends Component {
   constructor(props, context) {

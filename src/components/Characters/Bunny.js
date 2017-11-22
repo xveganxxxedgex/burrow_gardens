@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { branch } from 'baobab-react/higher-order';
+import _capitalize from 'lodash/capitalize';
 
 import 'less/Characters.less';
 
@@ -11,6 +12,7 @@ class Bunny extends Component {
     super(props, context);
 
     this.toggleTransition = this.toggleTransition.bind(this);
+    this.getBunnyImage = this.getBunnyImage.bind(this);
 
     this.state = {
       moveTransition: true
@@ -38,14 +40,43 @@ class Bunny extends Component {
     this.setState({ moveTransition });
   }
 
+  getPosNumber(pos) {
+    return Number(pos.replace('px', ''));
+  }
+
+  getBunnyImage() {
+    const { isMoving, direction, isFlopped, isLoaf, bunnyImages } = this.props;
+    let imageKey = 'left';
+
+    if (isFlopped || isLoaf) {
+      imageKey = isFlopped ? 'flop' : 'loaf';
+
+      if (['up', 'down'].indexOf(direction) > -1) {
+        imageKey = imageKey + _capitalize(direction);
+      }
+    } else {
+      if (['up', 'down'].indexOf(direction) > -1) {
+        imageKey = direction;
+      }
+
+      if (this.props.isMoving) {
+        imageKey = imageKey + 'Gif';
+      }
+    }
+
+    return bunnyImages[imageKey];
+  }
+
   render() {
     const { name, style, children, direction, isFlopped } = this.props;
     const { moveTransition } = this.state;
+    const bunnyImage = this.getBunnyImage();
     return (
       <div
         className={`bunny ${name} ${moveTransition ? '' : 'no-transition'} ${direction} ${isFlopped ? 'isFlopped' : ''}`}
         style={style || {}}
       >
+        <img src={bunnyImage} />
         {children}
       </div>
     );
