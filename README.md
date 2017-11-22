@@ -36,6 +36,8 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Create way for user to see their inventory/active quest/current friends~~
 
+Fix timeout issues with movement/idle (likely caused by recent refactors)
+
 Add collision detection for other bunnies
 
 Create characters
