@@ -46,6 +46,8 @@ Fix jumpy AI movement
 
 Fix console warnings when setState is called for AIs no longer rendered
 
+When repopulating produce, need to ensure nothing is colliding with that position before placing it there
+
 Create characters
 
 Create food items
