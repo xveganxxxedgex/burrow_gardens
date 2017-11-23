@@ -23,13 +23,6 @@ import bunnyFlopImg from 'images/bunnyflop.png';
 import bunnyFlopUpImg from 'images/bunnyupflop.png';
 import bunnyFlopDownImg from 'images/bunnydownflop.png';
 
-import lopBunnyLeftImg from 'images/lopbunny1.png';
-import lopBunnyUpImg from 'images/lopbunnyup1.png';
-import lopBunnyDownImg from 'images/lopbunnydown1.png';
-import lopBunnyLeftGif from 'images/lopbunnygif.gif';
-import lopBunnyUpGif from 'images/lopbunnyupgif.gif';
-import lopBunnyDownGif from 'images/lopbunnydowngif.gif';
-
 @branch({
   tile: ['tile']
 })
@@ -83,17 +76,20 @@ class Simba extends Component {
   render() {
     const {
       item: {
-        position: { x, y }
+        position,
+        id
       }
     } = this.props;
 
     return (
       <Bunny
         name="Simba"
-        style={{ top: y + 'px', left: x + 'px' }}
+        style={{ top: position.y + 'px', left: position.x + 'px' }}
+        position={position}
         direction={this.state.lastDirection}
         isMoving={this.state.moving.length}
-        bunnyImages={this.bunnyImages} />
+        bunnyImages={this.bunnyImages}
+        id={id} />
     );
   }
 }

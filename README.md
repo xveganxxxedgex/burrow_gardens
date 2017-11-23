@@ -36,15 +36,21 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Create way for user to see their inventory/active quest/current friends~~
 
+~~Add collision detection for other bunnies~~
+
+~~Create AI logic so characters randomly move on the map~~
+
 Fix timeout issues with movement/idle (likely caused by recent refactors)
 
-Add collision detection for other bunnies
+Fix jumpy AI movement
+
+Fix console warnings when setState is called for AIs no longer rendered
 
 Create characters
 
-Create AI logic so characters randomly move on the map
-
 Create food items
+
+Maybe have alt state for food items for buried items so the entity doesn't go away, but it shows like an empty patch where the produce was
 
 Create abilities that can only be done once certain characters join the group
 
@@ -68,6 +74,6 @@ Add event sound effects
 
 Add background music
 
-Pause game state when browser is idle
+Pause game state when browser is idle (see TODOs in code)
 
 Maybe save state to session using store.js to let players continue

@@ -8,8 +8,18 @@ import '../less/App.less';
 
 import tree from '../state';
 
+import { toggleGameVisibility } from 'actions';
+
 @root(tree)
 export default class App extends Component {
+  componentDidMount() {
+    window.addEventListener("visibilitychange", toggleGameVisibility, false);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('visibilitychange', toggleGameVisibility);
+  }
+
   render() {
     return (
       <div className="app">

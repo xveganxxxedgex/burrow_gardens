@@ -9,7 +9,7 @@ import 'less/InventoryModal.less';
 
 @branch({
   collectedFood: ['collectedFood'],
-  collectedBunnies: ['collectedBunnies']
+  bunnies: ['bunnies']
 })
 class InventoryModal extends Component {
   constructor(props, context) {
@@ -17,7 +17,7 @@ class InventoryModal extends Component {
   }
 
   render() {
-    const { collectedFood, collectedBunnies, container } = this.props;
+    const { collectedFood, bunnies, container } = this.props;
     const foodItems = _orderBy(collectedFood, ['hasCollected', 'name'], ['desc', 'asc']).map((food, index) => {
       const FoodItem = getFoodItem('Carrot');
       return (
@@ -45,7 +45,7 @@ class InventoryModal extends Component {
         </div>
       )
     });
-    const bunnies = collectedBunnies.map((bunny, index) => {
+    const bunnyElements = bunnies.map((bunny, index) => {
       // TODO: use actual bunny images
       return (
         <div key={`bunny_${index}`} className={`inventory-item-cell grid-cell ${bunny.hasCollected ? '' : 'disabled'}`}>
@@ -88,7 +88,7 @@ class InventoryModal extends Component {
             <div className="flex flex-column collected-section bunnies-inventory">
               <div className="h3 flex">Friends</div>
               <div className="inventory-list flex-grid grid-third flex-wrap">
-                {bunnies}
+                {bunnyElements}
               </div>
             </div>
           </div>

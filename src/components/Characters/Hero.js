@@ -10,7 +10,10 @@ import {
   collectItem,
   toggleShowInventory,
   checkSceneryCollision,
-  checkFoodCollision
+  checkFoodCollision,
+  checkBunnyCollision,
+  moveEntityBack,
+  moveEntityForward
 } from 'actions';
 
 import bunnyLeftImg from 'images/bunny1.png';
@@ -67,6 +70,8 @@ class Hero extends Component {
       'left': 'right',
       'right': 'left',
     };
+
+    this.isHero = true;
 
     this.movePlayer = this.movePlayer.bind(this);
     this.getDirection = this.getDirection.bind(this);
@@ -161,6 +166,7 @@ class Hero extends Component {
     if (direction == 'space') {
       if (!moving.length) {
         checkFoodCollision(this, x, y);
+        checkBunnyCollision(this, x, y);
       }
 
       return;
@@ -189,11 +195,11 @@ class Hero extends Component {
     if (directionIndex == -1 && oppositeDirectionIndex == -1) {
       this.setState({
         moving: [...moving, direction]
+      }, () => {
+        if (!this.movingTimeout) {
+          this.movePlayer();
+        }
       });
-
-      if (!this.movingTimeout) {
-        this.movePlayer();
-      }
     }
   }
 
@@ -240,98 +246,12 @@ class Hero extends Component {
     this.setState(newState);
   }
 
-  // Handle forward movements, ie moving down or right
-  movePlayerForward(axis, newX, newY, direction) {
-    const {
-      boardDimensions: {
-        height: boardHeight, width: boardWidth
-      },
-      tile,
-      movePixels
-    } = this.props;
-    const { moving } = this.state;
-    const isXAxis = axis == 'x';
-    const bunnyRect = findDOMNode(this).getBoundingClientRect();
-    const minLimit = 0 - ((isXAxis ? bunnyRect.width : bunnyRect.height) / 2);
-    const maxLimit = isXAxis ? boardWidth - (bunnyRect.width / 2) : boardHeight - (bunnyRect.height / 2);
-    const checkTile = this.props.tile[isXAxis ? 'y' : 'x'];
-    let value = (isXAxis ? newX : newY) + movePixels;
-
-    if (value > maxLimit && checkTile < 2) {
-      const tileX = tile.x + (isXAxis ? 0 : 1);
-      const tileY = tile.y + (isXAxis ? 1 : 0);
-      // Move to next tile
-      setActiveTile(tileX, tileY);
-      //Set player coordinate to start of next tile
-      return {
-        value: minLimit,
-        changeTile: true
-      };
-    }
-
-    const useX = isXAxis ? value : newX;
-    const useY = isXAxis ? newY : value;
-
-    // Ensure new position isn't colliding with any entities
-    const sceneryLimit = checkSceneryCollision(this, useX, useY, direction);
-    const foodLimit = checkFoodCollision(this, useX, useY, direction);
-
-    return {
-      value: Math.min(maxLimit, Math.min(value, Math.min(sceneryLimit, foodLimit)))
-    };
-  }
-
-  // Handle forward movements, ie moving up or left
-  movePlayerBack(axis, newX, newY, direction) {
-    const {
-      boardDimensions: {
-        height: boardHeight, width: boardWidth
-      },
-      tile,
-      movePixels
-    } = this.props;
-    const { moving } = this.state;
-    const isXAxis = axis == 'x';
-    const bunnyRect = findDOMNode(this).getBoundingClientRect();
-    const minLimit = 0 - ((isXAxis ? bunnyRect.width : bunnyRect.height) / 2);
-    const maxLimit = isXAxis ? boardWidth - (bunnyRect.width / 2) : boardHeight - (bunnyRect.height / 2);
-    const checkTile = this.props.tile[isXAxis ? 'y' : 'x'];
-    let value = (isXAxis ? newX : newY) - movePixels;
-
-    if (value < minLimit && checkTile > 1) {
-      const tileX = tile.x - (isXAxis ? 0 : 1);
-      const tileY = tile.y - (isXAxis ? 1 : 0);
-      // Move to previous tile
-      setActiveTile(tileX, tileY);
-      //Set player coordinate to end of previous tile
-      return {
-        value: maxLimit,
-        changeTile: true
-      };
-    }
-
-    const useX = isXAxis ? value : newX;
-    const useY = isXAxis ? newY : value;
-
-    // Ensure new position isn't colliding with any entities
-    const sceneryLimit = checkSceneryCollision(this, useX, useY, direction);
-    const foodLimit = checkFoodCollision(this, useX, useY, direction);
-
-    return {
-      value: Math.max(minLimit, Math.max(value, Math.max(sceneryLimit, foodLimit)))
-    };
-  }
-
   movePlayer() {
     const { moving } = this.state;
     const {
       hero: {
         position: { x, y }
-      },
-      boardDimensions: {
-        height, width
-      },
-      tile: { x: tileX, y: tileY }
+      }
     } = this.props;
 
     let newX = x;
@@ -340,19 +260,19 @@ class Hero extends Component {
     for (let m = 0; m < moving.length; m++) {
       switch(moving[m]) {
         case 'up':
-          const movePlayerUp = this.movePlayerBack('y', newX, newY, moving[m]);
+          const movePlayerUp = moveEntityBack(this, moving, 'y', newX, newY, moving[m]);
           newY = movePlayerUp.value;
           break;
         case 'down':
-          const movePlayerDown = this.movePlayerForward('y', newX, newY, moving[m]);
+          const movePlayerDown = moveEntityForward(this, moving, 'y', newX, newY, moving[m]);
           newY = movePlayerDown.value;
           break;
         case 'left':
-          const movePlayerLeft = this.movePlayerBack('x', newX, newY, moving[m]);
+          const movePlayerLeft = moveEntityBack(this, moving, 'x', newX, newY, moving[m]);
           newX = movePlayerLeft.value;
           break;
         case 'right':
-          const movePlayerRight = this.movePlayerForward('x', newX, newY, moving[m]);
+          const movePlayerRight = moveEntityForward(this, moving, 'x', newX, newY, moving[m]);
           newX = movePlayerRight.value;
           break;
       }
@@ -366,20 +286,22 @@ class Hero extends Component {
   render() {
     const {
       hero: {
-        position: { x, y }
+        position
       }
     } = this.props;
 
     return (
       <Bunny
         name="hero"
-        style={{ top: y + 'px', left: x + 'px' }}
+        style={{ top: position.y + 'px', left: position.x + 'px' }}
         ref={(hero) => { this.hero = hero }}
+        position={position}
         direction={this.state.lastDirection}
         isFlopped={this.state.isFlopped}
         isLoaf={this.state.isLoaf}
         isMoving={this.state.moving.length}
-        bunnyImages={this.bunnyImages} />
+        bunnyImages={this.bunnyImages}
+        id="Hero" />
     );
   }
 }

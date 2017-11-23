@@ -1,16 +1,10 @@
 import Baobab, { monkey } from 'baobab';
 import _filter from 'lodash/filter';
+import _forEach from 'lodash/forEach';
 
 import * as Tiles from 'Maps';
 
 const tiles = {};
-
-// for (let r = 1; r <= 9; r++) {
-//   for (let c = 1; c <= 8; c++) {
-//     const Tile = Tiles[`Tile${r}_${c}`];
-//     tiles[`${Tile.x}_${Tile.y}`] = { food: Tile.food, bunnies: Tile.bunnies };
-//   }
-// }
 
 for (let r = 1; r <= 2; r++) {
   for (let c = 1; c <= 2; c++) {
@@ -63,8 +57,56 @@ const state = new Baobab({
       x: 60,
       y: 60
     },
-    abilities: [],
+    abilities: monkey({
+      cursors: {
+        bunnies: ['bunnies']
+      },
+      get: function({ bunnies }) {
+        const abilities = [];
+        _forEach(bunnies, bunny => {
+          if (bunny.hasCollected && bunny.giveSkill) {
+            abilities.push(bunny.giveSkill);
+          }
+        });
+
+        return abilities;
+      }
+    }),
   },
+  skills: [
+    {
+      name: 'dig',
+      description: 'You can use the Dig skill anywhere you see burrow holes, or buried produce. This will grant you access to new places and allow you to obtain new produce items.'
+    },
+    {
+      name: 'ball',
+      description: 'You can use the Ball skill to cover gaps, which can unlock new areas to explore.'
+    },
+    {
+      name: 'binky',
+      description: 'You can use the Binky skill to win over sad buns and get them to become your friend.'
+    },
+    {
+      name: 'groom',
+      description: 'You can use the Groom skill to become friends with more dominant bunnies.'
+    },
+    {
+      name: 'stomp',
+      description: 'You can use the Stomp skill to become friends with more submissive bunnies, as well as shake produce off of certain trees.'
+    },
+    {
+      name: 'climb',
+      description: 'You can use the Climb skill to access higher locations or objects.'
+    },
+    {
+      name: 'zoom',
+      description: 'You can use the Zoom skill to rush past scary or questionable areas, which will allow you to explore new areas.'
+    },
+    {
+      name: 'jump',
+      description: 'You can use the Jump skill to get onto higher areas to explore.'
+    },
+  ],
   collectedFood: foodItems.map(foodItem => {
     return {
       name: foodItem,
@@ -72,7 +114,7 @@ const state = new Baobab({
       hasCollected: false
     }
   }),
-  collectedBunnies: [
+  bunnies: [
     {
       name: 'Simba',
       giveSkill: 'dig',
@@ -84,7 +126,8 @@ const state = new Baobab({
       onTile: {
         x: 1,
         y: 1
-      }
+      },
+      id: 1
     },
     {
       name: 'November',
@@ -97,11 +140,13 @@ const state = new Baobab({
       onTile: {
         x: 1,
         y: 5
-      }
+      },
+      id: 2
     },
     {
       name: 'Cloud',
       giveSkill: 'binky',
+      needsAbility: 'groom',
       hasCollected: false,
       position: {
         x: 60,
@@ -110,7 +155,8 @@ const state = new Baobab({
       onTile: {
         x: 1,
         y: 5
-      }
+      },
+      id: 3
     },
     {
       name: 'Spencer',
@@ -123,7 +169,8 @@ const state = new Baobab({
       onTile: {
         x: 1,
         y: 5
-      }
+      },
+      id: 4
     },
     {
       name: 'Giant',
@@ -136,7 +183,8 @@ const state = new Baobab({
       onTile: {
         x: 1,
         y: 5
-      }
+      },
+      id: 5
     },
     {
       name: 'Unknown 1',
@@ -149,11 +197,13 @@ const state = new Baobab({
       onTile: {
         x: 1,
         y: 5
-      }
+      },
+      id: 6
     },
     {
       name: 'Unknown 2',
       giveSkill: 'jump',
+      needsAbility: 'binky',
       hasCollected: false,
       position: {
         x: 60,
@@ -162,7 +212,8 @@ const state = new Baobab({
       onTile: {
         x: 1,
         y: 5
-      }
+      },
+      id: 7
     },
     {
       name: 'Unknown 3',
@@ -175,7 +226,8 @@ const state = new Baobab({
       onTile: {
         x: 1,
         y: 5
-      }
+      },
+      id: 8
     },
     {
       name: 'No Skill',
@@ -187,7 +239,22 @@ const state = new Baobab({
       onTile: {
         x: 1,
         y: 5
-      }
+      },
+      id: 9
+    },
+    {
+      name: 'No Skill',
+      hasCollected: false,
+      needsAbility: 'stomp',
+      position: {
+        x: 60,
+        y: 60
+      },
+      onTile: {
+        x: 1,
+        y: 5
+      },
+      id: 10
     },
     {
       name: 'No Skill',
@@ -199,7 +266,8 @@ const state = new Baobab({
       onTile: {
         x: 1,
         y: 5
-      }
+      },
+      id: 11
     },
     {
       name: 'No Skill',
@@ -211,7 +279,8 @@ const state = new Baobab({
       onTile: {
         x: 1,
         y: 5
-      }
+      },
+      id: 12
     },
     {
       name: 'No Skill',
@@ -223,19 +292,8 @@ const state = new Baobab({
       onTile: {
         x: 1,
         y: 5
-      }
-    },
-    {
-      name: 'No Skill',
-      hasCollected: false,
-      position: {
-        x: 60,
-        y: 60
       },
-      onTile: {
-        x: 1,
-        y: 5
-      }
+      id: 13
     },
   ],
   movePixels: 20,
@@ -254,7 +312,7 @@ const state = new Baobab({
   bunniesOnTile: monkey({
     cursors: {
       activeTile: ['activeTile'],
-      bunnies: ['collectedBunnies']
+      bunnies: ['bunnies']
     },
     get: function({ activeTile, bunnies }) {
       return _filter(bunnies, bunny => {
@@ -271,7 +329,8 @@ const state = new Baobab({
     B0: 'Dirt',
     B1: 'Grass',
     B2: 'Mud',
-  }
+  },
+  gameVisible: true
 });
 
 export default state;
