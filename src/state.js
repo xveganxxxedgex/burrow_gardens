@@ -109,7 +109,8 @@ const state = new Baobab({
   ],
   collectedFood: foodItems.map(foodItem => {
     return {
-      name: foodItem,
+      name: foodItem.replace(' ', ''),
+      display: foodItem,
       count: 0,
       hasCollected: false
     }

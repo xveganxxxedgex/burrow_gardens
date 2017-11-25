@@ -16,23 +16,30 @@ class InventoryModal extends Component {
     super(props, context);
   }
 
+  shouldComponentUpdate(nextProps) {
+    return nextProps.show != this.props.show;
+  }
+
   render() {
     const { collectedFood, bunnies, container } = this.props;
     const foodItems = _orderBy(collectedFood, ['hasCollected', 'name'], ['desc', 'asc']).map((food, index) => {
-      const FoodItem = getFoodItem('Carrot');
+      const FoodItem = getFoodItem(food.name);
+      // TODO: Remove this once all food items have files
+      const availableFood = ['Carrot', 'AlfalfaHay', 'Broccoli'];
+      const useFoodType = availableFood.indexOf(food.name) > -1 ? food.name : 'Carrot';
       return (
         <div key={`food_${index}`} className={`inventory-item-cell grid-cell ${food.hasCollected ? '' : 'disabled'}`}>
           <div className="inventory-item-cell-content flex flex-grow">
             {food.hasCollected &&
               <div className="flex flex-grow flex-column">
                 <div className="inventory-item-cell-image flex">
-                  <FoodItem inMenu={true} item={{ type: 'Carrot', id: index }} />
+                  <FoodItem inMenu={true} item={{ type: useFoodType, id: index }} />
                   <Label bsStyle={food.count ? 'primary' : 'default'} className="inventory-item-stock">
                     {food.count}
                   </Label>
                 </div>
                 <div className="inventory-item-cell-details">
-                  {food.name}
+                  {food.display}
                 </div>
               </div>
             }

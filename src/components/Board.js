@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
 import { branch } from 'baobab-react/higher-order';
 import { Popover } from 'react-bootstrap';
+import _isEqual from 'lodash/isEqual';
 
 import Hero from 'components/Characters/Hero';
 import Scenery from 'components/Scenery';
@@ -74,26 +75,10 @@ class Board extends Component {
           </Popover>
         }
         {showInventory &&
-          <InventoryModal container={this} />
+          <InventoryModal container={this} show={showInventory} />
         }
-        {tile.background.map((row, rowIndex) => {
-          return (
-            <div className="background-row" key={`row-${rowIndex}`}>
-              {row.map((tile, tileIndex) => {
-                const BackgroundItem = getBackgroundCell(tile);
-                return (
-                  <BackgroundItem tile={tile} key={`background-${tileIndex}`} index={tileIndex} />
-                );
-              })}
-            </div>
-          );
-        })}
-        {tile.scenery.map((item, itemIndex) => {
-          const SceneryItem = getSceneryItem(item.type);
-          return (
-            <SceneryItem item={item} key={`scenery-${itemIndex}`} index={itemIndex} />
-          );
-        })}
+        <BackgroundWrapper tile={tile} />
+        <SceneryWrapper tile={tile} />
         {tile.food.map((item, itemIndex) => {
           const FoodItem = getFoodItem(item.type);
           return (
@@ -113,3 +98,51 @@ class Board extends Component {
 }
 
 export default Board;
+
+class BackgroundWrapper extends Component {
+  shouldComponentUpdate(nextProps) {
+    return !_isEqual([nextProps.tile.x, nextProps.tile.y], [this.props.tile.x, this.props.tile.y]);
+  }
+
+  render() {
+    const { tile } = this.props;
+
+    return (
+      <div className="background-wrapper">
+        {tile.background.map((row, rowIndex) => {
+          return (
+            <div className="background-row" key={`row-${rowIndex}`}>
+              {row.map((tile, tileIndex) => {
+                const BackgroundItem = getBackgroundCell(tile);
+                return (
+                  <BackgroundItem tile={tile} key={`background-${tileIndex}`} index={tileIndex} />
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    )
+  }
+}
+
+class SceneryWrapper extends Component {
+  shouldComponentUpdate(nextProps) {
+    return !_isEqual([nextProps.tile.x, nextProps.tile.y], [this.props.tile.x, this.props.tile.y]);
+  }
+
+  render() {
+    const { tile } = this.props;
+
+    return (
+      <div className="scenery-wrapper">
+        {tile.scenery.map((item, itemIndex) => {
+          const SceneryItem = getSceneryItem(item.type);
+          return (
+            <SceneryItem item={item} key={`scenery-${itemIndex}`} index={itemIndex} />
+          );
+        })}
+      </div>
+    )
+  }
+}

@@ -103,13 +103,13 @@ export function collectItem(type, itemId) {
   }
 
   const item = items[itemIndex];
-  const itemDisplay = item.display || item.type;
   const activeTile = tree.get('tile');
   const collectedFoodCursor = tree.select('collectedFood');
-  const foodIndex = _findIndex(collectedFoodCursor.get(), foodItem => foodItem.name == itemDisplay);
+  const foodIndex = _findIndex(collectedFoodCursor.get(), foodItem => foodItem.name == (item.display || item.type));
   tree.select(['tiles', `${activeTile.x}_${activeTile.y}`, type, itemIndex, 'collected']).set(true);
 
   const collectedObj = collectedFoodCursor.get(foodIndex);
+  const itemDisplay = collectedObj.display;
   if (!collectedObj.hasCollected) {
     collectedFoodCursor.set([foodIndex, 'hasCollected'], true);
   }

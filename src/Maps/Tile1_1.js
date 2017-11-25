@@ -68,6 +68,18 @@ const Tile = {
       position: { x: 460, y: 285 },
       id: 2,
       collected: false
+    },
+    {
+      type: 'AlfalfaHay',
+      position: { x: 550, y: 455 },
+      id: 3,
+      collected: false
+    },
+    {
+      type: 'Broccoli',
+      position: { x: 800, y: 300 },
+      id: 4,
+      collected: false
     }
   ],
   x: 1,
