@@ -79,12 +79,7 @@ class Board extends Component {
         }
         <BackgroundWrapper tile={tile} />
         <SceneryWrapper tile={tile} />
-        {tile.food.map((item, itemIndex) => {
-          const FoodItem = getFoodItem(item.type);
-          return (
-            <FoodItem item={item} key={`food-${itemIndex}`} index={itemIndex} />
-          );
-        })}
+        <FoodWrapper tile={tile} />
         {bunniesOnTile.map((item, itemIndex) => {
           const BunnyItem = getCharacter(item.name);
           return (
@@ -140,6 +135,30 @@ class SceneryWrapper extends Component {
           const SceneryItem = getSceneryItem(item.type);
           return (
             <SceneryItem item={item} key={`scenery-${itemIndex}`} index={itemIndex} />
+          );
+        })}
+      </div>
+    )
+  }
+}
+
+class FoodWrapper extends Component {
+  shouldComponentUpdate(nextProps) {
+    const tileChanged = !_isEqual([nextProps.tile.x, nextProps.tile.y], [this.props.tile.x, this.props.tile.y]);
+    const foodChanged = !_isEqual(nextProps.tile.food, this.props.tile.food);
+    return tileChanged || foodChanged;
+  }
+
+  render() {
+    const { tile } = this.props;
+
+    return (
+      <div className="food-wrapper">
+        {tile.food.map((item, itemIndex) => {
+          const FoodItem = getFoodItem(item.type);
+
+          return (
+            <FoodItem item={item} key={`food-${itemIndex}`} index={itemIndex} />
           );
         })}
       </div>

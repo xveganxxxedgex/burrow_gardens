@@ -297,6 +297,7 @@ const state = new Baobab({
       id: 13
     },
   ],
+  itemQueue: [],
   movePixels: 20,
   popover: null,
   showInventory: false,

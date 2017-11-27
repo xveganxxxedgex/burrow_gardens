@@ -207,8 +207,7 @@ class Bunny extends Component {
     const { name, style, children, direction, isFlopped, id } = this.props;
     const { moveTransition, moving, lastDirection } = this.state;
     const bunnyImage = this.getBunnyImage();
-    const isHero = this.checkIfIsHero();
-    const useDirection = isHero ? direction : lastDirection;
+    const useDirection = this.checkIfIsHero() ? direction : lastDirection;
 
     return (
       <div

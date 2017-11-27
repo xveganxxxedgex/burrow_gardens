@@ -40,21 +40,23 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Create AI logic so characters randomly move on the map~~
 
-Fix timeout issues with movement/idle (likely caused by recent refactors)
+~~Fix jumpy AI movement~~
 
-Fix jumpy AI movement
+~~When repopulating produce, need to ensure nothing is colliding with that position before placing it there~~
+
+~~Create logic to handle abilities that can only be done once certain characters join the group~~
+
+Fix timeout issues with movement/idle (likely caused by recent refactors)
 
 Fix console warnings when setState is called for AIs no longer rendered
 
-When repopulating produce, need to ensure nothing is colliding with that position before placing it there
+Move AI to group area once they've been friended
 
 Create characters
 
 Create food items
 
 Maybe have alt state for food items for buried items so the entity doesn't go away, but it shows like an empty patch where the produce was
-
-Create abilities that can only be done once certain characters join the group
 
 Create inventory state/logic
 

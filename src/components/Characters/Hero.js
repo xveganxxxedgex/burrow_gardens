@@ -147,12 +147,12 @@ class Hero extends Component {
       showInventory
     } = this.props;
 
+    clearTimeout(this.idleTimeout);
+    this.idleTimeout = null;
+
     if (!direction) {
       return;
     }
-
-    clearTimeout(this.idleTimeout);
-    this.idleTimeout = null;
 
     if (direction == 'inventory') {
       toggleShowInventory();

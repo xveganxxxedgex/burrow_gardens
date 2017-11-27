@@ -5,9 +5,7 @@ import { branch } from 'baobab-react/higher-order';
 import Bunny from 'components/Characters/Bunny';
 
 import {
-  updateHeroPosition,
-  checkSceneryCollision,
-  checkFoodCollision
+  updateHeroPosition
 } from 'actions';
 
 import bunnyLeftImg from 'images/bunny1.png';
@@ -30,13 +28,6 @@ class Simba extends Component {
   constructor(props, context) {
     super(props, context);
 
-    this.oppositeDirections = {
-      'up': 'down',
-      'down': 'up',
-      'left': 'right',
-      'right': 'left',
-    };
-
     this.bunnyImages = {
       left: bunnyLeftImg,
       up: bunnyUpImg,
@@ -50,26 +41,6 @@ class Simba extends Component {
       flop: bunnyFlopImg,
       flopUp: bunnyFlopUpImg,
       flopDown: bunnyFlopDownImg
-    }
-
-    this.state = {
-      moving: [],
-      lastDirection: 'right'
-    };
-  }
-
-  componentWillUpdate(nextProps, nextState) {
-    if (nextState.moving != this.state.moving) {
-      const lastDirection = nextState.moving.length ? nextState.moving[nextState.moving.length - 1] : this.state.lastDirection;
-
-      if (lastDirection != this.state.lastDirection) {
-        this.setState({ lastDirection });
-      }
-
-      if (nextState || !nextState.moving.length) {
-        clearTimeout(this.movingTimeout);
-        this.movingTimeout = null;
-      }
     }
   }
 
@@ -86,8 +57,6 @@ class Simba extends Component {
         name="Simba"
         style={{ top: position.y + 'px', left: position.x + 'px' }}
         position={position}
-        direction={this.state.lastDirection}
-        isMoving={this.state.moving.length}
         bunnyImages={this.bunnyImages}
         id={id} />
     );

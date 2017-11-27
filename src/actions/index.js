@@ -3,6 +3,8 @@ import tree from 'state';
 import _capitalize from 'lodash/capitalize';
 import _find from 'lodash/find';
 import _findIndex from 'lodash/findIndex';
+import _forEach from 'lodash/forEach';
+import _isEqual from 'lodash/isEqual';
 import _max from 'lodash/max';
 import _min from 'lodash/min';
 import { findDOMNode } from 'react-dom';
@@ -70,6 +72,22 @@ export function setBoardDimensions(board) {
 
 export function setActiveTile(x = 1, y = 1) {
   const cursor = tree.select('activeTile');
+  const previousTile = cursor.get();
+  const previousTileCursor = tree.select(['tiles', `${previousTile.x}_${previousTile.y}`]);
+  const itemQueue = tree.select('itemQueue');
+
+  if (itemQueue.get().length) {
+    // If we have an item queue for the now previous tile, set their
+    // hasCollected status to false so they repopulate when the tile is next rendered
+    _forEach(itemQueue.get(), item => {
+      const itemIndex = _findIndex(previousTileCursor.get('food'), foodItem => foodItem.id == item);
+      previousTileCursor.set(['food', itemIndex, 'collected'], false);
+    });
+
+    // Clear the queue
+    itemQueue.set([]);
+  }
+
   cursor.set({ x, y });
   tree.commit();
 }
@@ -122,11 +140,22 @@ export function collectItem(type, itemId) {
     popoverClass: 'info'
   });
 
+  // Repopulate items every three minutes
   const repopulateTimeout = 3 * 60 * 1000;
 
   // Repopulate item after a timeout
   setTimeout(() => {
-    tree.select(['tiles', `${activeTile.x}_${activeTile.y}`, type, itemIndex, 'collected']).set(false);
+    const currentTile = tree.get('tile');
+    const stillOnSameTile = _isEqual([currentTile.x, currentTile.y], [activeTile.x, activeTile.y]);
+
+    if (stillOnSameTile) {
+      // If tile is still active, add to queue to repopulate when the tile changes
+      const queueCursor = tree.select('itemQueue');
+      queueCursor.push(itemId);
+    } else {
+      // If tile is not still active, repopulate the item
+      tree.select(['tiles', `${activeTile.x}_${activeTile.y}`, type, itemIndex, 'collected']).set(false);
+    }
   }, repopulateTimeout);
 }
 
