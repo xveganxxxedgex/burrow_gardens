@@ -42,7 +42,7 @@ class Bunny extends Component {
       moveTransition: true,
       startingPosition: props.position,
       moving: [],
-      lastDirection: 'right'
+      lastDirection: _sample(this.directions)
     };
   }
 
@@ -88,6 +88,17 @@ class Bunny extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.clearTimeouts();
+  }
+
+  clearTimeouts() {
+    clearTimeout(this.stopMovingCharacterTimeout);
+    clearTimeout(this.transitionTimeout);
+    clearTimeout(this.movingTimeout);
+    clearTimeout(this.moveCharacterTimeout);
+  }
+
   toggleTransition(moveTransition) {
     this.setState({ moveTransition });
   }
@@ -125,13 +136,13 @@ class Bunny extends Component {
     const duration = _random(1.5, 3, true) * 1000;
     const waitTimeout = _random(3, 7, true) * 1000;
 
-    setTimeout(() => {
+    this.moveCharacterTimeout = setTimeout(() => {
       this.setState({
         moving: [direction]
       }, () => {
         this.moveCharacter();
 
-        setTimeout(this.stopMovingCharacter, duration);
+        this.stopMovingCharacterTimeout = setTimeout(this.stopMovingCharacter, duration);
       });
     }, waitTimeout);
   }

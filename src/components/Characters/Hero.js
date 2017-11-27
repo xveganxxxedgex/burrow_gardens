@@ -126,6 +126,12 @@ class Hero extends Component {
   componentWillUnmount() {
     document.removeEventListener('keydown', this.setKeyDown);
     document.removeEventListener('keyup', this.setKeyUp);
+    this.clearTimeouts();
+  }
+
+  clearTimeouts() {
+    clearTimeout(this.movingTimeout);
+    clearTimeout(this.idleTimeout);
   }
 
   getDirection(e) {
