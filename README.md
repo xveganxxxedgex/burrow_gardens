@@ -46,9 +46,9 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Create logic to handle abilities that can only be done once certain characters join the group~~
 
-Fix timeout issues with movement/idle (likely caused by recent refactors)
+~~Fix console warnings when setState is called for AIs no longer rendered~~
 
-Fix console warnings when setState is called for AIs no longer rendered
+~~Fix timeout issues with movement/idle (likely caused by recent refactors)~~
 
 Move AI to group area once they've been friended
 

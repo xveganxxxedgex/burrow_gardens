@@ -225,15 +225,13 @@ class Hero extends Component {
       }, () => {
         if (newMoving.length) {
           this.movePlayer();
+        } else {
+          // If player is no longer moving, clear moving timeout and set idle timeout
+          clearTimeout(this.movingTimeout);
+          this.movingTimeout = null;
+          this.idleTimeout = setTimeout(this.setHeroIdleStatus.bind(this, 'isLoaf'), 5000);
         }
       });
-    }
-
-    // If player is no longer moving, clear moving timeout and set idle timeout
-    if (!newMoving.length) {
-      clearTimeout(this.movingTimeout);
-      this.movingTimeout = null;
-      this.idleTimeout = setTimeout(this.setHeroIdleStatus.bind(this, 'isLoaf'), 5000);
     }
   }
 
