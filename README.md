@@ -54,6 +54,8 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 Move AI to group area once they've been friended
 
+When Hero hits space next to another bunny, make the bunny face their direction
+
 Create characters
 
 Create food items
