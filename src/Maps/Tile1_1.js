@@ -122,6 +122,18 @@ const Tile = {
       position: { x: 850, y: 350 },
       id: 11,
       collected: false
+    },
+    {
+      type: 'Cabbage',
+      position: { x: 850, y: 400 },
+      id: 12,
+      collected: false
+    },
+    {
+      type: 'Cilantro',
+      position: { x: 850, y: 450 },
+      id: 13,
+      collected: false
     }
   ],
   x: 1,

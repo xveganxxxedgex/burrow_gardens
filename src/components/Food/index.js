@@ -8,4 +8,6 @@ export { default as BokChoy } from 'components/Food/BokChoy';
 export { default as Broccoli } from 'components/Food/Broccoli';
 export { default as BuriedCarrot } from 'components/Food/BuriedCarrot';
 export { default as ButterLettuce } from 'components/Food/ButterLettuce';
+export { default as Cabbage } from 'components/Food/Cabbage';
 export { default as Carrot } from 'components/Food/Carrot';
+export { default as Cilantro } from 'components/Food/Cilantro';

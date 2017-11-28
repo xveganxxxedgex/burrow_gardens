@@ -42,8 +42,6 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Fix jumpy AI movement~~
 
-~~When repopulating produce, need to ensure nothing is colliding with that position before placing it there~~
-
 ~~Create logic to handle abilities that can only be done once certain characters join the group~~
 
 ~~Fix console warnings when setState is called for AIs no longer rendered~~
@@ -55,6 +53,8 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 Move AI to group area once they've been friended
 
 When Hero hits space next to another bunny, make the bunny face their direction
+
+When repopulating produce, need to ensure nothing is colliding with that position before placing it there (ensure food doesn't populate where an AI is)
 
 Create characters
 

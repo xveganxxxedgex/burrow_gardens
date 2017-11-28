@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import FoodItem from 'components/Food/FoodItem';
-import image from 'images/carrot1.png';
+import image from 'images/carrot.png';
 
 class Carrot extends Component {
   constructor(props, context) {
