@@ -219,13 +219,14 @@
 .inventory-modal .inventory-modal-content .collected-section .inventory-list .food {
   display: block;
   position: initial;
-  height: 30px;
+  max-height: 30px;
 }
 .inventory-modal .inventory-modal-content .collected-section .inventory-list .food img {
   display: block;
   height: 100%;
-  width: auto;
   margin: 0 auto;
+  width: 100%;
+  max-width: 45px;
 }
 .board {
   height: 600px;
