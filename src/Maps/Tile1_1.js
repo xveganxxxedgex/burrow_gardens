@@ -80,6 +80,48 @@ const Tile = {
       position: { x: 800, y: 300 },
       id: 4,
       collected: false
+    },
+    {
+      type: 'Apple',
+      position: { x: 800, y: 350 },
+      id: 5,
+      collected: false
+    },
+    {
+      type: 'Arugula',
+      position: { x: 800, y: 400 },
+      id: 6,
+      collected: false
+    },
+    {
+      type: 'Banana',
+      position: { x: 800, y: 450 },
+      id: 7,
+      collected: false
+    },
+    {
+      type: 'Basil',
+      position: { x: 850, y: 300 },
+      id: 8,
+      collected: false
+    },
+    {
+      type: 'Blueberry',
+      position: { x: 900, y: 300 },
+      id: 9,
+      collected: false
+    },
+    {
+      type: 'BokChoy',
+      position: { x: 950, y: 300 },
+      id: 10,
+      collected: false
+    },
+    {
+      type: 'ButterLettuce',
+      position: { x: 850, y: 350 },
+      id: 11,
+      collected: false
     }
   ],
   x: 1,

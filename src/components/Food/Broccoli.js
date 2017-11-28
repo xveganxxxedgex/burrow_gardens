@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import FoodItem from 'components/Food/FoodItem';
-import broccoliImage from 'images/broccoli.png';
+import image from 'images/broccoli.png';
 
 class Broccoli extends Component {
   constructor(props, context) {
@@ -11,7 +11,7 @@ class Broccoli extends Component {
   render() {
     return (
       <FoodItem {...this.props}>
-        <img src={broccoliImage} />
+        <img src={image} />
       </FoodItem>
     )
   }

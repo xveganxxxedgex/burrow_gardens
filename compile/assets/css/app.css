@@ -2,17 +2,98 @@
   position: absolute;
   z-index: 1;
 }
-.food.Carrot {
-  width: 20px;
+.food.AlfalfaHay {
+  width: 59px;
+}
+.food.Apple {
+  width: 17px;
+}
+.food.Arugula {
+  width: 17px;
+}
+.food.Banana {
+  width: 19px;
+}
+.food.Basil {
+  width: 19px;
+}
+.food.Blueberry {
+  width: 23px;
+}
+.food.BokChoy {
+  width: 18px;
+}
+.food.Broccoli {
+  width: 17px;
 }
 .food.BuriedCarrot {
   width: 24px;
 }
-.food.AlfalfaHay {
-  width: 59px;
+.food.ButterLettuce {
+  width: 25px;
 }
-.food.Broccoli {
-  width: 17px;
+.food.Cabbage {
+  width: 20px;
+}
+.food.Carrot {
+  width: 20px;
+}
+.food.Cilantro {
+  width: 20px;
+}
+.food.DandelionGreens {
+  width: 20px;
+}
+.food.Endive {
+  width: 20px;
+}
+.food.Melon {
+  width: 20px;
+}
+.food.Mint {
+  width: 20px;
+}
+.food.Papaya {
+  width: 20px;
+}
+.food.Parsley {
+  width: 20px;
+}
+.food.Peach {
+  width: 20px;
+}
+.food.Pear {
+  width: 20px;
+}
+.food.Pumpkin {
+  width: 20px;
+}
+.food.Radicchio {
+  width: 20px;
+}
+.food.Raspberry {
+  width: 20px;
+}
+.food.RedLeafLettuce {
+  width: 20px;
+}
+.food.RomaineLettuce {
+  width: 20px;
+}
+.food.Spinach {
+  width: 20px;
+}
+.food.Strawberry {
+  width: 20px;
+}
+.food.SwissChard {
+  width: 20px;
+}
+.food.TimothyHay {
+  width: 20px;
+}
+.food.Zucchini {
+  width: 20px;
 }
 .food img {
   display: block;

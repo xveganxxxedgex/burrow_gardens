@@ -1,4 +1,11 @@
-export { default as Carrot } from 'components/Food/Carrot';
-export { default as BuriedCarrot } from 'components/Food/BuriedCarrot';
-export { default as Broccoli } from 'components/Food/Broccoli';
 export { default as AlfalfaHay } from 'components/Food/AlfalfaHay';
+export { default as Apple } from 'components/Food/Apple';
+export { default as Arugula } from 'components/Food/Arugula';
+export { default as Banana } from 'components/Food/Banana';
+export { default as Basil } from 'components/Food/Basil';
+export { default as Blueberry } from 'components/Food/Blueberry';
+export { default as BokChoy } from 'components/Food/BokChoy';
+export { default as Broccoli } from 'components/Food/Broccoli';
+export { default as BuriedCarrot } from 'components/Food/BuriedCarrot';
+export { default as ButterLettuce } from 'components/Food/ButterLettuce';
+export { default as Carrot } from 'components/Food/Carrot';
