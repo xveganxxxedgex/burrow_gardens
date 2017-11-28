@@ -32,7 +32,7 @@ class InventoryModal extends Component {
           <div className="inventory-item-cell-content flex flex-grow">
             {food.hasCollected &&
               <div className="flex flex-grow flex-column">
-                <div className="inventory-item-cell-image flex">
+                <div className="inventory-item-cell-image flex flex-grow">
                   <FoodItem inMenu={true} item={{ type: useFoodType, id: index }} />
                   <Label bsStyle={food.count ? 'primary' : 'default'} className="inventory-item-stock">
                     {food.count}
@@ -59,7 +59,7 @@ class InventoryModal extends Component {
           <div className="inventory-item-cell-content flex flex-grow">
             {bunny.hasCollected &&
               <div className="flex flex-grow flex-column">
-                <div className="inventory-item-cell-image flex">
+                <div className="inventory-item-cell-image flex flex-grow">
                   <img />
                 </div>
                 <div className="inventory-item-cell-details">

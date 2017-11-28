@@ -50,7 +50,7 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Fix timeout issues with movement/idle (likely caused by recent refactors)~~
 
-Fix image aspect ratio in inventory 
+~~Fix image aspect ratio in inventory~~
 
 Move AI to group area once they've been friended
 
