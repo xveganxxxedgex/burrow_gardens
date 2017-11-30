@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import FoodItem from 'components/Food/FoodItem';
-import image from 'images/alfalfa_hay.png';
+import image from 'images/alfalfa_hay1.png';
 
 class AlfalfaHay extends Component {
   constructor(props, context) {
