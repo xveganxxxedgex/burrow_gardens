@@ -25,7 +25,7 @@ class InventoryModal extends Component {
     const foodItems = _orderBy(collectedFood, ['hasCollected', 'name'], ['desc', 'asc']).map((food, index) => {
       const FoodItem = getFoodItem(food.name);
       // TODO: Remove this once all food items have files
-      const availableFood = ['AlfalfaHay', 'Apple', 'Arugula', 'Banana', 'Blueberry', 'BokChoy', 'Broccoli', 'ButterLettuce', 'Carrot'];
+      const availableFood = ['AlfalfaHay', 'Apple', 'Arugula', 'Banana', 'Blueberry', 'BokChoy', 'Broccoli', 'ButterLettuce', 'Cabbage', 'Carrot', 'Cilantro', 'DandelionGreens', 'Endive', 'Melon', 'Mint'];
       const useFoodType = availableFood.indexOf(food.name) > -1 ? food.name : 'Carrot';
       return (
         <div key={`food_${index}`} className={`inventory-item-cell grid-cell ${food.hasCollected ? '' : 'disabled'}`}>
