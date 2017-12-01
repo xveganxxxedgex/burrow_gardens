@@ -137,8 +137,26 @@ const Tile = {
     },
     {
       type: 'DandelionGreens',
-      position: { x: 850, y: 500 },
+      position: { x: 900, y: 400 },
       id: 14,
+      collected: false
+    },
+    {
+      type: 'Endive',
+      position: { x: 900, y: 450 },
+      id: 15,
+      collected: false
+    },
+    {
+      type: 'Melon',
+      position: { x: 900, y: 500 },
+      id: 16,
+      collected: false
+    },
+    {
+      type: 'Mint',
+      position: { x: 900, y: 350 },
+      id: 17,
       collected: false
     }
   ],
