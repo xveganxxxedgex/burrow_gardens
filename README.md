@@ -50,9 +50,11 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Fix image aspect ratio in inventory~~
 
-Move AI to group area once they've been friended
+~~When Hero hits space next to another bunny, make the bunny face their direction~~
 
-When Hero hits space next to another bunny, make the bunny face their direction
+Fix bouncy hero/bunny collision behaviour
+
+Move AI to group area once they've been friended
 
 When repopulating produce, need to ensure nothing is colliding with that position before placing it there (ensure food doesn't populate where an AI is)
 

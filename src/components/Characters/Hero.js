@@ -13,7 +13,9 @@ import {
   checkFoodCollision,
   checkBunnyCollision,
   moveEntityBack,
-  moveEntityForward
+  moveEntityForward,
+  setHeroLastDirection,
+  getOppositeDirection
 } from 'actions';
 
 import bunnyLeftImg from 'images/bunny1.png';
@@ -64,13 +66,6 @@ class Hero extends Component {
       73: 'inventory'
     };
 
-    this.oppositeDirections = {
-      'up': 'down',
-      'down': 'up',
-      'left': 'right',
-      'right': 'left',
-    };
-
     this.isHero = true;
 
     this.movePlayer = this.movePlayer.bind(this);
@@ -95,8 +90,7 @@ class Hero extends Component {
     }
 
     this.state = {
-      moving: [],
-      lastDirection: 'right'
+      moving: []
     };
   }
 
@@ -110,10 +104,10 @@ class Hero extends Component {
 
   componentWillUpdate(nextProps, nextState) {
     if (nextState.moving != this.state.moving) {
-      const lastDirection = nextState.moving.length ? nextState.moving[nextState.moving.length - 1] : this.state.lastDirection;
+      const lastDirection = nextState.moving.length ? nextState.moving[nextState.moving.length - 1] : nextProps.hero.lastDirection;
 
-      if (lastDirection != this.state.lastDirection) {
-        this.setState({ lastDirection });
+      if (lastDirection != nextProps.hero.lastDirection) {
+        setHeroLastDirection(lastDirection);
       }
 
       if (nextState || !nextState.moving.length) {
@@ -141,10 +135,7 @@ class Hero extends Component {
 
   setKeyDown(e) {
     e.preventDefault();
-    const {
-      moving,
-      lastDirection
-    } = this.state;
+    const { moving } = this.state;
     const direction = this.getDirection(e);
     const {
       hero: {
@@ -178,7 +169,7 @@ class Hero extends Component {
       return;
     }
 
-    const oppositeDirection = this.oppositeDirections[direction];
+    const oppositeDirection = getOppositeDirection(direction);
     const directionIndex = moving.indexOf(direction);
     const oppositeDirectionIndex = moving.indexOf(oppositeDirection);
     const newState = {};
@@ -264,19 +255,19 @@ class Hero extends Component {
     for (let m = 0; m < moving.length; m++) {
       switch(moving[m]) {
         case 'up':
-          const movePlayerUp = moveEntityBack(this, moving, 'y', newX, newY, moving[m]);
+          const movePlayerUp = moveEntityBack(this, 'y', newX, newY, moving[m]);
           newY = movePlayerUp.value;
           break;
         case 'down':
-          const movePlayerDown = moveEntityForward(this, moving, 'y', newX, newY, moving[m]);
+          const movePlayerDown = moveEntityForward(this, 'y', newX, newY, moving[m]);
           newY = movePlayerDown.value;
           break;
         case 'left':
-          const movePlayerLeft = moveEntityBack(this, moving, 'x', newX, newY, moving[m]);
+          const movePlayerLeft = moveEntityBack(this, 'x', newX, newY, moving[m]);
           newX = movePlayerLeft.value;
           break;
         case 'right':
-          const movePlayerRight = moveEntityForward(this, moving, 'x', newX, newY, moving[m]);
+          const movePlayerRight = moveEntityForward(this, 'x', newX, newY, moving[m]);
           newX = movePlayerRight.value;
           break;
       }
@@ -290,7 +281,8 @@ class Hero extends Component {
   render() {
     const {
       hero: {
-        position
+        position,
+        lastDirection
       }
     } = this.props;
 
@@ -300,7 +292,7 @@ class Hero extends Component {
         style={{ top: position.y + 'px', left: position.x + 'px' }}
         ref={(hero) => { this.hero = hero }}
         position={position}
-        direction={this.state.lastDirection}
+        direction={lastDirection}
         isFlopped={this.state.isFlopped}
         isLoaf={this.state.isLoaf}
         isMoving={this.state.moving.length}

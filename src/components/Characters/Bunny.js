@@ -9,7 +9,9 @@ import _sample from 'lodash/sample';
 import {
   moveEntityBack,
   moveEntityForward,
-  updateCharacterPosition
+  updateCharacterPosition,
+  checkBunnyCollision,
+  getOppositeDirection
 } from 'actions';
 
 import 'less/Characters.less';
@@ -17,7 +19,9 @@ import 'less/Characters.less';
 @branch({
   tile: ['tile'],
   boardDimensions: ['boardDimensions'],
-  gameVisible: ['gameVisible']
+  gameVisible: ['gameVisible'],
+  heroCollisions: ['heroCollisions'],
+  heroLastDirection: ['hero', 'lastDirection']
 })
 class Bunny extends Component {
   constructor(props, context) {
@@ -68,16 +72,26 @@ class Bunny extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    const { tile, gameVisible, position: { x, y }, heroCollisions, heroLastDirection } = nextProps;
     // Tile is changing - temporarily disable movement transition
     // This will prevent the hero from appearing to slide across the tile to the new starting position
-    if (nextProps.tile != this.props.tile) {
+    if (tile != this.props.tile) {
       clearTimeout(this.transitionTimeout);
       this.transitionTimeout = null;
       this.toggleTransition(false);
     }
 
-    if (nextProps.gameVisible != this.props.gameVisible && nextProps.gameVisible) {
+    if (gameVisible != this.props.gameVisible && gameVisible) {
       // TODO: Handle when tab is no longer active/visible
+    }
+
+    // Check if colliding with Hero and if so, face their direction
+    if (this.checkIfCollidingWithHero(nextProps)) {
+      const oppositeHeroDirection = getOppositeDirection(heroLastDirection);
+
+      if (this.state.lastDirection != oppositeHeroDirection) {
+        this.setState({ lastDirection: oppositeHeroDirection });
+      }
     }
   }
 
@@ -97,6 +111,13 @@ class Bunny extends Component {
     clearTimeout(this.transitionTimeout);
     clearTimeout(this.movingTimeout);
     clearTimeout(this.moveCharacterTimeout);
+  }
+
+  checkIfCollidingWithHero(props) {
+    props = props || this.props;
+    const { heroCollisions, id } = props;
+
+    return !this.isHero && heroCollisions.indexOf(id) > -1;
   }
 
   toggleTransition(moveTransition) {
@@ -135,8 +156,16 @@ class Bunny extends Component {
     const direction = _sample(this.directions);
     const duration = _random(1.5, 3, true) * 1000;
     const waitTimeout = _random(3, 7, true) * 1000;
+    const { position: { x, y } } = this.props;
 
     this.moveCharacterTimeout = setTimeout(() => {
+      // Don't move if currently colliding with Hero
+      if (this.checkIfCollidingWithHero()) {
+        // Try moving again after another timeout
+        this.moveAI();
+        return;
+      }
+
       this.setState({
         moving: [direction]
       }, () => {
@@ -154,7 +183,7 @@ class Bunny extends Component {
   shouldContinueMoving(newPos, maxBound, oldPos) {
     // If newPos is equal to the old position, we're colliding with an entity,
     // so stop moving the character
-    if (newPos == oldPos) {
+    if (newPos == oldPos || this.checkIfCollidingWithHero()) {
       return false;
     }
 
@@ -178,22 +207,22 @@ class Bunny extends Component {
     for (let m = 0; m < moving.length; m++) {
       switch(moving[m]) {
         case 'up':
-          const movePlayerUp = moveEntityBack(this, moving, 'y', newX, newY, moving[m]);
+          const movePlayerUp = moveEntityBack(this, 'y', newX, newY, moving[m]);
           newY = _max([movePlayerUp.value, this.maxBounds.top]);
           continueMoving = this.shouldContinueMoving(newY, 'top', y);
           break;
         case 'down':
-          const movePlayerDown = moveEntityForward(this, moving, 'y', newX, newY, moving[m]);
+          const movePlayerDown = moveEntityForward(this, 'y', newX, newY, moving[m]);
           newY = _min([movePlayerDown.value, this.maxBounds.bottom]);
           continueMoving = this.shouldContinueMoving(newY, 'bottom', y);
           break;
         case 'left':
-          const movePlayerLeft = moveEntityBack(this, moving, 'x', newX, newY, moving[m]);
+          const movePlayerLeft = moveEntityBack(this, 'x', newX, newY, moving[m]);
           newX = _max([movePlayerLeft.value, this.maxBounds.left]);
           continueMoving = this.shouldContinueMoving(newX, 'left', x);
           break;
         case 'right':
-          const movePlayerRight = moveEntityForward(this, moving, 'x', newX, newY, moving[m]);
+          const movePlayerRight = moveEntityForward(this, 'x', newX, newY, moving[m]);
           newX = _min([movePlayerRight.value, this.maxBounds.right]);
           continueMoving = this.shouldContinueMoving(newX, 'right', x);
           break;

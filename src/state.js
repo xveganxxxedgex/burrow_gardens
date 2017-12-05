@@ -57,6 +57,7 @@ const state = new Baobab({
       x: 60,
       y: 60
     },
+    lastDirection: 'right',
     abilities: monkey({
       cursors: {
         bunnies: ['bunnies']
@@ -73,6 +74,7 @@ const state = new Baobab({
       }
     }),
   },
+  heroCollisions: [],
   skills: [
     {
       name: 'dig',
