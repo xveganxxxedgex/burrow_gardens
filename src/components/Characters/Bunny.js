@@ -87,6 +87,9 @@ class Bunny extends Component {
 
     // Check if colliding with Hero and if so, face their direction
     if (this.checkIfCollidingWithHero(nextProps)) {
+      this.stopMovingCharacter();
+      this.clearTimeouts();
+      this.moveAI();
       const oppositeHeroDirection = getOppositeDirection(heroLastDirection);
 
       if (this.state.lastDirection != oppositeHeroDirection) {

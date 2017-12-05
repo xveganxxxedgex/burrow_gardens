@@ -308,6 +308,13 @@ export function setHeroLastDirection(direction) {
   cursor.set(direction);
 }
 
+/**
+ * Returns the opposite direction from the provided direction
+ *
+ * @param  {string} direction - Direction to get the opposite for
+ *
+ * @return {string} - The opposite direction
+ */
 export function getOppositeDirection(direction) {
   let oppositeDirection;
 
@@ -370,18 +377,20 @@ export function checkCollisions(character, x, y, direction, type) {
   const isHero = character.isHero;
   const tile = tree.get('tile');
   const heroCollisions = tree.select('heroCollisions');
+  const movePixels = tree.get('movePixels');
   // When checking collisions for hero, compare against other AI bunnies on the tile
   // Otherwise, when checking AI collisions, ensure they're not colliding with hero
   const bunniesOnTile = isHero ? tree.get('bunniesOnTile') : [{ id: 'Hero' }];
   const boardDimensions = tree.get('boardDimensions');
   const { left: boardX, top: boardY } = boardDimensions;
+  const movementOffset = !isHero && type == 'bunny' ? movePixels * 2 : 0;
 
   const bunnyRect = findDOMNode(character).getBoundingClientRect();
   const useBunnyRect = {
-    top: y + boardY,
-    bottom: y + boardY + bunnyRect.height,
-    left: x + boardX,
-    right: x + boardX + bunnyRect.width
+    top: y + boardY - movementOffset,
+    bottom: y + boardY + bunnyRect.height + movementOffset,
+    left: x + boardX - movementOffset,
+    right: x + boardX + bunnyRect.width + movementOffset
   };
   let loopItems = type == 'bunny' ? bunniesOnTile : tile[type].filter(item => !item.collected);
   let maxValue = direction && (['up', 'down'].indexOf(direction) > -1 ? y : x);
@@ -425,7 +434,7 @@ export function checkCollisions(character, x, y, direction, type) {
             break;
         }
       }
-    } else if (type == 'bunny') {
+    } else if (type == 'bunny' && isHero) {
       if (heroCollisions.get().indexOf(elementId) > -1) {
         heroCollisions.splice([heroCollisions.get().indexOf(elementId), 1]);
       }
