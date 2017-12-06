@@ -61,7 +61,7 @@ class Bunny extends Component {
       const lastDirection = nextState.moving.length ? nextState.moving[nextState.moving.length - 1] : this.state.lastDirection;
 
       if (lastDirection != this.state.lastDirection) {
-        this.setState({ lastDirection });
+        this.setLastDirection(lastDirection);
       }
 
       if (nextState || !nextState.moving.length) {
@@ -85,15 +85,17 @@ class Bunny extends Component {
       // TODO: Handle when tab is no longer active/visible
     }
 
-    // Check if colliding with Hero and if so, face their direction
-    if (this.checkIfCollidingWithHero(nextProps)) {
-      this.stopMovingCharacter();
-      this.clearTimeouts();
-      this.moveAI();
-      const oppositeHeroDirection = getOppositeDirection(heroLastDirection);
+    if (heroCollisions != this.props.heroCollisions) {
+      // Check if colliding with Hero and if so, face their direction
+      if (this.checkIfCollidingWithHero(nextProps)) {
+        this.stopMovingCharacter();
+        this.clearTimeouts();
+        this.moveAI();
+        const oppositeHeroDirection = getOppositeDirection(heroLastDirection);
 
-      if (this.state.lastDirection != oppositeHeroDirection) {
-        this.setState({ lastDirection: oppositeHeroDirection });
+        if (this.state.lastDirection != oppositeHeroDirection) {
+          this.setLastDirection(oppositeHeroDirection);
+        }
       }
     }
   }
@@ -107,6 +109,10 @@ class Bunny extends Component {
 
   componentWillUnmount() {
     this.clearTimeouts();
+  }
+
+  setLastDirection(lastDirection) {
+    this.setState({ lastDirection });
   }
 
   clearTimeouts() {

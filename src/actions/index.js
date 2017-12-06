@@ -383,14 +383,13 @@ export function checkCollisions(character, x, y, direction, type) {
   const bunniesOnTile = isHero ? tree.get('bunniesOnTile') : [{ id: 'Hero' }];
   const boardDimensions = tree.get('boardDimensions');
   const { left: boardX, top: boardY } = boardDimensions;
-  const movementOffset = !isHero && type == 'bunny' ? movePixels * 2 : 0;
 
   const bunnyRect = findDOMNode(character).getBoundingClientRect();
   const useBunnyRect = {
-    top: y + boardY - movementOffset,
-    bottom: y + boardY + bunnyRect.height + movementOffset,
-    left: x + boardX - movementOffset,
-    right: x + boardX + bunnyRect.width + movementOffset
+    top: y + boardY,
+    bottom: y + boardY + bunnyRect.height,
+    left: x + boardX,
+    right: x + boardX + bunnyRect.width
   };
   let loopItems = type == 'bunny' ? bunniesOnTile : tile[type].filter(item => !item.collected);
   let maxValue = direction && (['up', 'down'].indexOf(direction) > -1 ? y : x);
