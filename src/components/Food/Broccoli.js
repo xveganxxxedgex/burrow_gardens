@@ -1,20 +1,13 @@
-import React, { Component } from 'react';
-
-import FoodItem from 'components/Food/FoodItem';
 import image from 'images/broccoli.png';
 
-class Broccoli extends Component {
-  constructor(props, context) {
-    super(props, context);
-  }
-
-  render() {
-    return (
-      <FoodItem {...this.props}>
-        <img src={image} />
-      </FoodItem>
-    )
+export default class Broccoli {
+  constructor(position, id) {
+    this.position = position;
+    this.height = 23;
+    this.width = 17;
+    this.type = 'Broccoli';
+    this.collected = false;
+    this.image = image;
+    this.id = id;
   }
 }
-
-export default Broccoli;

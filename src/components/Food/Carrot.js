@@ -1,20 +1,13 @@
-import React, { Component } from 'react';
-
-import FoodItem from 'components/Food/FoodItem';
 import image from 'images/carrot.png';
 
-class Carrot extends Component {
-  constructor(props, context) {
-    super(props, context);
-  }
-
-  render() {
-    return (
-      <FoodItem {...this.props}>
-        <img src={image} />
-      </FoodItem>
-    )
+export default class Carrot {
+  constructor(position, id) {
+    this.position = position;
+    this.height = 26;
+    this.width = 20;
+    this.type = 'Carrot';
+    this.collected = false;
+    this.image = image;
+    this.id = id;
   }
 }
-
-export default Carrot;

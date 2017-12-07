@@ -1,13 +1,3 @@
-import React, { Component } from 'react';
-import { findDOMNode } from 'react-dom';
-import { branch } from 'baobab-react/higher-order';
-
-import Bunny from 'components/Characters/Bunny';
-
-import {
-  updateHeroPosition
-} from 'actions';
-
 import bunnyLeftImg from 'images/bunny1.png';
 import bunnyUpImg from 'images/bunnyup1.png';
 import bunnyDownImg from 'images/bunnydown1.png';
@@ -21,13 +11,16 @@ import bunnyFlopImg from 'images/bunnyflop.png';
 import bunnyFlopUpImg from 'images/bunnyupflop.png';
 import bunnyFlopDownImg from 'images/bunnydownflop.png';
 
-@branch({
-  tile: ['tile']
-})
-class Simba extends Component {
-  constructor(props, context) {
-    super(props, context);
-
+export default class Simba {
+  constructor() {
+    this.name = 'Simba';
+    this.giveSkill = 'dig';
+    this.hasCollected = false;
+    this.position = { x: 300, y: 230 };
+    this.onTile = { x: 1, y: 1 };
+    this.height = 40;
+    this.width = 40;
+    this.id = 1;
     this.bunnyImages = {
       left: bunnyLeftImg,
       up: bunnyUpImg,
@@ -43,24 +36,4 @@ class Simba extends Component {
       flopDown: bunnyFlopDownImg
     }
   }
-
-  render() {
-    const {
-      item: {
-        position,
-        id
-      }
-    } = this.props;
-
-    return (
-      <Bunny
-        name="Simba"
-        style={{ top: position.y + 'px', left: position.x + 'px' }}
-        position={position}
-        bunnyImages={this.bunnyImages}
-        id={id} />
-    );
-  }
 }
-
-export default Simba;

@@ -1,20 +1,12 @@
-import React, { Component } from 'react';
+import image from 'images/Brick3.png';
 
-import SceneryItem from 'components/Scenery/SceneryItem';
-import bushImage from 'images/Brick3.png';
-
-class Bush extends Component {
-  constructor(props, context) {
-    super(props, context);
-  }
-
-  render() {
-    return (
-      <SceneryItem {...this.props}>
-        <img src={bushImage} />
-      </SceneryItem>
-    )
+export default class Bush {
+  constructor(position) {
+    this.position = position;
+    this.height = 40;
+    this.width = 40;
+    this.sceneryClass = 'bush';
+    this.image = image;
+    this.type = 'Bush';
   }
 }
-
-export default Bush;

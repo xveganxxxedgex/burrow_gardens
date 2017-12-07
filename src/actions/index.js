@@ -43,6 +43,18 @@ export function updateCharacterPosition(bunnyId, newPos) {
 }
 
 /**
+ * Saves the hero's height and width to the state
+ * 
+ * @param  {int} height - The hero's new height
+ * @param  {int} width - The hero's new width
+ */
+export function updateHeroSize(height, width) {
+  const cursor = tree.select('hero');
+  cursor.set('height', height);
+  cursor.set('width', width);
+}
+
+/**
  * Sets popover object that will unset after a given timeout duration
  *
  * @param {object} popoverObj - The object to use when rendering the popover content
@@ -336,26 +348,48 @@ export function getOppositeDirection(direction) {
 }
 
 /**
- * Checks collision between two element bounding rect dimensions relative to
- * the board
+ * Returns a clean object containing the current position and dimensions for an
+ * element
  *
- * @param  {object}  element1Rect - First element to use in check
- * @param  {object}  element2Rect - Second element to use in check
+ * @param  {object} element - The element to get dimensions for
+ *
+ * @return {object} - The position/dimensions for the element
+ */
+function getElementRect(element) {
+  return {
+    x: element.x || (element.position && element.position.x),
+    y: element.y || (element.position && element.position.y),
+    height: element.height || element.props.height,
+    width: element.width || element.props.width
+  };
+}
+
+/**
+ * Checks collision between two elements
+ *
+ * The provided element params must contain the following properties:
+ * { x, y, height, width }
+ *
+ * @param  {object}  element1 - First element to use in check
+ * @param  {object}  element2 - Second element to use in check
  * @param  {Boolean} isMoving - If element1 is currently moving
  *
  * @return {Boolean} - If the two elements are colliding
  */
-export function checkElementCollision(element1Rect, element2Rect, isMoving) {
-  const element2Bottom = element2Rect.top + element2Rect.height;
-  const element2Right = element2Rect.left + element2Rect.width;
-  const hitElement1Right = isMoving ? element1Rect.right > element2Rect.left : element1Rect.right >= element2Rect.left;
-  const hitElement1Bottom = isMoving ? element1Rect.bottom > element2Rect.top : element1Rect.bottom >= element2Rect.top;
-  const hitElement1Left = isMoving ? element1Rect.left < element2Right : element1Rect.left <= element2Right;
-  const hitElement1Top = isMoving ? element1Rect.top < element2Bottom : element1Rect.top <= element2Bottom;
-  const isBetweenY = hitElement1Top && hitElement1Bottom;
-  const isBetweenX = hitElement1Left && hitElement1Right;
-  const isColliding = isBetweenY && isBetweenX;
-  return isColliding;
+export function checkElementCollision(element1, element2, isMoving) {
+  const element1Rect = getElementRect(element1, isMoving);
+  const element2Rect = getElementRect(element2);
+  const element2Right = element2Rect.x + element2Rect.width;
+  const element1Right = element1Rect.x + element1Rect.width;
+  const element2Bottom = element2Rect.y + element2Rect.height;
+  const element1Bottom = element1Rect.height + element1Rect.y;
+
+  const elementHittingLeft = isMoving ? element1Rect.x < element2Right : element1Rect.x <= element2Right;
+  const elementHittingRight = isMoving ? element1Right > element2Rect.x : element1Right >= element2Rect.x;
+  const elementHittingTop = isMoving ? element1Rect.y < element2Bottom : element1Rect.y <= element2Bottom;
+  const elementHittingBottom = isMoving ? element1Bottom > element2Rect.y : element1Bottom >= element2Rect.y;
+
+  return elementHittingLeft && elementHittingRight && elementHittingTop && elementHittingBottom;
 }
 
 /**
@@ -378,26 +412,22 @@ export function checkCollisions(character, x, y, direction, type) {
   const tile = tree.get('tile');
   const heroCollisions = tree.select('heroCollisions');
   const movePixels = tree.get('movePixels');
+  const heroCursor = tree.get('hero');
   // When checking collisions for hero, compare against other AI bunnies on the tile
   // Otherwise, when checking AI collisions, ensure they're not colliding with hero
-  const bunniesOnTile = isHero ? tree.get('bunniesOnTile') : [{ id: 'Hero' }];
-  const boardDimensions = tree.get('boardDimensions');
-  const { left: boardX, top: boardY } = boardDimensions;
+  const bunniesOnTile = isHero ? tree.get('bunniesOnTile') : [{
+    id: 'Hero',
+    position: heroCursor.position,
+    height: heroCursor.height,
+    width: heroCursor.width
+  }];
 
-  const bunnyRect = findDOMNode(character).getBoundingClientRect();
-  const useBunnyRect = {
-    top: y + boardY,
-    bottom: y + boardY + bunnyRect.height,
-    left: x + boardX,
-    right: x + boardX + bunnyRect.width
-  };
   let loopItems = type == 'bunny' ? bunniesOnTile : tile[type].filter(item => !item.collected);
   let maxValue = direction && (['up', 'down'].indexOf(direction) > -1 ? y : x);
 
   for (let t = 0; t < loopItems.length; t++) {
     const elementId = loopItems[t].id;
-    const checkElement = document.querySelector(`.${type}_index_${elementId || t}`).getBoundingClientRect();
-    const isColliding = checkElementCollision(useBunnyRect, checkElement, direction);
+    const isColliding = checkElementCollision(character, loopItems[t], direction);
 
     if (isColliding) {
       if (isHero) {
@@ -418,22 +448,26 @@ export function checkCollisions(character, x, y, direction, type) {
       }
 
       if (direction) {
+        const bunnyRect = getElementRect(character);
+        const collidingElementRect = getElementRect(loopItems[t]);
+
         switch(direction) {
           case 'up':
-            maxValue = Math.max(maxValue, ((checkElement.top + checkElement.height) - boardY));
+            maxValue = Math.max(maxValue, (collidingElementRect.y + collidingElementRect.height));
             break;
           case 'down':
-            maxValue = Math.min(maxValue, (checkElement.top - boardY - bunnyRect.height));
+            maxValue = Math.min(maxValue, (collidingElementRect.y - bunnyRect.height));
             break;
           case 'left':
-            maxValue = Math.max(maxValue, ((checkElement.left + checkElement.width) - boardX));
+            maxValue = Math.max(maxValue, (collidingElementRect.x + collidingElementRect.width));
             break;
           case 'right':
-            maxValue = Math.min(maxValue, (checkElement.left - boardX - bunnyRect.width));
+            maxValue = Math.min(maxValue, (collidingElementRect.x - bunnyRect.width));
             break;
         }
       }
     } else if (type == 'bunny' && isHero) {
+      // If no longer colliding with a bunny, remove them from the collisions list
       if (heroCollisions.get().indexOf(elementId) > -1) {
         heroCollisions.splice([heroCollisions.get().indexOf(elementId), 1]);
       }
@@ -543,6 +577,13 @@ export function moveEntityBack(character, axis, currentX, currentY, direction) {
   };
 }
 
+function getCharacterWithNextPosition(character, x, y) {
+  return {
+    ...character,
+    position: { x, y }
+  };
+}
+
 /**
  * Check if character is collidiing with any food items
  *
@@ -557,7 +598,8 @@ export function moveEntityBack(character, axis, currentX, currentY, direction) {
  *                 will be whatever that collision point is.
  */
 export function checkFoodCollision(character, x, y, direction) {
-  return checkCollisions(character, x, y, direction, 'food');
+  const useCharacter = getCharacterWithNextPosition(character, x, y);
+  return checkCollisions(useCharacter, x, y, direction, 'food');
 }
 
 /**
@@ -574,7 +616,8 @@ export function checkFoodCollision(character, x, y, direction) {
  *                 will be whatever that collision point is.
  */
 export function checkSceneryCollision(character, x, y, direction) {
-  return checkCollisions(character, x, y, direction, 'scenery');
+  const useCharacter = getCharacterWithNextPosition(character, x, y);
+  return checkCollisions(useCharacter, x, y, direction, 'scenery');
 }
 
 /**
@@ -591,7 +634,8 @@ export function checkSceneryCollision(character, x, y, direction) {
  *                 will be whatever that collision point is.
  */
 export function checkBunnyCollision(character, x, y, direction) {
-  return checkCollisions(character, x, y, direction, 'bunny');
+  const useCharacter = getCharacterWithNextPosition(character, x, y);
+  return checkCollisions(useCharacter, x, y, direction, 'bunny');
 }
 
 /**

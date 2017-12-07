@@ -1,20 +1,13 @@
-import React, { Component } from 'react';
-
-import FoodItem from 'components/Food/FoodItem';
 import image from 'images/cilantro.png';
 
-class Cilantro extends Component {
-  constructor(props, context) {
-    super(props, context);
-  }
-
-  render() {
-    return (
-      <FoodItem {...this.props}>
-        <img src={image} />
-      </FoodItem>
-    )
+export default class Cilantro {
+  constructor(position, id) {
+    this.position = position;
+    this.height = 23;
+    this.width = 20;
+    this.type = 'Cilantro';
+    this.collected = false;
+    this.image = image;
+    this.id = id;
   }
 }
-
-export default Cilantro;

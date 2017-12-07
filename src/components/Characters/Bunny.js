@@ -253,7 +253,7 @@ class Bunny extends Component {
   }
 
   render() {
-    const { name, style, children, direction, isFlopped, id } = this.props;
+    const { name, position, height, width, children, direction, isFlopped, id } = this.props;
     const { moveTransition, moving, lastDirection } = this.state;
     const bunnyImage = this.getBunnyImage();
     const useDirection = this.checkIfIsHero() ? direction : lastDirection;
@@ -261,7 +261,12 @@ class Bunny extends Component {
     return (
       <div
         className={`bunny ${name} ${moveTransition ? '' : 'no-transition'} ${useDirection} ${isFlopped ? 'isFlopped' : ''} bunny_index_${id}`}
-        style={style || {}}
+        style={{
+          top: position.y + 'px',
+          left: position.x + 'px',
+          height: height + 'px',
+          width: width + 'px'
+        }}
       >
         <img src={bunnyImage} />
         {children}

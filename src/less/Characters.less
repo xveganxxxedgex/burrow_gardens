@@ -1,13 +1,8 @@
 .bunny {
-  height: 40px;
-  width: 40px;
   position: absolute;
   z-index: 1;
 
   transition: top .12s linear, left .12s linear;
-
-  &.hero {
-  }
 
   &.no-transition {
     transition: none;
@@ -16,13 +11,6 @@
   &.right {
     img {
       transform: scaleX(-1);
-    }
-  }
-
-  &:not(.up):not(.down) {
-    &.isFlopped {
-      height: 36px;
-      width: 44px;
     }
   }
 

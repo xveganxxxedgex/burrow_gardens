@@ -1,26 +1,29 @@
+import * as Food from 'components/Food';
+import * as Scenery from 'components/Scenery';
+
 let left1 = [];
 for (let i = 0; i < 760; i = i + 40) {
-  left1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: 0, y: i } });
+  left1.push(new Scenery.Bush({ x: 0, y: i }));
 }
 
 let right1 = [];
 for (let i = 0; i < 480; i = i + 40) {
-  right1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: 1160, y: i } });
+  right1.push(new Scenery.Bush({ x: 1160, y: i }));
 }
 
 let top1 = [];
 for (let i = 40; i < 220; i = i + 40) {
-  top1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: i, y: 0 } });
+  top1.push(new Scenery.Bush({ x: i, y: 0 }));
 }
 
 let top2 = [];
 for (let i = 640; i < 1200; i = i + 40) {
-  top2.push({ type: 'Bush', sceneryClass: 'bush', position: { x: i, y: 0 } });
+  top2.push(new Scenery.Bush({ x: i, y: 0 }));
 }
 
 let bottom1 = [];
 for (let i = 0; i < 1200; i = i + 40) {
-  bottom1.push({ type: 'Bush', sceneryClass: 'bush', position: { x: i, y: 560 } });
+  bottom1.push(new Scenery.Bush({ x: i, y: 560 }));
 }
 
 const Tile = {

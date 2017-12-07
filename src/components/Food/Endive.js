@@ -1,20 +1,13 @@
-import React, { Component } from 'react';
-
-import FoodItem from 'components/Food/FoodItem';
 import image from 'images/endive.png';
 
-class Endive extends Component {
-  constructor(props, context) {
-    super(props, context);
-  }
-
-  render() {
-    return (
-      <FoodItem {...this.props}>
-        <img src={image} />
-      </FoodItem>
-    )
+export default class Endive {
+  constructor(position, id) {
+    this.position = position;
+    this.height = 29;
+    this.width = 25;
+    this.type = 'Endive';
+    this.collected = false;
+    this.image = image;
+    this.id = id;
   }
 }
-
-export default Endive;

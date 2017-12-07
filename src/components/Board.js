@@ -7,6 +7,9 @@ import _isEqual from 'lodash/isEqual';
 import Hero from 'components/Characters/Hero';
 import Scenery from 'components/Scenery';
 import InventoryModal from 'components/InventoryModal';
+import SceneryItem from 'components/Scenery/SceneryItem';
+import FoodItem from 'components/Food/FoodItem';
+import Bunny from 'components/Characters/Bunny';
 import grassImage from 'images/grass.png';
 
 import {
@@ -81,9 +84,10 @@ class Board extends Component {
         <SceneryWrapper tile={tile} />
         <FoodWrapper tile={tile} />
         {bunniesOnTile.map((item, itemIndex) => {
-          const BunnyItem = getCharacter(item.name);
+          // TODO: Ensure bunny isn't overlapping/colliding with any other
+          // element before populating on the board
           return (
-            <BunnyItem item={item} key={`bunny-${itemIndex}`} index={itemIndex} />
+            <Bunny {...item} key={`bunny-${itemIndex}`} index={itemIndex} />
           );
         })}
         <Hero />
@@ -132,9 +136,8 @@ class SceneryWrapper extends Component {
     return (
       <div className="scenery-wrapper">
         {tile.scenery.map((item, itemIndex) => {
-          const SceneryItem = getSceneryItem(item.type);
           return (
-            <SceneryItem item={item} key={`scenery-${itemIndex}`} index={itemIndex} />
+            <SceneryItem {...item} key={`scenery-${itemIndex}`} index={itemIndex} />
           );
         })}
       </div>
@@ -155,10 +158,8 @@ class FoodWrapper extends Component {
     return (
       <div className="food-wrapper">
         {tile.food.map((item, itemIndex) => {
-          const FoodItem = getFoodItem(item.type);
-
           return (
-            <FoodItem item={item} key={`food-${itemIndex}`} index={itemIndex} />
+            <FoodItem {...item} key={`food-${itemIndex}`} index={itemIndex} />
           );
         })}
       </div>

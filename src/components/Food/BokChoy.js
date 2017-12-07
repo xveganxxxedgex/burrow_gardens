@@ -1,20 +1,13 @@
-import React, { Component } from 'react';
-
-import FoodItem from 'components/Food/FoodItem';
 import image from 'images/bokchoy.png';
 
-class BokChoy extends Component {
-  constructor(props, context) {
-    super(props, context);
-  }
-
-  render() {
-    return (
-      <FoodItem {...this.props}>
-        <img src={image} />
-      </FoodItem>
-    )
+export default class BokChoy {
+  constructor(position, id) {
+    this.position = position;
+    this.height = 27;
+    this.width = 18;
+    this.type = 'BokChoy';
+    this.collected = false;
+    this.image = image;
+    this.id = id;
   }
 }
-
-export default BokChoy;

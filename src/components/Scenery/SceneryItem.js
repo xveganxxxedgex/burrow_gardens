@@ -9,17 +9,20 @@ class SceneryItem extends Component {
 
   render() {
     const {
-      item: {
-        type,
-        position: { x, y },
-        sceneryClass
-      },
+      type,
+      position: { x, y },
+      sceneryClass,
+      height,
+      width,
+      image,
       index,
       children
     } = this.props;
     const style = {
       top: y + 'px',
-      left: x + 'px'
+      left: x + 'px',
+      height: height + 'px',
+      width: width + 'px'
     };
 
     return (
@@ -27,7 +30,7 @@ class SceneryItem extends Component {
         className={`scenery ${type} ${sceneryClass || ''} scenery_index_${index}`}
         style={style}
       >
-        {children}
+        <img src={image} />
       </div>
     )
   }

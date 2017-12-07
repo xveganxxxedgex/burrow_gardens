@@ -3,6 +3,7 @@ import _filter from 'lodash/filter';
 import _forEach from 'lodash/forEach';
 
 import * as Tiles from 'Maps';
+import * as Bunnies from 'components/Characters';
 
 const tiles = {};
 
@@ -53,10 +54,9 @@ const foodItems = vegetables.concat(fruits);
 
 const state = new Baobab({
   hero: {
-    position: {
-      x: 60,
-      y: 60
-    },
+    position: { x: 60, y: 60 },
+    height: 40,
+    width: 40,
     lastDirection: 'right',
     abilities: monkey({
       cursors: {
@@ -118,89 +118,24 @@ const state = new Baobab({
     }
   }),
   bunnies: [
-    {
-      name: 'Simba',
-      giveSkill: 'dig',
-      hasCollected: false,
-      position: {
-        x: 300,
-        y: 230
-      },
-      onTile: {
-        x: 1,
-        y: 1
-      },
-      id: 1
-    },
-    {
-      name: 'November',
-      giveSkill: 'ball',
-      hasCollected: false,
-      position: {
-        x: 60,
-        y: 60
-      },
-      onTile: {
-        x: 1,
-        y: 5
-      },
-      id: 2
-    },
-    {
-      name: 'Cloud',
-      giveSkill: 'binky',
-      needsAbility: 'groom',
-      hasCollected: false,
-      position: {
-        x: 60,
-        y: 60
-      },
-      onTile: {
-        x: 1,
-        y: 5
-      },
-      id: 3
-    },
-    {
-      name: 'Spencer',
-      giveSkill: 'groom',
-      hasCollected: false,
-      position: {
-        x: 60,
-        y: 60
-      },
-      onTile: {
-        x: 1,
-        y: 5
-      },
-      id: 4
-    },
+    new Bunnies.Simba(),
+    new Bunnies.November(),
+    new Bunnies.Cloud(),
+    new Bunnies.Spencer(),
     {
       name: 'Giant',
       giveSkill: 'climb',
       hasCollected: false,
-      position: {
-        x: 60,
-        y: 60
-      },
-      onTile: {
-        x: 1,
-        y: 5
-      },
+      position: { x: 60, y: 60 },
+      onTile: { x: 1, y: 5 },
       id: 5
     },
     {
       name: 'Unknown 1',
       giveSkill: 'zoom',
       hasCollected: false,
-      position: {
-        x: 60,
-        y: 60
-      },
-      onTile: {
-        x: 1,
-        y: 5
-      },
+      position: { x: 60, y: 60 },
+      onTile: { x: 1, y: 5 },
       id: 6
     },
     {
@@ -208,94 +143,52 @@ const state = new Baobab({
       giveSkill: 'jump',
       needsAbility: 'binky',
       hasCollected: false,
-      position: {
-        x: 60,
-        y: 60
-      },
-      onTile: {
-        x: 1,
-        y: 5
-      },
+      position: { x: 60, y: 60 },
+      onTile: { x: 1, y: 5 },
       id: 7
     },
     {
       name: 'Unknown 3',
       giveSkill: 'stomp',
       hasCollected: false,
-      position: {
-        x: 60,
-        y: 60
-      },
-      onTile: {
-        x: 1,
-        y: 5
-      },
+      position: { x: 60, y: 60 },
+      onTile: { x: 1, y: 5 },
       id: 8
     },
     {
       name: 'No Skill',
       hasCollected: false,
-      position: {
-        x: 60,
-        y: 60
-      },
-      onTile: {
-        x: 1,
-        y: 5
-      },
+      position: { x: 60, y: 60 },
+      onTile: { x: 1, y: 5 },
       id: 9
     },
     {
       name: 'No Skill',
       hasCollected: false,
       needsAbility: 'stomp',
-      position: {
-        x: 60,
-        y: 60
-      },
-      onTile: {
-        x: 1,
-        y: 5
-      },
+      position: { x: 60, y: 60 },
+      onTile: { x: 1, y: 5 },
       id: 10
     },
     {
       name: 'No Skill',
       hasCollected: false,
-      position: {
-        x: 60,
-        y: 60
-      },
-      onTile: {
-        x: 1,
-        y: 5
-      },
+      position: { x: 60, y: 60 },
+      onTile: { x: 1, y: 5 },
       id: 11
     },
     {
       name: 'No Skill',
       hasCollected: false,
-      position: {
-        x: 60,
-        y: 60
-      },
-      onTile: {
-        x: 1,
-        y: 5
-      },
+      position: { x: 60, y: 60 },
+      onTile: { x: 1, y: 5 },
       id: 12
     },
     {
       name: 'No Skill',
       hasCollected: false,
-      position: {
-        x: 60,
-        y: 60
-      },
-      onTile: {
-        x: 1,
-        y: 5
-      },
+      position: { x: 60, y: 60 },
+      onTile: { x: 1, y: 5 },
       id: 13
     },
   ],
@@ -324,10 +217,7 @@ const state = new Baobab({
       });
     }
   }),
-  activeTile: {
-    x: 1,
-    y: 1
-  },
+  activeTile: { x: 1, y: 1 },
   boardDimensions: {},
   backgrounds: {
     B0: 'Dirt',

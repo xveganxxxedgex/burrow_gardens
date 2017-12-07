@@ -15,7 +15,8 @@ import {
   moveEntityBack,
   moveEntityForward,
   setHeroLastDirection,
-  getOppositeDirection
+  getOppositeDirection,
+  updateHeroSize
 } from 'actions';
 
 import bunnyLeftImg from 'images/bunny1.png';
@@ -74,6 +75,7 @@ class Hero extends Component {
     this.setKeyUp = this.setKeyUp.bind(this);
     this.setHeroIdleStatus = this.setHeroIdleStatus.bind(this);
 
+    this.assignDimensions();
     this.bunnyImages = {
       left: bunnyLeftImg,
       up: bunnyUpImg,
@@ -103,17 +105,22 @@ class Hero extends Component {
   }
 
   componentWillUpdate(nextProps, nextState) {
-    if (nextState.moving != this.state.moving) {
-      const lastDirection = nextState.moving.length ? nextState.moving[nextState.moving.length - 1] : nextProps.hero.lastDirection;
+    const { hero } = nextProps;
+    const { moving, isLoaf, isFlopped } = nextState;
 
-      if (lastDirection != nextProps.hero.lastDirection) {
+    if (moving != this.state.moving) {
+      const lastDirection = moving.length ? moving[moving.length - 1] : hero.lastDirection;
+
+      if (lastDirection != hero.lastDirection) {
         setHeroLastDirection(lastDirection);
       }
 
-      if (nextState || !nextState.moving.length) {
+      if (nextState || !moving.length) {
         clearTimeout(this.movingTimeout);
         this.movingTimeout = null;
       }
+    } else if (this.state.isLoaf != isLoaf || this.state.isFlopped != isFlopped) {
+      this.assignDimensions(nextProps, nextState);
     }
   }
 
@@ -121,6 +128,31 @@ class Hero extends Component {
     document.removeEventListener('keydown', this.setKeyDown);
     document.removeEventListener('keyup', this.setKeyUp);
     this.clearTimeouts();
+  }
+
+  assignDimensions(props, state) {
+    props = props || this.props || {};
+    state = state || this.state || {};
+    const isVertical = ['up', 'down'].indexOf(props.hero.lastDirection) > -1;
+    const { height, width } = this.getBunnyDimensions(state.isFlopped, isVertical);
+
+    if (this.props.hero.height != height || this.props.hero.width != width) {
+      updateHeroSize(height, width);
+    }
+  }
+
+  getBunnyDimensions(isFlopped, isVertical) {
+    if (isFlopped && !isVertical) {
+      return {
+        height: 36,
+        width: 44
+      };
+    }
+
+    return {
+      height: 40,
+      width: 40
+    };
   }
 
   clearTimeouts() {
@@ -282,15 +314,18 @@ class Hero extends Component {
     const {
       hero: {
         position,
-        lastDirection
+        lastDirection,
+        height,
+        width
       }
     } = this.props;
 
     return (
       <Bunny
         name="hero"
-        style={{ top: position.y + 'px', left: position.x + 'px' }}
         ref={(hero) => { this.hero = hero }}
+        height={height}
+        width={width}
         position={position}
         direction={lastDirection}
         isFlopped={this.state.isFlopped}

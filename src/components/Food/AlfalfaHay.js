@@ -1,20 +1,13 @@
-import React, { Component } from 'react';
-
-import FoodItem from 'components/Food/FoodItem';
 import image from 'images/alfalfa_hay1.png';
 
-class AlfalfaHay extends Component {
-  constructor(props, context) {
-    super(props, context);
-  }
-
-  render() {
-    return (
-      <FoodItem {...this.props}>
-        <img src={image} />
-      </FoodItem>
-    )
+export default class AlfalfaHay {
+  constructor(position, id) {
+    this.position = position;
+    this.height = 35;
+    this.width = 59;
+    this.type = 'AlfalfaHay';
+    this.collected = false;
+    this.image = image;
+    this.id = id;
   }
 }
-
-export default AlfalfaHay;

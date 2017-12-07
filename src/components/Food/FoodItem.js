@@ -9,19 +9,22 @@ class FoodItem extends Component {
 
   render() {
     const {
-      item: {
-        type,
-        position,
-        collected,
-        id
-      },
+      type,
+      position,
+      collected,
+      id,
+      height,
+      width,
+      image,
       index,
       children,
       inMenu
     } = this.props;
     const style = !inMenu ? {
       top: position.y + 'px',
-      left: position.x + 'px'
+      left: position.x + 'px',
+      height: height + 'px',
+      width: width + 'px'
     } : null;
 
     if (!inMenu && collected) {
@@ -33,7 +36,7 @@ class FoodItem extends Component {
         className={`food ${type} food_index_${id}`}
         style={style}
       >
-        {children}
+        <img src={image} />
       </div>
     )
   }
