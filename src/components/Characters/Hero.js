@@ -9,7 +9,6 @@ import {
   setActiveTile,
   collectItem,
   toggleShowInventory,
-  checkSceneryCollision,
   checkFoodCollision,
   checkBunnyCollision,
   moveEntityBack,
@@ -194,8 +193,9 @@ class Hero extends Component {
 
     if (direction == 'space') {
       if (!moving.length) {
-        checkFoodCollision(this, x, y);
-        checkBunnyCollision(this, x, y);
+        const useCharacter = this.getCharacterWithDimensions();
+        checkFoodCollision(useCharacter, x, y);
+        checkBunnyCollision(useCharacter, x, y);
       }
 
       return;
@@ -273,6 +273,15 @@ class Hero extends Component {
     this.setState(newState);
   }
 
+  getCharacterWithDimensions() {
+    const { hero: { height, width } } = this.props;
+    return {
+      ...this,
+      height,
+      width
+    };
+  }
+
   movePlayer() {
     const { moving } = this.state;
     const {
@@ -284,22 +293,24 @@ class Hero extends Component {
     let newX = x;
     let newY = y;
 
+    const useCharacter = this.getCharacterWithDimensions();
+
     for (let m = 0; m < moving.length; m++) {
       switch(moving[m]) {
         case 'up':
-          const movePlayerUp = moveEntityBack(this, 'y', newX, newY, moving[m]);
+          const movePlayerUp = moveEntityBack(useCharacter, 'y', newX, newY, moving[m]);
           newY = movePlayerUp.value;
           break;
         case 'down':
-          const movePlayerDown = moveEntityForward(this, 'y', newX, newY, moving[m]);
+          const movePlayerDown = moveEntityForward(useCharacter, 'y', newX, newY, moving[m]);
           newY = movePlayerDown.value;
           break;
         case 'left':
-          const movePlayerLeft = moveEntityBack(this, 'x', newX, newY, moving[m]);
+          const movePlayerLeft = moveEntityBack(useCharacter, 'x', newX, newY, moving[m]);
           newX = movePlayerLeft.value;
           break;
         case 'right':
-          const movePlayerRight = moveEntityForward(this, 'x', newX, newY, moving[m]);
+          const movePlayerRight = moveEntityForward(useCharacter, 'x', newX, newY, moving[m]);
           newX = movePlayerRight.value;
           break;
       }

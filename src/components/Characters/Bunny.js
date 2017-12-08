@@ -189,18 +189,22 @@ class Bunny extends Component {
     this.setState({ moving: [] });
   }
 
-  shouldContinueMoving(newPos, maxBound, oldPos) {
+  shouldContinueMoving(newPos, boundsDirection, oldPos) {
     // If newPos is equal to the old position, we're colliding with an entity,
     // so stop moving the character
     if (newPos == oldPos || this.checkIfCollidingWithHero()) {
       return false;
     }
 
-    if (['top', 'left'].indexOf(maxBound) > -1) {
-      return newPos > this.maxBounds[maxBound];
+    return this.isInBounds(newPos, boundsDirection);
+  }
+
+  isInBounds(newPos, boundsDirection) {
+    if (['top', 'left'].indexOf(boundsDirection) > -1) {
+      return newPos > this.maxBounds[boundsDirection];
     }
 
-    return newPos < this.maxBounds[maxBound];
+    return newPos < this.maxBounds[boundsDirection];
   }
 
   moveCharacter() {
