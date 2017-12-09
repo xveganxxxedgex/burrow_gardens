@@ -20,12 +20,15 @@ class FoodItem extends Component {
       children,
       inMenu
     } = this.props;
-    const style = !inMenu ? {
-      top: position.y + 'px',
-      left: position.x + 'px',
+    const style = {
       height: height + 'px',
       width: width + 'px'
-    } : null;
+    };
+
+    if (!inMenu) {
+      style.top = position.y + 'px';
+      style.left = position.x + 'px';
+    }
 
     if (!inMenu && collected) {
       return <span />;

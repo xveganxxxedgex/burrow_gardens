@@ -6,7 +6,7 @@ import _isEqual from 'lodash/isEqual';
 
 import Hero from 'components/Characters/Hero';
 import Scenery from 'components/Scenery';
-import InventoryModal from 'components/InventoryModal';
+import MenuModal from 'components/MenuModal';
 import SceneryItem from 'components/Scenery/SceneryItem';
 import FoodItem from 'components/Food/FoodItem';
 import Bunny from 'components/Characters/Bunny';
@@ -19,7 +19,7 @@ import {
   getFoodItem,
   getBackgroundCell,
   getSceneryItem,
-  showInventory
+  showMenu
 } from 'actions';
 
 import 'less/Board.less';
@@ -27,7 +27,7 @@ import 'less/Board.less';
 @branch({
   tile: ['tile'],
   popover: ['popover'],
-  showInventory: ['showInventory'],
+  showMenu: ['showMenu'],
   bunniesOnTile: ['bunniesOnTile']
 })
 class Board extends Component {
@@ -58,7 +58,7 @@ class Board extends Component {
   }
 
   render() {
-    const { popover, tile, showInventory, bunniesOnTile } = this.props;
+    const { popover, tile, showMenu, bunniesOnTile } = this.props;
 
     if (!Object.keys(tile).length) {
       return <div>Loading...</div>;
@@ -77,8 +77,8 @@ class Board extends Component {
             {popover.text}
           </Popover>
         }
-        {showInventory &&
-          <InventoryModal container={this} show={showInventory} />
+        {showMenu &&
+          <MenuModal container={this} show={showMenu} />
         }
         <BackgroundWrapper tile={tile} />
         <SceneryWrapper tile={tile} />

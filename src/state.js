@@ -195,7 +195,7 @@ const state = new Baobab({
   itemQueue: [],
   movePixels: 20,
   popover: null,
-  showInventory: false,
+  showMenu: true,
   tiles,
   tile: monkey({
     cursors: {

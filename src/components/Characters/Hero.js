@@ -2,15 +2,18 @@ import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
 import { branch } from 'baobab-react/higher-order';
 
+import * as constants from 'components/Characters/constants';
+
 import Bunny from 'components/Characters/Bunny';
 
 import {
   updateHeroPosition,
   setActiveTile,
   collectItem,
-  toggleShowInventory,
+  toggleShowMenu,
   checkFoodCollision,
   checkBunnyCollision,
+  checkSceneryCollision,
   moveEntityBack,
   moveEntityForward,
   setHeroLastDirection,
@@ -38,33 +41,33 @@ import lopBunnyLeftGif from 'images/lopbunnygif.gif';
 import lopBunnyUpGif from 'images/lopbunnyupgif.gif';
 import lopBunnyDownGif from 'images/lopbunnydowngif.gif';
 
+const KEYBOARD_EVENTS = {
+  // Direction keys
+  38: 'up',
+  40: 'down',
+  37: 'left',
+  39: 'right',
+  // WASD keys
+  87: 'up',
+  83: 'down',
+  65: 'left',
+  68: 'right',
+  // Space Bar
+  32: 'space',
+  // i key
+  73: 'inventory'
+};
+
 @branch({
   hero: ['hero'],
   boardDimensions: ['boardDimensions'],
   tile: ['tile'],
-  showInventory: ['showInventory'],
+  showMenu: ['showMenu'],
   movePixels: ['movePixels']
 })
 class Hero extends Component {
   constructor(props, context) {
     super(props, context);
-
-    this.keyboardEvents = {
-      // Direction keys
-      38: 'up',
-      40: 'down',
-      37: 'left',
-      39: 'right',
-      // WASD keys
-      87: 'up',
-      83: 'down',
-      65: 'left',
-      68: 'right',
-      // Space Bar
-      32: 'space',
-      // i key
-      73: 'inventory'
-    };
 
     this.isHero = true;
 
@@ -143,14 +146,14 @@ class Hero extends Component {
   getBunnyDimensions(isFlopped, isVertical) {
     if (isFlopped && !isVertical) {
       return {
-        height: 36,
-        width: 44
+        height: constants.BUNNY_FLOP_HEIGHT,
+        width: constants.BUNNY_FLOP_WIDTH
       };
     }
 
     return {
-      height: 40,
-      width: 40
+      height: constants.BUNNY_HEIGHT,
+      width: constants.BUNNY_WIDTH,
     };
   }
 
@@ -161,7 +164,7 @@ class Hero extends Component {
 
   getDirection(e) {
     const keycode = e.keyCode;
-    return this.keyboardEvents[keycode];
+    return KEYBOARD_EVENTS[keycode];
   }
 
   setKeyDown(e) {
@@ -172,7 +175,7 @@ class Hero extends Component {
       hero: {
         position: { x, y }
       },
-      showInventory
+      showMenu
     } = this.props;
 
     clearTimeout(this.idleTimeout);
@@ -183,11 +186,11 @@ class Hero extends Component {
     }
 
     if (direction == 'inventory') {
-      toggleShowInventory();
+      toggleShowMenu();
       return;
     }
 
-    if (showInventory) {
+    if (showMenu) {
       return;
     }
 
@@ -196,6 +199,7 @@ class Hero extends Component {
         const useCharacter = this.getCharacterWithDimensions();
         checkFoodCollision(useCharacter, x, y);
         checkBunnyCollision(useCharacter, x, y);
+        checkSceneryCollision(useCharacter, x, y);
       }
 
       return;

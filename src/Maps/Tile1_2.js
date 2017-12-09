@@ -7,7 +7,7 @@ for (let i = 0; i < 200; i = i + 40) {
 }
 
 let left2 = [];
-for (let i = 400; i < 560; i = i + 40) {
+for (let i = 240; i < 560; i = i + 40) {
   left2.push(new Scenery.Bush({ x: 0, y: i }));
 }
 
@@ -56,7 +56,8 @@ const Tile = {
     ...right1,
     ...top1,
     ...bottom1,
-    ...bottom2
+    ...bottom2,
+    new Scenery.Burrow({ x: 0, y: 200 }, { x: 1, y: 1 }, 'right')
   ],
   food: [
   ],

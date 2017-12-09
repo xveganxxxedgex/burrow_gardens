@@ -27,7 +27,7 @@ class SceneryItem extends Component {
 
     return (
       <div
-        className={`scenery ${type} ${sceneryClass || ''} scenery_index_${index}`}
+        className={`scenery ${sceneryClass || ''} scenery_index_${index}`}
         style={style}
       >
         <img src={image} />

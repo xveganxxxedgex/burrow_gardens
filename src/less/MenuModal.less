@@ -1,17 +1,23 @@
-.inventory-modal {
+.menu-modal {
   overflow: auto;
 
-  .inventory-modal-content {
+  .menu-modal-content {
     height: 100%;
+
+    .tabs {
+      width: 100%;
+
+      .tab-content {
+        padding-top: 10px;
+
+        .main-menu-content {
+          padding: 10px 20px;
+        }
+      }
+    }
 
     .collected-section {
       height: 100%;
-      width: 50%;
-      margin-left: 10px;
-
-      &:first-of-type {
-        margin-left: 0;
-      }
 
       .inventory-list {
         overflow-y: auto;
@@ -20,7 +26,7 @@
 
         .inventory-item-cell {
           padding: 5px;
-          height: 75px;
+          height: 100px;
 
           &.disabled {
             .inventory-item-cell-content {
@@ -65,7 +71,7 @@
         .food {
           display: block;
           position: initial;
-          max-height: 30px;
+          max-height: 50px;
 
           img {
             display: block;

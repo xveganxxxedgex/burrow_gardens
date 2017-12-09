@@ -1,106 +1,3 @@
-.food {
-  position: absolute;
-  z-index: 1;
-}
-.food.AlfalfaHay {
-  width: 59px;
-}
-.food.Apple {
-  width: 17px;
-}
-.food.Arugula {
-  width: 17px;
-}
-.food.Banana {
-  width: 19px;
-}
-.food.Basil {
-  width: 19px;
-}
-.food.Blueberry {
-  width: 23px;
-}
-.food.BokChoy {
-  width: 18px;
-}
-.food.Broccoli {
-  width: 17px;
-}
-.food.BuriedCarrot {
-  width: 24px;
-}
-.food.ButterLettuce {
-  width: 25px;
-}
-.food.Cabbage {
-  width: 25px;
-}
-.food.Carrot {
-  width: 20px;
-}
-.food.Cilantro {
-  width: 20px;
-}
-.food.DandelionGreens {
-  width: 25px;
-}
-.food.Endive {
-  width: 25px;
-}
-.food.Melon {
-  width: 30px;
-}
-.food.Mint {
-  width: 20px;
-}
-.food.Papaya {
-  width: 20px;
-}
-.food.Parsley {
-  width: 20px;
-}
-.food.Peach {
-  width: 20px;
-}
-.food.Pear {
-  width: 20px;
-}
-.food.Pumpkin {
-  width: 20px;
-}
-.food.Radicchio {
-  width: 20px;
-}
-.food.Raspberry {
-  width: 20px;
-}
-.food.RedLeafLettuce {
-  width: 20px;
-}
-.food.RomaineLettuce {
-  width: 20px;
-}
-.food.Spinach {
-  width: 20px;
-}
-.food.Strawberry {
-  width: 20px;
-}
-.food.SwissChard {
-  width: 20px;
-}
-.food.TimothyHay {
-  width: 20px;
-}
-.food.Zucchini {
-  width: 20px;
-}
-.food img {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin: 0 auto;
-}
 .background-tile {
   height: 40px;
   width: 40px;
@@ -119,21 +16,7 @@
   height: 100%;
   width: 100%;
 }
-.scenery {
-  position: absolute;
-  z-index: 1;
-}
-.scenery.Bush {
-  height: 40px;
-  width: 40px;
-}
-.scenery.Bush img {
-  height: 100%;
-  width: 100%;
-}
 .bunny {
-  height: 40px;
-  width: 40px;
   position: absolute;
   z-index: 1;
   -webkit-transition: top .12s linear, left .12s linear;
@@ -147,46 +30,56 @@
   -webkit-transform: scaleX(-1);
           transform: scaleX(-1);
 }
-.bunny:not(.up):not(.down).isFlopped {
-  height: 36px;
-  width: 44px;
-}
 .bunny img {
   height: 100%;
   width: 100%;
 }
-.inventory-modal {
+.food {
+  position: absolute;
+  z-index: 1;
+}
+.food img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+.menu-modal {
   overflow: auto;
 }
-.inventory-modal .inventory-modal-content {
+.menu-modal .menu-modal-content {
   height: 100%;
 }
-.inventory-modal .inventory-modal-content .collected-section {
+.menu-modal .menu-modal-content .tabs {
+  width: 100%;
+}
+.menu-modal .menu-modal-content .tabs .tab-content {
+  padding-top: 10px;
+}
+.menu-modal .menu-modal-content .tabs .tab-content .main-menu-content {
+  padding: 10px 20px;
+}
+.menu-modal .menu-modal-content .collected-section {
   height: 100%;
-  width: 50%;
-  margin-left: 10px;
 }
-.inventory-modal .inventory-modal-content .collected-section:first-of-type {
-  margin-left: 0;
-}
-.inventory-modal .inventory-modal-content .collected-section .inventory-list {
+.menu-modal .menu-modal-content .collected-section .inventory-list {
   overflow-y: auto;
   height: 100%;
   -ms-flex-line-pack: start;
       align-content: flex-start;
 }
-.inventory-modal .inventory-modal-content .collected-section .inventory-list .inventory-item-cell {
+.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell {
   padding: 5px;
-  height: 75px;
+  height: 100px;
 }
-.inventory-modal .inventory-modal-content .collected-section .inventory-list .inventory-item-cell.disabled .inventory-item-cell-content {
+.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell.disabled .inventory-item-cell-content {
   background-color: #ececec;
 }
-.inventory-modal .inventory-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content {
+.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content {
   border: 1px solid #ccc;
   padding: 5px;
 }
-.inventory-modal .inventory-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .inventory-item-cell-image {
+.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .inventory-item-cell-image {
   padding: 5px;
   -webkit-box-align: center;
       -ms-flex-align: center;
@@ -196,37 +89,49 @@
           justify-content: center;
   position: relative;
 }
-.inventory-modal .inventory-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .inventory-item-cell-image .inventory-item-stock {
+.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .inventory-item-cell-image .inventory-item-stock {
   position: absolute;
   right: 0;
   top: 0;
 }
-.inventory-modal .inventory-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .inventory-item-cell-details {
+.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .inventory-item-cell-details {
   text-align: center;
   font-size: 12px;
 }
-.inventory-modal .inventory-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .unlock-icon {
+.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .unlock-icon {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
 }
-.inventory-modal .inventory-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .unlock-icon .glyphicon {
+.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .unlock-icon .glyphicon {
   -ms-flex-item-align: center;
       align-self: center;
   font-size: 36px;
   color: #9f9f9f;
 }
-.inventory-modal .inventory-modal-content .collected-section .inventory-list .food {
+.menu-modal .menu-modal-content .collected-section .inventory-list .food {
   display: block;
   position: initial;
-  max-height: 30px;
+  max-height: 50px;
 }
-.inventory-modal .inventory-modal-content .collected-section .inventory-list .food img {
+.menu-modal .menu-modal-content .collected-section .inventory-list .food img {
   display: block;
   height: 100%;
   margin: 0 auto;
   width: 100%;
   max-width: 45px;
+}
+.scenery {
+  position: absolute;
+  z-index: 1;
+}
+.scenery.burrow.right img {
+  -webkit-transform: scaleX(-1);
+          transform: scaleX(-1);
+}
+.scenery img {
+  height: 100%;
+  width: 100%;
 }
 .board {
   height: 600px;
@@ -254,18 +159,18 @@
   background-color: #5cb85c;
   border-color: #4cae4c;
 }
-.board .inventory-modal {
+.board .menu-modal {
   height: 100%;
   overflow: hidden;
 }
-.board .inventory-modal .modal-dialog {
+.board .menu-modal .modal-dialog {
   height: calc(100% - 60px);
   width: 800px;
 }
-.board .inventory-modal .modal-dialog .modal-content {
+.board .menu-modal .modal-dialog .modal-content {
   height: 100%;
 }
-.board .inventory-modal .modal-dialog .modal-content .modal-body {
+.board .menu-modal .modal-dialog .modal-content .modal-body {
   height: calc(100% - 55px);
   overflow: auto;
 }
@@ -360,6 +265,12 @@ body {
       -ms-flex: 0 0 25%;
           flex: 0 0 25%;
 }
+.flex-grid.grid-fifth > .grid-cell {
+  width: 20%;
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 20%;
+          flex: 0 0 20%;
+}
 .flex-grid > .min-full-cell {
   width: 100%;
   -webkit-box-flex: 0;
@@ -417,6 +328,12 @@ body {
         -ms-flex: 0 0 25%;
             flex: 0 0 25%;
   }
+  .flex-grid.small-grid-fifth > .grid-cell {
+    width: 20%;
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 20%;
+            flex: 0 0 20%;
+  }
   .flex-grid > .min-full-cell {
     width: 100%;
     -webkit-box-flex: 0;
@@ -456,6 +373,12 @@ body {
     -webkit-box-flex: 0;
         -ms-flex: 0 0 25%;
             flex: 0 0 25%;
+  }
+  .flex-grid.medium-grid-fifth > .grid-cell {
+    width: 2%;
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 2%;
+            flex: 0 0 2%;
   }
   .flex-grid > .min-full-cell {
     width: 100%;
@@ -508,6 +431,12 @@ body {
     -webkit-box-flex: 0;
         -ms-flex: 0 0 25%;
             flex: 0 0 25%;
+  }
+  .flex-grid.large-grid-fifth > .grid-cell {
+    width: 20%;
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 20%;
+            flex: 0 0 20%;
   }
   .flex-grid > .min-full-cell {
     width: 100%;

@@ -10,6 +10,7 @@ import bunnyLoafDownImg from 'images/bunnydownloaf.png';
 import bunnyFlopImg from 'images/bunnyflop.png';
 import bunnyFlopUpImg from 'images/bunnyupflop.png';
 import bunnyFlopDownImg from 'images/bunnydownflop.png';
+import * as constants from './constants';
 
 export default class Simba {
   constructor() {
@@ -18,8 +19,8 @@ export default class Simba {
     this.hasCollected = false;
     this.position = { x: 300, y: 230 };
     this.onTile = { x: 1, y: 1 };
-    this.height = 40;
-    this.width = 40;
+    this.height = constants.BUNNY_HEIGHT;
+    this.width = constants.BUNNY_WIDTH;
     this.id = 1;
     this.bunnyImages = {
       left: bunnyLeftImg,

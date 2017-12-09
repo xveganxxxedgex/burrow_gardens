@@ -12,7 +12,7 @@ for (let i = 0; i < 200; i = i + 40) {
 }
 
 let right2 = [];
-for (let i = 400; i < 560; i = i + 40) {
+for (let i = 240; i < 560; i = i + 40) {
   right2.push(new Scenery.Bush({ x: 1160, y: i }));
 }
 
@@ -75,7 +75,8 @@ const Tile = {
     ...right2,
     ...top1,
     ...bottom1,
-    ...bottom2
+    ...bottom2,
+    new Scenery.Burrow({ x: 1138, y: 200 }, { x: 1, y: 2 }, 'left')
   ],
   food: foodItems.map((item, index) => {
     return new Food[item.type](item.position, index + 1);

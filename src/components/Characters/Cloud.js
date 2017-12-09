@@ -10,6 +10,7 @@ import bunnyLoafDownImg from 'images/bunnydownloaf.png';
 import bunnyFlopImg from 'images/bunnyflop.png';
 import bunnyFlopUpImg from 'images/bunnyupflop.png';
 import bunnyFlopDownImg from 'images/bunnydownflop.png';
+import * as constants from './constants';
 
 // TODO: use actual images
 export default class Cloud {
@@ -20,8 +21,8 @@ export default class Cloud {
     this.hasCollected = false;
     this.position = { x: 60, y: 60 };
     this.onTile = { x: 1, y: 5 };
-    this.height = 40;
-    this.width = 40;
+    this.height = constants.BUNNY_HEIGHT;
+    this.width = constants.BUNNY_WIDTH;
     this.id = 3;
     this.bunnyImages = {
       left: bunnyLeftImg,

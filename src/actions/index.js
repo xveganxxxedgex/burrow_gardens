@@ -15,6 +15,9 @@ import * as Characters from 'components/Characters';
 import * as Backgrounds from 'components/Backgrounds';
 import * as SceneryItems from 'components/Scenery';
 
+import * as SceneryConstants from 'components/Scenery/constants';
+import * as CharacterConstants from 'components/Characters/constants';
+
 let popoverTimeout;
 
 /**
@@ -44,7 +47,7 @@ export function updateCharacterPosition(bunnyId, newPos) {
 
 /**
  * Saves the hero's height and width to the state
- * 
+ *
  * @param  {int} height - The hero's new height
  * @param  {int} width - The hero's new width
  */
@@ -307,8 +310,8 @@ export function getSceneryItem(type) {
 /**
  * Toggles whether the inventory modal should be shown
  */
-export function toggleShowInventory() {
-  const cursor = tree.select('showInventory');
+export function toggleShowMenu() {
+  const cursor = tree.select('showMenu');
   cursor.set(!cursor.get());
 }
 
@@ -410,7 +413,6 @@ export function checkElementCollision(element1, element2, isMoving) {
 export function checkCollisions(character, x, y, direction, type) {
   const isHero = character.isHero;
   const tile = tree.get('tile');
-  const heroCollisions = tree.select('heroCollisions');
   const movePixels = tree.get('movePixels');
   const heroCursor = tree.get('hero');
   // When checking collisions for hero, compare against other AI bunnies on the tile
@@ -426,27 +428,13 @@ export function checkCollisions(character, x, y, direction, type) {
   let maxValue = direction && (['up', 'down'].indexOf(direction) > -1 ? y : x);
 
   for (let t = 0; t < loopItems.length; t++) {
-    const elementId = loopItems[t].id;
     const isColliding = checkElementCollision(character, loopItems[t], direction);
 
-    if (isColliding) {
-      if (isHero) {
-        if (!direction) {
-          if (type == 'food') {
-            collectItem('food', elementId);
-          } else if (type == 'bunny') {
-            collectBunny(elementId);
-          }
-        } else {
-          // Save to state who we're colliding with
-          if (type == 'bunny') {
-            if (heroCollisions.get().indexOf(elementId) == -1) {
-              heroCollisions.push(elementId);
-            }
-          }
-        }
-      }
+    if (isHero) {
+      handleHeroItemCollision(direction, type, loopItems[t], isColliding);
+    }
 
+    if (isColliding) {
       if (direction) {
         const bunnyRect = getElementRect(character);
         const collidingElementRect = getElementRect(loopItems[t]);
@@ -466,15 +454,185 @@ export function checkCollisions(character, x, y, direction, type) {
             break;
         }
       }
-    } else if (type == 'bunny' && isHero) {
-      // If no longer colliding with a bunny, remove them from the collisions list
-      if (heroCollisions.get().indexOf(elementId) > -1) {
-        heroCollisions.splice([heroCollisions.get().indexOf(elementId), 1]);
-      }
     }
   }
 
   return maxValue;
+}
+
+/**
+ * Handles action when collision changes between hero and another entity
+ *
+ * @param  {Boolean} isMoving - If the hero is currently moving
+ * @param  {string}  type - The type of the potentially colliding element
+ * @param  {object}  item - The item object that the hero is potentially colliding with
+ * @param  {Boolean} isColliding - If the hero is colliding with the item
+ */
+export function handleHeroItemCollision(isMoving, type, item, isColliding) {
+  const heroCollisions = tree.select('heroCollisions');
+  const heroPosition = tree.get('hero', 'position');
+
+  if (isColliding) {
+    // If we're not moving, a space action is happening
+    if (!isMoving) {
+      if (type == 'food') {
+        collectItem('food', item.id);
+      } else if (type == 'bunny') {
+        collectBunny(item.id);
+      } else if (type == 'scenery' && item.takeToTile) {
+        const { x: tileX, y: tileY } = tree.get('tile');
+        // If bunny is going into a burrow, take them to the appropriate tile
+        setActiveTile(item.takeToTile.x, item.takeToTile.y);
+
+        // Determine which axis we're using to move to the next tile
+        const changingTileX = item.takeToTile.y != tileY;
+
+        // Depending on the tile axis, get the min and max limits of the board
+        // and the boundary of where the burrow is
+        const minLimit = changingTileX ? getMinBoardXLimit(true) : getMinBoardYLimit(true);
+        const maxLimit = changingTileX ? getMaxBoardXLimit(true) : getMaxBoardYLimit(true);
+
+        // Determine if we're going to the next or previous tile
+        const goToNextTile = changingTileX ? item.takeToTile.y > tileY : item.takeToTile.x > tileX;
+
+        // If we're going to the next tile, put the hero at the starting edge of the next tile
+        // If we're going to the previous tile, put the hero at the ending edge of the previous tile
+        const newLimit = goToNextTile ? minLimit : maxLimit;
+        const newX = changingTileX ? newLimit : heroPosition.x;
+        const newY = changingTileX ? heroPosition.y : newLimit;
+
+        // Set new hero position on the new tile
+        updateHeroPosition({ x: newX, y: newY });
+      }
+    } else {
+      // Save to state who we're colliding with
+      if (type == 'bunny') {
+        if (heroCollisions.get().indexOf(item.id) == -1) {
+          heroCollisions.push(item.id);
+        }
+      }
+    }
+  } else {
+    if (type == 'bunny') {
+      // If no longer colliding with a bunny, remove them from the collisions list
+      if (heroCollisions.get().indexOf(item.id) > -1) {
+        heroCollisions.splice([heroCollisions.get().indexOf(item.id), 1]);
+      }
+    }
+  }
+}
+
+/**
+ * Sets the active tile to the next tile depending on the axis
+ *
+ * @param  {string} axis - The axis being used to go to the next tile
+ */
+export function goToNextTile(axis) {
+  const tile = tree.get('tile');
+  const isXAxis = axis == 'x';
+  const tileX = tile.x + (isXAxis ? 0 : 1);
+  const tileY = tile.y + (isXAxis ? 1 : 0);
+  // Move to next tile
+  setActiveTile(tileX, tileY);
+}
+
+/**
+ * Sets the active tile to the previous tile depending on the axis
+ *
+ * @param  {string} axis - The axis being used to go to the previous tile
+ */
+export function goToPreviousTile(axis) {
+  const tile = tree.get('tile');
+  const isXAxis = axis == 'x';
+  const tileX = tile.x - (isXAxis ? 0 : 1);
+  const tileY = tile.y - (isXAxis ? 1 : 0);
+  // Move to next tile
+  setActiveTile(tileX, tileY);
+}
+
+/**
+ * Returns the minimum possible spawn point for the X axis on a tile
+ *
+ * If the entity went through a burrow, set the min to be where the burrow
+ * ends on the next tile
+ *
+ * Otherwise, set to the edge of the board, minus half the character's width
+ * This gives the illusion of the entity actually walking to the next tile,
+ * as opposed to just teleporting there
+ *
+ * @param  {bool} usingBurrow - Entity used burrow to switch tiles
+ *
+ * @return {int} - The minimum spawn point
+ */
+export function getMinBoardXLimit(usingBurrow) {
+  // If they went through a burrow, set the min to be where the burrow ends on the next tile
+  // Otherwise, set to the edge of the board, minus half the character's height
+  return usingBurrow ? SceneryConstants.BURROW_WIDTH : 0 - (CharacterConstants.BUNNY_WIDTH / 2);
+}
+
+/**
+ * Returns the minimum possible spawn point for the Y axis on a tile
+ *
+ * If the entity went through a burrow, set the min to be where the burrow
+ * ends on the next tile
+ *
+ * Otherwise, set to the edge of the board, minus half the character's height
+ * This gives the illusion of the entity actually walking to the next tile,
+ * as opposed to just teleporting there
+ *
+ * @param  {bool} usingBurrow - Entity used burrow to switch tiles
+ *
+ * @return {int} - The minimum spawn point
+ */
+export function getMinBoardYLimit(usingBurrow) {
+  // If they went through a burrow, set the min to be where the burrow ends on the next tile
+  // Otherwise, set to the edge of the board, minus half the character's height
+  return usingBurrow ? SceneryConstants.BURROW_HEIGHT : 0 - (CharacterConstants.BUNNY_HEIGHT / 2);
+}
+
+/**
+ * Returns the maximum possible spawn point for the X axis on a tile
+ *
+ * If the entity went through a burrow, set the max to be where the burrow
+ * starts on the next tile
+ *
+ * Otherwise, set to the edge of the board, minus half the character's width
+ * This gives the illusion of the entity actually walking to the next tile,
+ * as opposed to just teleporting there
+ *
+ * @param  {bool} usingBurrow - Entity used burrow to switch tiles
+ *
+ * @return {int} - The minimum spawn point
+ */
+export function getMaxBoardXLimit(usingBurrow) {
+  const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
+  // If they went through a burrow, set the max to be where the burrow starts
+  // Otherwise, set to the edge of the board, minus half the character's width
+  const offset = usingBurrow ? (SceneryConstants.BURROW_WIDTH + CharacterConstants.BUNNY_WIDTH) : (CharacterConstants.BUNNY_WIDTH / 2);
+  return boardWidth - offset;
+}
+
+
+/**
+ * Returns the maximum possible spawn point for the Y axis on a tile
+ *
+ * If the entity went through a burrow, set the max to be where the burrow
+ * starts on the next tile
+ *
+ * Otherwise, set to the edge of the board, minus half the character's height
+ * This gives the illusion of the entity actually walking to the next tile,
+ * as opposed to just teleporting there
+ *
+ * @param  {bool} usingBurrow - Entity used burrow to switch tiles
+ *
+ * @return {int} - The minimum spawn point
+ */
+export function getMaxBoardYLimit(usingBurrow) {
+  const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
+  // If they went through a burrow, set the max to be where the burrow starts
+  // Otherwise, set to the edge of the board, minus half the character's height
+  const offset = usingBurrow ? (SceneryConstants.BURROW_HEIGHT + CharacterConstants.BUNNY_HEIGHT) : (CharacterConstants.BUNNY_HEIGHT / 2);
+  return boardHeight - offset;
 }
 
 /**
@@ -496,17 +654,13 @@ export function moveEntityForward(character, axis, currentX, currentY, direction
 
   const isHero = character.isHero;
   const isXAxis = axis == 'x';
-  const bunnyRect = findDOMNode(character).getBoundingClientRect();
-  const minLimit = 0 - ((isXAxis ? bunnyRect.width : bunnyRect.height) / 2);
-  const maxLimit = isXAxis ? boardWidth - (bunnyRect.width / 2) : boardHeight - (bunnyRect.height / 2);
+  const minLimit = isXAxis ? getMinBoardXLimit() : getMinBoardYLimit();
+  const maxLimit = isXAxis ? getMaxBoardXLimit() : getMaxBoardYLimit();
   const checkTile = tile[isXAxis ? 'y' : 'x'];
   let value = (isXAxis ? currentX : currentY) + movePixels;
 
   if (isHero && value > maxLimit && checkTile < 2) {
-    const tileX = tile.x + (isXAxis ? 0 : 1);
-    const tileY = tile.y + (isXAxis ? 1 : 0);
-    // Move to next tile
-    setActiveTile(tileX, tileY);
+    goToNextTile(axis);
     //Set player coordinate to start of next tile
     return {
       value: minLimit,
@@ -553,10 +707,7 @@ export function moveEntityBack(character, axis, currentX, currentY, direction) {
   let value = (isXAxis ? currentX : currentY) - movePixels;
 
   if (isHero && value < minLimit && checkTile > 1) {
-    const tileX = tile.x - (isXAxis ? 0 : 1);
-    const tileY = tile.y - (isXAxis ? 1 : 0);
-    // Move to previous tile
-    setActiveTile(tileX, tileY);
+    goToPreviousTile(axis);
     //Set player coordinate to end of previous tile
     return {
       value: maxLimit,
