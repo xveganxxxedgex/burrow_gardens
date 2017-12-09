@@ -1,6 +1,7 @@
 import React from 'react';
 import tree from 'state';
 import _capitalize from 'lodash/capitalize';
+import _filter from 'lodash/filter';
 import _find from 'lodash/find';
 import _findIndex from 'lodash/findIndex';
 import _forEach from 'lodash/forEach';
@@ -417,12 +418,19 @@ export function checkCollisions(character, x, y, direction, type) {
   const heroCursor = tree.get('hero');
   // When checking collisions for hero, compare against other AI bunnies on the tile
   // Otherwise, when checking AI collisions, ensure they're not colliding with hero
-  const bunniesOnTile = isHero ? tree.get('bunniesOnTile') : [{
-    id: 'Hero',
-    position: heroCursor.position,
-    height: heroCursor.height,
-    width: heroCursor.width
-  }];
+  // or any other AIs
+  const bunniesOnTile = _filter(tree.get('bunniesOnTile'), bunny => {
+    return bunny.id != character.props.id;
+  });
+
+  if (!isHero) {
+    bunniesOnTile.push({
+      id: 'Hero',
+      position: heroCursor.position,
+      height: heroCursor.height,
+      width: heroCursor.width
+    });
+  }
 
   let loopItems = type == 'bunny' ? bunniesOnTile : tile[type].filter(item => !item.collected);
   let maxValue = direction && (['up', 'down'].indexOf(direction) > -1 ? y : x);
