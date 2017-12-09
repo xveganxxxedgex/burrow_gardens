@@ -40,8 +40,9 @@ class MenuModal extends Component {
 export default MenuModal;
 
 @branch({
-  collectedFood: ['collectedFood'],
-  bunnies: ['bunnies']
+  produceList: ['produceList'],
+  bunnies: ['bunnies'],
+  wonGame: ['wonGame']
 })
 class MenuTabs extends Component {
   constructor(props, context) {
@@ -58,36 +59,54 @@ class MenuTabs extends Component {
     this.setState({ activeTab });
   }
 
+  getWonGameContent() {
+    return (
+      <div className="main-menu-content">
+        <div className="h3">Congratulations!</div>
+        <br/>
+        <p>
+          You collected all the possible produce and befriended all the bunnies!
+        </p>
+      </div>
+    )
+  }
+
+  getWelcomeContent() {
+    return (
+      <div className="main-menu-content">
+        <div className="h3">Welcome to Burrow Gardens!</div>
+        <p>
+          As the newest bunny in Burrow Gardens, your mission is to discover
+          all of the produce in the area, as well as get all bunny residents
+          to become your friend.
+        </p>
+        <p>
+          Some bunnies will teach you new skills that
+          will gain you access to new areas, enable to you collect certain
+          produce, and even win over some less-friendly bunnies.
+        </p>
+        <br/>
+        <div className="h3">Controls</div>
+        <h5>
+          Use your <Label>keyboard controls</Label> or <Label>WASD</Label> to
+          move, <Label>space</Label> for action,
+          and <Label>i</Label> to open or close this menu.
+        </h5>
+      </div>
+    )
+  }
+
   render() {
-    const { collectedFood, bunnies } = this.props;
+    const { produceList, bunnies, wonGame } = this.props;
 
     return (
       <div className="flex menu-modal-content">
         <Tabs activeKey={this.state.activeTab} onSelect={this.changeTab} className="tabs" id="menu-tabs">
           <Tab eventKey={1} title="Main Menu">
-            <div className="main-menu-content">
-              <div className="h3">Welcome to Burrow Gardens!</div>
-              <p>
-                As the newest bunny in Burrow Gardens, your mission is to discover
-                all of the produce in the area, as well as get all bunny residents
-                to become your friend.
-              </p>
-              <p>
-                Some bunnies will teach you new skills that
-                will gain you access to new areas, enable to you collect certain
-                produce, and even win over some less-friendly bunnies.
-              </p>
-              <br/>
-              <div className="h3">Controls</div>
-              <h5>
-                Use your <Label>keyboard controls</Label> or <Label>WASD</Label> to
-                move, <Label>space</Label> for action,
-                and <Label>i</Label> to open or close this menu.
-              </h5>
-            </div>
+            {wonGame ? this.getWonGameContent() : this.getWelcomeContent()}
           </Tab>
           <Tab eventKey={2} title="Collected Food">
-            <FoodList collectedFood={collectedFood} />
+            <FoodList produceList={produceList} />
           </Tab>
           <Tab eventKey={3} title="Friends">
             <BunnyList bunnies={bunnies} />
@@ -104,8 +123,8 @@ class FoodList extends Component {
   }
 
   render() {
-    const { collectedFood } = this.props;
-    const foodItems = _orderBy(collectedFood, ['hasCollected', 'name'], ['desc', 'asc']).map((food, index) => {
+    const { produceList } = this.props;
+    const foodItems = _orderBy(produceList, ['hasCollected', 'name'], ['desc', 'asc']).map((food, index) => {
       // TODO: Remove this once all food items have files
       const availableFood = ['AlfalfaHay', 'Apple', 'Arugula', 'Banana', 'Blueberry', 'BokChoy', 'Broccoli', 'ButterLettuce', 'Cabbage', 'Carrot', 'Cilantro', 'DandelionGreens', 'Endive', 'Melon', 'Mint'];
       const useFoodType = availableFood.indexOf(food.name) > -1 ? food.name : 'Carrot';

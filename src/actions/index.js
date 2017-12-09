@@ -204,19 +204,19 @@ export function collectItem(type, itemId) {
 
   const item = items[itemIndex];
   const activeTile = tree.get('tile');
-  const collectedFoodCursor = tree.select('collectedFood');
-  const foodIndex = _findIndex(collectedFoodCursor.get(), foodItem => foodItem.name == (item.display || item.type));
+  const produceListCursor = tree.select('produceList');
+  const foodIndex = _findIndex(produceListCursor.get(), foodItem => foodItem.name == (item.display || item.type));
   tree.select(['tiles', `${activeTile.x}_${activeTile.y}`, type, itemIndex, 'collected']).set(true);
 
-  const collectedObj = collectedFoodCursor.get(foodIndex);
+  const collectedObj = produceListCursor.get(foodIndex);
   const itemDisplay = collectedObj.display;
 
   // If we're collecting this type of item for the first time, set the hasCollected flag to true
   if (!collectedObj.hasCollected) {
-    collectedFoodCursor.set([foodIndex, 'hasCollected'], true);
+    produceListCursor.set([foodIndex, 'hasCollected'], true);
   }
 
-  collectedFoodCursor.set([foodIndex, 'count'], collectedObj.count + 1);
+  produceListCursor.set([foodIndex, 'count'], collectedObj.count + 1);
 
   setPopover({
     title: 'Item Added',
@@ -469,6 +469,50 @@ export function checkCollisions(character, x, y, direction, type) {
 }
 
 /**
+ * Handles when player interacts with a burrow entity
+ *
+ * @param  {object} item - The burrow entity object
+ */
+export function handleBurrowAction(item) {
+  const heroAbilities = tree.get(['hero', 'abilities']);
+  const heroPosition = tree.get('hero', 'position');
+  const { x: tileX, y: tileY } = tree.get('tile');
+
+  // Hero doesn't have the required skill to add this item yet
+  if (item.needsAbility && heroAbilities.indexOf(item.needsAbility) == -1) {
+    setPopover({
+      title: 'Skill Needed',
+      text: `You must learn a new skill to perform this action.`,
+      popoverClass: 'info'
+    });
+    return;
+  }
+
+  // If bunny is going into a burrow, take them to the appropriate tile
+  setActiveTile(item.takeToTile.x, item.takeToTile.y);
+
+  // Determine which axis we're using to move to the next tile
+  const changingTileX = item.takeToTile.y != tileY;
+
+  // Depending on the tile axis, get the min and max limits of the board
+  // and the boundary of where the burrow is
+  const minLimit = changingTileX ? getMinBoardXLimit(true) : getMinBoardYLimit(true);
+  const maxLimit = changingTileX ? getMaxBoardXLimit(true) : getMaxBoardYLimit(true);
+
+  // Determine if we're going to the next or previous tile
+  const goToNextTile = changingTileX ? item.takeToTile.y > tileY : item.takeToTile.x > tileX;
+
+  // If we're going to the next tile, put the hero at the starting edge of the next tile
+  // If we're going to the previous tile, put the hero at the ending edge of the previous tile
+  const newLimit = goToNextTile ? minLimit : maxLimit;
+  const newX = changingTileX ? newLimit : heroPosition.x;
+  const newY = changingTileX ? heroPosition.y : newLimit;
+
+  // Set new hero position on the new tile
+  updateHeroPosition({ x: newX, y: newY });
+}
+
+/**
  * Handles action when collision changes between hero and another entity
  *
  * @param  {Boolean} isMoving - If the hero is currently moving
@@ -478,7 +522,6 @@ export function checkCollisions(character, x, y, direction, type) {
  */
 export function handleHeroItemCollision(isMoving, type, item, isColliding) {
   const heroCollisions = tree.select('heroCollisions');
-  const heroPosition = tree.get('hero', 'position');
 
   if (isColliding) {
     // If we're not moving, a space action is happening
@@ -488,29 +531,7 @@ export function handleHeroItemCollision(isMoving, type, item, isColliding) {
       } else if (type == 'bunny') {
         collectBunny(item.id);
       } else if (type == 'scenery' && item.takeToTile) {
-        const { x: tileX, y: tileY } = tree.get('tile');
-        // If bunny is going into a burrow, take them to the appropriate tile
-        setActiveTile(item.takeToTile.x, item.takeToTile.y);
-
-        // Determine which axis we're using to move to the next tile
-        const changingTileX = item.takeToTile.y != tileY;
-
-        // Depending on the tile axis, get the min and max limits of the board
-        // and the boundary of where the burrow is
-        const minLimit = changingTileX ? getMinBoardXLimit(true) : getMinBoardYLimit(true);
-        const maxLimit = changingTileX ? getMaxBoardXLimit(true) : getMaxBoardYLimit(true);
-
-        // Determine if we're going to the next or previous tile
-        const goToNextTile = changingTileX ? item.takeToTile.y > tileY : item.takeToTile.x > tileX;
-
-        // If we're going to the next tile, put the hero at the starting edge of the next tile
-        // If we're going to the previous tile, put the hero at the ending edge of the previous tile
-        const newLimit = goToNextTile ? minLimit : maxLimit;
-        const newX = changingTileX ? newLimit : heroPosition.x;
-        const newY = changingTileX ? heroPosition.y : newLimit;
-
-        // Set new hero position on the new tile
-        updateHeroPosition({ x: newX, y: newY });
+        handleBurrowAction(item);
       }
     } else {
       // Save to state who we're colliding with

@@ -19,7 +19,7 @@ import {
   getFoodItem,
   getBackgroundCell,
   getSceneryItem,
-  showMenu
+  toggleShowMenu
 } from 'actions';
 
 import 'less/Board.less';
@@ -28,7 +28,8 @@ import 'less/Board.less';
   tile: ['tile'],
   popover: ['popover'],
   showMenu: ['showMenu'],
-  bunniesOnTile: ['bunniesOnTile']
+  bunniesOnTile: ['bunniesOnTile'],
+  wonGame: ['wonGame']
 })
 class Board extends Component {
   constructor(props, context) {
@@ -39,6 +40,13 @@ class Board extends Component {
 
   componentWillMount() {
     setActiveTile();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // If player just won the game, open the modal to notify them
+    if (nextProps.wonGame && this.props.wonGame != nextProps.wonGame && !nextProps.showMenu) {
+      toggleShowMenu();
+    }
   }
 
   componentDidMount() {
@@ -58,7 +66,7 @@ class Board extends Component {
   }
 
   render() {
-    const { popover, tile, showMenu, bunniesOnTile } = this.props;
+    const { popover, tile, showMenu, bunniesOnTile, wonGame, showWonGameModal } = this.props;
 
     if (!Object.keys(tile).length) {
       return <div>Loading...</div>;

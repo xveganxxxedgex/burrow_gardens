@@ -109,7 +109,7 @@ const state = new Baobab({
       description: 'You can use the Jump skill to get onto higher areas to explore.'
     },
   ],
-  collectedFood: foodItems.map(foodItem => {
+  produceList: foodItems.map(foodItem => {
     return {
       name: foodItem.replace(' ', ''),
       display: foodItem,
@@ -215,6 +215,21 @@ const state = new Baobab({
       return _filter(bunnies, bunny => {
         return bunny.onTile.x == activeTile.x && bunny.onTile.y == activeTile.y;
       });
+    }
+  }),
+  wonGame: monkey({
+    cursors: {
+      produceList: ['produceList'],
+      bunnies: ['bunnies']
+    },
+    get: function({ produceList, bunnies }) {
+      const foodCollected = _filter(produceList, food => {
+        return food.hasCollected;
+      });
+      const bunniesCollected = _filter(bunnies, bunny => {
+        return bunny.hasCollected;
+      });
+      return foodCollected.length == produceList.length && bunniesCollected.length == bunnies.length;
     }
   }),
   activeTile: { x: 1, y: 1 },

@@ -11,5 +11,6 @@ export default class Burrow {
     this.image = image;
     this.type = 'Burrow';
     this.takeToTile = takeToTile;
+    this.needsAbility = 'dig';
   }
 }
