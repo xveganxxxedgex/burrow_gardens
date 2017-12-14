@@ -332,23 +332,14 @@ export function setHeroLastDirection(direction) {
  * @return {string} - The opposite direction
  */
 export function getOppositeDirection(direction) {
-  let oppositeDirection;
+  const oppositeDirections = {
+    up: 'down',
+    down: 'up',
+    left: 'right',
+    right: 'left'
+  };
 
-  switch(direction) {
-    case 'up':
-      oppositeDirection = 'down';
-      break;
-    case 'down':
-      oppositeDirection = 'up';
-      break;
-    case 'left':
-      oppositeDirection = 'right';
-      break;
-    default:
-      oppositeDirection = 'left';
-  }
-
-  return oppositeDirection;
+  return oppositeDirections[direction];
 }
 
 /**
@@ -757,6 +748,15 @@ export function moveEntityBack(character, axis, currentX, currentY, direction) {
   };
 }
 
+/**
+ * Returns the character with their position at the top level
+ *
+ * @param  {object} character - The character to alter
+ * @param  {int} x - The character's X position
+ * @param  {int} y - The character's Y position
+ *
+ * @return {object} - The new character object
+ */
 function getCharacterWithNextPosition(character, x, y) {
   return {
     ...character,

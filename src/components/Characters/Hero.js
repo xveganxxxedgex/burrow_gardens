@@ -72,7 +72,7 @@ class Hero extends Component {
     this.isHero = true;
 
     this.movePlayer = this.movePlayer.bind(this);
-    this.getDirection = this.getDirection.bind(this);
+    this.getKeyEvent = this.getKeyEvent.bind(this);
     this.setKeyDown = this.setKeyDown.bind(this);
     this.setKeyUp = this.setKeyUp.bind(this);
     this.setHeroIdleStatus = this.setHeroIdleStatus.bind(this);
@@ -113,15 +113,18 @@ class Hero extends Component {
     if (moving != this.state.moving) {
       const lastDirection = moving.length ? moving[moving.length - 1] : hero.lastDirection;
 
+      // Set the last direction the hero was moving in
       if (lastDirection != hero.lastDirection) {
         setHeroLastDirection(lastDirection);
       }
 
+      // If no longer moving, clear the moving timeout
       if (nextState || !moving.length) {
         clearTimeout(this.movingTimeout);
         this.movingTimeout = null;
       }
-    } else if (this.state.isLoaf != isLoaf || this.state.isFlopped != isFlopped) {
+    } else if (this.state.isFlopped != isFlopped) {
+      // Update dimensions when flop status is changed
       this.assignDimensions(nextProps, nextState);
     }
   }
@@ -132,6 +135,12 @@ class Hero extends Component {
     this.clearTimeouts();
   }
 
+  /**
+   * Assigns the hero dimensions based on their idle status
+   *
+   * @param  {object} props - The most up to date props
+   * @param  {object} state - The most up to date state
+   */
   assignDimensions(props, state) {
     props = props || this.props || {};
     state = state || this.state || {};
@@ -143,6 +152,16 @@ class Hero extends Component {
     }
   }
 
+  /**
+   * Determines the hero dimensions based on their idle status
+   *
+   * @param  {Boolean} isFlopped  - If hero is in flopped status
+   * @param  {Boolean} isVertical - If the hero is facing a vertical direction
+   *                                Flopped dimensions are only affected when
+   *                                hero is facing a horizontal direction
+   *
+   * @return {object} - The new dimensions to use
+   */
   getBunnyDimensions(isFlopped, isVertical) {
     if (isFlopped && !isVertical) {
       return {
@@ -157,20 +176,35 @@ class Hero extends Component {
     };
   }
 
+  /**
+   * Clear moving and idle timeouts
+   */
   clearTimeouts() {
     clearTimeout(this.movingTimeout);
     clearTimeout(this.idleTimeout);
   }
 
-  getDirection(e) {
+  /**
+   * Returns the keyboard action event
+   *
+   * @param  {object} e - The key down/up event
+   *
+   * @return {string} - The string representation of the key event
+   */
+  getKeyEvent(e) {
     const keycode = e.keyCode;
     return KEYBOARD_EVENTS[keycode];
   }
 
+  /**
+   * Handles the Key Down event
+   *
+   * @param {object} e - The key down event
+   */
   setKeyDown(e) {
     e.preventDefault();
     const { moving } = this.state;
-    const direction = this.getDirection(e);
+    const keyEvent = this.getKeyEvent(e);
     const {
       hero: {
         position: { x, y }
@@ -181,20 +215,24 @@ class Hero extends Component {
     clearTimeout(this.idleTimeout);
     this.idleTimeout = null;
 
-    if (!direction) {
+    // If player hit a key we don't have an event for, return
+    if (!keyEvent) {
       return;
     }
 
-    if (direction == 'inventory') {
+    // Player is toggling the inventory menu
+    if (keyEvent == 'inventory') {
       toggleShowMenu();
       return;
     }
 
+    // Don't allow any key actions while player has the menu open
     if (showMenu) {
       return;
     }
 
-    if (direction == 'space') {
+    // Handle space for collision actions
+    if (keyEvent == 'space') {
       if (!moving.length) {
         const useCharacter = this.getCharacterWithDimensions();
         checkFoodCollision(useCharacter, x, y);
@@ -205,8 +243,8 @@ class Hero extends Component {
       return;
     }
 
-    const oppositeDirection = getOppositeDirection(direction);
-    const directionIndex = moving.indexOf(direction);
+    const oppositeDirection = getOppositeDirection(keyEvent);
+    const directionIndex = moving.indexOf(keyEvent);
     const oppositeDirectionIndex = moving.indexOf(oppositeDirection);
     const newState = {};
     let updateIdleState = false;
@@ -221,14 +259,18 @@ class Hero extends Component {
       updateIdleState = true;
     }
 
+    // If idle status changed, set it to state
     if (updateIdleState) {
       this.setState(newState);
     }
 
+    // If player is moving in a new direction that isn't an opposite of another
+    // diretion they're already moving, update the state
     if (directionIndex == -1 && oppositeDirectionIndex == -1) {
       this.setState({
         moving: [...moving, direction]
       }, () => {
+        // Move the player entity after the state updates
         if (!this.movingTimeout) {
           this.movePlayer();
         }
@@ -236,21 +278,29 @@ class Hero extends Component {
     }
   }
 
+  /**
+   * Handle the Key Up event
+   *
+   * @param {object} e - The key up event
+   */
   setKeyUp(e) {
-    const direction = this.getDirection(e);
+    const keyEvent = this.getKeyEvent(e);
 
-    if (!direction) {
+    // If player hit a key we don't have an event for, return
+    if (!keyEvent) {
       return;
     }
 
-    const directionIndex = this.state.moving.indexOf(direction);
+    const directionIndex = this.state.moving.indexOf(keyEvent);
     const newMoving = this.state.moving.filter((value, index) => { return index != directionIndex });
 
     if (directionIndex > -1) {
+      // If we're no longer moving in a direction, update the state
       this.setState({
         moving: newMoving
       }, () => {
         if (newMoving.length) {
+          // If player is still moving in another direction, keep the entity moving
           this.movePlayer();
         } else {
           // If player is no longer moving, clear moving timeout and set idle timeout
@@ -262,6 +312,12 @@ class Hero extends Component {
     }
   }
 
+  /**
+   * Sets the hero's idle status to the state
+   *
+   * @param {string} type - The idle status type, ex: 'isLoaf' or 'isFlopped'
+   * @param {bool} value - The idle status value
+   */
   setHeroIdleStatus(type, value) {
     const newState = {
       [type]: value || !this.state[type]
@@ -277,6 +333,11 @@ class Hero extends Component {
     this.setState(newState);
   }
 
+  /**
+   * Returns the character object with height and width at the top level
+   *
+   * @return {object} - The new character object
+   */
   getCharacterWithDimensions() {
     const { hero: { height, width } } = this.props;
     return {
@@ -286,6 +347,9 @@ class Hero extends Component {
     };
   }
 
+  /**
+   * Moves the hero entity based on the directions they're going
+   */
   movePlayer() {
     const { moving } = this.state;
     const {
@@ -302,18 +366,22 @@ class Hero extends Component {
     for (let m = 0; m < moving.length; m++) {
       switch(moving[m]) {
         case 'up':
+          // Move player up on the Y axis
           const movePlayerUp = moveEntityBack(useCharacter, 'y', newX, newY, moving[m]);
           newY = movePlayerUp.value;
           break;
         case 'down':
+          // Move player down on the Y axis
           const movePlayerDown = moveEntityForward(useCharacter, 'y', newX, newY, moving[m]);
           newY = movePlayerDown.value;
           break;
         case 'left':
+          // Move player left on the X axis
           const movePlayerLeft = moveEntityBack(useCharacter, 'x', newX, newY, moving[m]);
           newX = movePlayerLeft.value;
           break;
         case 'right':
+          // Move player right on the X axis
           const movePlayerRight = moveEntityForward(useCharacter, 'x', newX, newY, moving[m]);
           newX = movePlayerRight.value;
           break;
@@ -322,6 +390,7 @@ class Hero extends Component {
 
     updateHeroPosition({ x: newX, y: newY });
 
+    // Keep moving the player for as long as the direction keys are pressed
     this.movingTimeout = setTimeout(this.movePlayer, 120);
   }
 
