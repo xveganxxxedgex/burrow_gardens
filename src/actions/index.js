@@ -254,6 +254,12 @@ export function collectBunny(bunnyId) {
   const bunnies = bunniesCursor.get();
   const heroAbilities = tree.get(['hero', 'abilities']);
   const bunnyIndex = _findIndex(bunnies, bunny => bunny.id == bunnyId);
+  const collectedObj = bunniesCursor.get(bunnyIndex);
+
+  // Do nothing if hero has already collected this bunny
+  if (collectedObj.hasCollected) {
+    return;
+  }
 
   // Hero doesn't have the required skill to add this bunny yet
   if (bunnies[bunnyIndex].needsAbility && heroAbilities.indexOf(bunnies[bunnyIndex].needsAbility) == -1) {
@@ -268,13 +274,6 @@ export function collectBunny(bunnyId) {
   const bunny = bunnies[bunnyIndex];
   const skills = tree.get('skills');
   const newSkill = bunny.giveSkill && _find(skills, skill => skill.name == bunny.giveSkill);
-
-  const collectedObj = bunniesCursor.get(bunnyIndex);
-
-  // Do nothing if hero has already collected this bunny
-  if (collectedObj.hasCollected) {
-    return;
-  }
 
   bunniesCursor.set([bunnyIndex, 'hasCollected'], true);
 
