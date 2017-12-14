@@ -268,7 +268,7 @@ class Hero extends Component {
     // diretion they're already moving, update the state
     if (directionIndex == -1 && oppositeDirectionIndex == -1) {
       this.setState({
-        moving: [...moving, direction]
+        moving: [...moving, keyEvent]
       }, () => {
         // Move the player entity after the state updates
         if (!this.movingTimeout) {
