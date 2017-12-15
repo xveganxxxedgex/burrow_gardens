@@ -89,6 +89,13 @@
           justify-content: center;
   position: relative;
 }
+.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .inventory-item-cell-image.bunny-image-wrapper {
+  height: 60px;
+}
+.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .inventory-item-cell-image.bunny-image-wrapper img {
+  height: 100%;
+  width: auto;
+}
 .menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .inventory-item-cell-image .inventory-item-stock {
   position: absolute;
   right: 0;

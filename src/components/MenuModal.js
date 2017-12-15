@@ -180,8 +180,8 @@ class BunnyList extends Component {
           <div className="inventory-item-cell-content flex flex-grow">
             {bunny.hasCollected &&
               <div className="flex flex-grow flex-column">
-                <div className="inventory-item-cell-image flex flex-grow">
-                  <img />
+                <div className="inventory-item-cell-image flex flex-grow bunny-image-wrapper">
+                  <img src={bunny.bunnyImages.closeup} className="bunny-close-up"/>
                 </div>
                 <div className="inventory-item-cell-details">
                   {bunny.name}

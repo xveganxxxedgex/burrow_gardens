@@ -10,6 +10,7 @@ import bunnyLoafDownImg from 'images/bunnydownloaf.png';
 import bunnyFlopImg from 'images/bunnyflop.png';
 import bunnyFlopUpImg from 'images/bunnyupflop.png';
 import bunnyFlopDownImg from 'images/bunnydownflop.png';
+import bunnyCloseUpImg from 'images/bunny_close_1.png'; // TODO: Use correct image for Simba
 import * as constants from './constants';
 
 export default class Simba {
@@ -34,7 +35,8 @@ export default class Simba {
       loafDown: bunnyLoafDownImg,
       flop: bunnyFlopImg,
       flopUp: bunnyFlopUpImg,
-      flopDown: bunnyFlopDownImg
+      flopDown: bunnyFlopDownImg,
+      closeup: bunnyCloseUpImg
     }
   }
 }

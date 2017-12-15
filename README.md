@@ -54,6 +54,8 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Fix bouncy hero/bunny collision behaviour~~
 
+~~Create inventory state/logic~~
+
 Move AI to group area once they've been friended
 
 When repopulating produce, need to ensure nothing is colliding with that position before placing it there (ensure food doesn't populate where an AI is)
@@ -64,9 +66,7 @@ Create food items
 
 Maybe have alt state for food items for buried items so the entity doesn't go away, but it shows like an empty patch where the produce was
 
-Create inventory state/logic
-
-Create quests to bring food items to different characters
+Create quests to bring food items to different characters that will subtract those items from your inventory
 
 Create game state storage
 
