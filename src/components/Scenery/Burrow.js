@@ -9,7 +9,7 @@ export default class Burrow {
     this.width = constants.BURROW_WIDTH;
     this.sceneryClass = `burrow ${faceDirection}`;
     this.image = image;
-    this.type = 'Burrow';
+    this.type = constants.BURROW_TYPE;
     this.takeToTile = takeToTile;
     this.needsAbility = 'dig';
   }

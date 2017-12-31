@@ -1,39 +1,47 @@
 import * as Food from 'components/Food';
 import * as Scenery from 'components/Scenery';
 
-let left1 = [];
+const exits = {
+  right: { start: 200, end: 240 },
+  bottom: { start: 220, end: 640 }
+};
+
+let left = [];
 for (let i = 0; i < 760; i = i + 40) {
-  left1.push(new Scenery.Bush({ x: 0, y: i }));
+  left.push(new Scenery.Bush({ x: 0, y: i }));
 }
 
-let right1 = [];
-for (let i = 0; i < 200; i = i + 40) {
-  right1.push(new Scenery.Bush({ x: 1160, y: i }));
+let right = [];
+for (let i = 0; i < 560; i = i + 40) {
+  if (i < exits.right.start || i >= exits.right.end) {
+    right.push(new Scenery.Bush({ x: 1160, y: i }));
+  }
 }
 
-let right2 = [];
-for (let i = 240; i < 560; i = i + 40) {
-  right2.push(new Scenery.Bush({ x: 1160, y: i }));
-}
-
-let top1 = [];
+let top = [];
 for (let i = 0; i < 1160; i = i + 40) {
-  top1.push(new Scenery.Bush({ x: i, y: 0 }));
+  top.push(new Scenery.Bush({ x: i, y: 0 }));
 }
 
-let bottom1 = [];
-for (let i = 40; i < 220; i = i + 40) {
-  bottom1.push(new Scenery.Bush({ x: i, y: 560 }));
-}
-
-let bottom2 = [];
-for (let i = 640; i < 1200; i = i + 40) {
-  bottom2.push(new Scenery.Bush({ x: i, y: 560 }));
+let bottom = [];
+for (let i = 40; i < 1200; i = i + 40) {
+  if (i < exits.bottom.start || i >= exits.bottom.end) {
+    bottom.push(new Scenery.Bush({ x: i, y: 560 }));
+  }
 }
 
 const foodItems = [
   { type: 'BuriedCarrot', position: { x: 80, y: 130 } },
-  { type: 'Carrot', position: { x: 460, y: 285 } },
+  { type: 'Carrot', position: { x: 460, y: 110 } },
+  { type: 'Carrot', position: { x: 460, y: 70 } },
+  { type: 'Carrot', position: { x: 460, y: 150 } },
+  { type: 'Carrot', position: { x: 460, y: 190 } },
+  { type: 'Carrot', position: { x: 460, y: 230 } },
+  { type: 'Carrot', position: { x: 460, y: 270 } },
+  { type: 'Carrot', position: { x: 460, y: 310 } },
+  { type: 'Carrot', position: { x: 420, y: 270 } },
+  { type: 'Carrot', position: { x: 420, y: 190 } },
+  { type: 'Carrot', position: { x: 380, y: 190 } },
   { type: 'AlfalfaHay', position: { x: 550, y: 455 } },
   { type: 'Broccoli', position: { x: 800, y: 300 } },
   { type: 'Apple', position: { x: 800, y: 350 } },
@@ -70,19 +78,18 @@ const Tile = {
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1']
   ],
   scenery: [
-    ...left1,
-    ...right1,
-    ...right2,
-    ...top1,
-    ...bottom1,
-    ...bottom2,
+    ...left,
+    ...right,
+    ...top,
+    ...bottom,
     new Scenery.Burrow({ x: 1138, y: 200 }, { x: 1, y: 2 }, 'left')
   ],
   food: foodItems.map((item, index) => {
     return new Food[item.type](item.position, index + 1);
   }),
   x: 1,
-  y: 1
+  y: 1,
+  exits
 };
 
 export default Tile;

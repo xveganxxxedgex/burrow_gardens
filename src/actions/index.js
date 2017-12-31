@@ -7,7 +7,11 @@ import _findIndex from 'lodash/findIndex';
 import _forEach from 'lodash/forEach';
 import _isEqual from 'lodash/isEqual';
 import _max from 'lodash/max';
+import _maxBy from 'lodash/maxBy';
 import _min from 'lodash/min';
+import _minBy from 'lodash/minBy';
+import _union from 'lodash/union';
+import _uniq from 'lodash/uniq';
 import { findDOMNode } from 'react-dom';
 
 import * as Tiles from 'Maps';
@@ -40,10 +44,22 @@ export function updateHeroPosition(newPos) {
  *                           of the character
  */
 export function updateCharacterPosition(bunnyId, newPos) {
+  updateBunnyProp(bunnyId, 'position', newPos);
+}
+
+export function updateBunnyTile(bunnyId, newTile) {
+  updateBunnyProp(bunnyId, 'onTile', newTile);
+}
+
+export function updateBunnyProp(bunnyId, key, value) {
+  const bunnyIndex = getBunnyCursorIndex(bunnyId);
+  const cursor = tree.select(['bunnies', bunnyIndex, key]);
+  cursor.set(value);
+}
+
+export function getBunnyCursorIndex(bunnyId) {
   const bunnies = tree.get('bunnies');
-  const bunnyIndex = _findIndex(bunnies, bunny => bunny.id == bunnyId);
-  const cursor = tree.select(['bunnies', bunnyIndex, 'position']);
-  cursor.set(newPos);
+  return _findIndex(bunnies, bunny => bunny.id == bunnyId);
 }
 
 /**
@@ -181,6 +197,53 @@ export function getBackgroundCell(cell) {
   return Backgrounds[type];
 }
 
+export function findTileExit(targetTile) {
+  const tile = tree.get('tile');
+  let preferredExit;
+
+  // Determine the best direction to head to based on where the group tile is in comparison to the current tile
+  if (tile.x < targetTile.x) {
+    preferredExit = 'bottom';
+  } else if (tile.x > targetTile.x) {
+    preferredExit = 'top';
+  } else if (tile.y < targetTile.y) {
+    preferredExit = 'right';
+  } else if (tile.y > targetTile.y) {
+    preferredExit = 'left';
+  }
+
+  // Use the preferred exit if possible, otherwise use the first exit available
+  return preferredExit && tile.exits[preferredExit] ? preferredExit : Object.keys(tile.exits)[0];
+}
+
+export function getExitPosition(targetTile) {
+  const tile = tree.get('tile');
+  const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
+  const useExit = findTileExit(targetTile);
+  const goToPosition = {};
+
+  switch (useExit) {
+    case 'top':
+      goToPosition.x = tile.exits[useExit].start;
+      goToPosition.y = 0; // Top of the board
+      break;
+    case 'bottom':
+      goToPosition.x = tile.exits[useExit].start;
+      goToPosition.y = boardHeight; // Bottom of the board
+      break;
+    case 'left':
+      goToPosition.x = 0; // Left of the board
+      goToPosition.y = tile.exits[useExit].start;
+      break;
+    case 'right':
+      goToPosition.x = boardWidth; // Right of the board
+      goToPosition.y = tile.exits[useExit].start;
+      break;
+  }
+
+  return goToPosition;
+}
+
 /**
  * Adds an item to the hero's inventory
  *
@@ -276,7 +339,7 @@ export function collectBunny(bunnyId) {
   const newSkill = bunny.giveSkill && _find(skills, skill => skill.name == bunny.giveSkill);
 
   bunniesCursor.set([bunnyIndex, 'hasCollected'], true);
-
+  
   setPopover({
     title: 'New Friend',
     text: (
@@ -286,14 +349,13 @@ export function collectBunny(bunnyId) {
           <div>
             <p>They taught you a new skill: <strong>{_capitalize(newSkill.name)}</strong>!</p>
             <p>{newSkill.description}</p>
+            <p>{bunny.name} will now reside in the Bunny Group area.</p>
           </div>
         }
       </div>
     ),
     popoverClass: 'info'
   }, 10000);
-
-  // TODO: Make bunny go to the group area
 }
 
 /**
@@ -350,12 +412,17 @@ export function getOppositeDirection(direction) {
  * @return {object} - The position/dimensions for the element
  */
 function getElementRect(element) {
-  return {
+  const rect = {
     x: element.x || (element.position && element.position.x),
     y: element.y || (element.position && element.position.y),
     height: element.height || element.props.height,
     width: element.width || element.props.width
   };
+
+  rect.right = rect.x + rect.width;
+  rect.bottom = rect.y + rect.height;
+
+  return rect;
 }
 
 /**
@@ -371,17 +438,13 @@ function getElementRect(element) {
  * @return {Boolean} - If the two elements are colliding
  */
 export function checkElementCollision(element1, element2, isMoving) {
-  const element1Rect = getElementRect(element1, isMoving);
+  const element1Rect = getElementRect(element1);
   const element2Rect = getElementRect(element2);
-  const element2Right = element2Rect.x + element2Rect.width;
-  const element1Right = element1Rect.x + element1Rect.width;
-  const element2Bottom = element2Rect.y + element2Rect.height;
-  const element1Bottom = element1Rect.height + element1Rect.y;
 
-  const elementHittingLeft = isMoving ? element1Rect.x < element2Right : element1Rect.x <= element2Right;
-  const elementHittingRight = isMoving ? element1Right > element2Rect.x : element1Right >= element2Rect.x;
-  const elementHittingTop = isMoving ? element1Rect.y < element2Bottom : element1Rect.y <= element2Bottom;
-  const elementHittingBottom = isMoving ? element1Bottom > element2Rect.y : element1Bottom >= element2Rect.y;
+  const elementHittingLeft = element1Rect.x <= element2Rect.right;
+  const elementHittingRight = element1Rect.right >= element2Rect.x;
+  const elementHittingTop = element1Rect.y <= element2Rect.bottom;
+  const elementHittingBottom = element1Rect.bottom >= element2Rect.y;
 
   return elementHittingLeft && elementHittingRight && elementHittingTop && elementHittingBottom;
 }
@@ -401,57 +464,96 @@ export function checkElementCollision(element1, element2, isMoving) {
  *                 If character is colliding with an item, this max value will
  *                 be whatever that collision point is.
  */
-export function checkCollisions(character, x, y, direction, type) {
-  const isHero = character.isHero;
-  const tile = tree.get('tile');
-  const movePixels = tree.get('movePixels');
-  const heroCursor = tree.get('hero');
-  // When checking collisions for hero, compare against other AI bunnies on the tile
-  // Otherwise, when checking AI collisions, ensure they're not colliding with hero
-  // or any other AIs
-  const bunniesOnTile = _filter(tree.get('bunniesOnTile'), bunny => {
-    return bunny.id != character.props.id;
-  });
+export function checkCollisions(character, direction, items) {
+  const collisions = [];
 
-  if (!isHero) {
-    bunniesOnTile.push({
-      id: 'Hero',
-      position: heroCursor.position,
-      height: heroCursor.height,
-      width: heroCursor.width
-    });
-  }
-
-  let loopItems = type == 'bunny' ? bunniesOnTile : tile[type].filter(item => !item.collected);
-  let maxValue = direction && (['up', 'down'].indexOf(direction) > -1 ? y : x);
-
-  for (let t = 0; t < loopItems.length; t++) {
-    const isColliding = checkElementCollision(character, loopItems[t], direction);
-
-    if (isHero) {
-      handleHeroItemCollision(direction, type, loopItems[t], isColliding);
-    }
+  for (let t = 0; t < items.length; t++) {
+    const isColliding = checkElementCollision(character, items[t], direction);
 
     if (isColliding) {
-      if (direction) {
-        const bunnyRect = getElementRect(character);
-        const collidingElementRect = getElementRect(loopItems[t]);
+      collisions.push(items[t]);
+    }
+  }
 
-        switch(direction) {
-          case 'up':
-            maxValue = Math.max(maxValue, (collidingElementRect.y + collidingElementRect.height));
-            break;
-          case 'down':
-            maxValue = Math.min(maxValue, (collidingElementRect.y - bunnyRect.height));
-            break;
-          case 'left':
-            maxValue = Math.max(maxValue, (collidingElementRect.x + collidingElementRect.width));
-            break;
-          case 'right':
-            maxValue = Math.min(maxValue, (collidingElementRect.x - bunnyRect.width));
-            break;
+  return collisions;
+}
+
+export function getEntityCollisions(character, useX, useY, direction, goToTargetPosition, failedAttempts = []) {
+  const useCharacter = getCharacterWithNextPosition(character, useX, useY);
+  const sceneryCollisions = checkSceneryCollision(useCharacter, direction);
+  const foodCollisions = checkFoodCollision(useCharacter, direction);
+  const bunnyCollisions = checkBunnyCollision(useCharacter, direction, goToTargetPosition);
+  const failedCoordinateCollisions = checkCollisions(useCharacter, direction, failedAttempts);
+  const collisions = _union(sceneryCollisions, foodCollisions, bunnyCollisions, failedCoordinateCollisions);
+  return collisions;
+}
+
+export function isMovingOnYAxis(direction) {
+  return ['up', 'down'].indexOf(direction) > -1;
+}
+
+export function getAxisFromDirection(direction) {
+  return isMovingOnYAxis(direction) ? 'y' : 'x';
+}
+
+export function entityIsMovingBack(direction) {
+  return ['up', 'left'].indexOf(direction) > -1;
+}
+
+export function getCollisionMaxValue(currentPosition, direction, character, collisions) {
+  if (!direction || !collisions.length) {
+    return false;
+  }
+
+  const axis = getAxisFromDirection(direction);
+  let maxValue = currentPosition[axis];
+
+  const useCharacter = getCharacterWithNextPosition(character, currentPosition.x, currentPosition.y);
+  const bunnyRect = getElementRect(useCharacter);
+  let maxDirectionValue;
+
+  _forEach(collisions, entity => {
+    const entityRect = getElementRect(entity);
+
+    // Check if collision is in the path of the direction we're actively going
+    if (isMovingOnYAxis(direction)) {
+      if (entityRect.x < bunnyRect.right && entityRect.right > bunnyRect.x) {
+        if (direction == 'up') {
+          // Moving up
+          if (!maxDirectionValue || entityRect.bottom > maxDirectionValue) {
+            maxDirectionValue = entityRect.bottom;
+          }
+        } else {
+          // Moving down
+          const bunnyOffset = entityRect.y - bunnyRect.height;
+          if (!maxDirectionValue || bunnyOffset < maxDirectionValue) {
+            maxDirectionValue = bunnyOffset;
+          }
         }
       }
+    } else {
+      if (entityRect.y < bunnyRect.bottom && entityRect.bottom > bunnyRect.y) {
+        if (direction == 'left') {
+          // Moving left
+          if (!maxDirectionValue || entityRect.right > maxDirectionValue) {
+            maxDirectionValue = entityRect.right;
+          }
+        } else {
+          // Moving right
+          const bunnyOffset = entityRect.x - bunnyRect.width;
+          if (!maxDirectionValue || bunnyOffset < maxDirectionValue) {
+            maxDirectionValue = bunnyOffset;
+          }
+        }
+      }
+    }
+  });
+
+  if (maxDirectionValue) {
+    if (entityIsMovingBack(direction)) {
+      maxValue = Math.max(maxValue, maxDirectionValue);
+    } else {
+      maxValue = Math.min(maxValue, maxDirectionValue);
     }
   }
 
@@ -502,43 +604,10 @@ export function handleBurrowAction(item) {
   updateHeroPosition({ x: newX, y: newY });
 }
 
-/**
- * Handles action when collision changes between hero and another entity
- *
- * @param  {Boolean} isMoving - If the hero is currently moving
- * @param  {string}  type - The type of the potentially colliding element
- * @param  {object}  item - The item object that the hero is potentially colliding with
- * @param  {Boolean} isColliding - If the hero is colliding with the item
- */
-export function handleHeroItemCollision(isMoving, type, item, isColliding) {
-  const heroCollisions = tree.select('heroCollisions');
-
-  if (isColliding) {
-    // If we're not moving, a space action is happening
-    if (!isMoving) {
-      if (type == 'food') {
-        collectItem('food', item.id);
-      } else if (type == 'bunny') {
-        collectBunny(item.id);
-      } else if (type == 'scenery' && item.takeToTile) {
-        handleBurrowAction(item);
-      }
-    } else {
-      // Save to state who we're colliding with
-      if (type == 'bunny') {
-        if (heroCollisions.get().indexOf(item.id) == -1) {
-          heroCollisions.push(item.id);
-        }
-      }
-    }
-  } else {
-    if (type == 'bunny') {
-      // If no longer colliding with a bunny, remove them from the collisions list
-      if (heroCollisions.get().indexOf(item.id) > -1) {
-        heroCollisions.splice([heroCollisions.get().indexOf(item.id), 1]);
-      }
-    }
-  }
+export function takeBunnyToGroupTile(character) {
+  const { id, groupTile, groupPosition } = character.props;
+  updateBunnyTile(id, groupTile);
+  updateCharacterPosition(id, groupPosition);
 }
 
 /**
@@ -666,7 +735,7 @@ export function getMaxBoardYLimit(usingBurrow) {
  * @return {object} - Returns the value to move, and also potentially if the
  *                    tile needs to be changed
  */
-export function moveEntityForward(character, axis, currentX, currentY, direction) {
+export function moveEntityForward(character, axis, currentX, currentY, direction, moveDiagonally, goToTargetPosition, failedAttempts = []) {
   const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
   const tile = tree.get('tile');
   const movePixels = tree.get('movePixels');
@@ -676,28 +745,52 @@ export function moveEntityForward(character, axis, currentX, currentY, direction
   const minLimit = isXAxis ? getMinBoardXLimit() : getMinBoardYLimit();
   const maxLimit = isXAxis ? getMaxBoardXLimit() : getMaxBoardYLimit();
   const checkTile = tile[isXAxis ? 'y' : 'x'];
-  let value = (isXAxis ? currentX : currentY) + movePixels;
+  const currentValue = isXAxis ? currentX : currentY;
+  const diagonalPercentage = getSquareDiagonalPercentage(movePixels);
+  let value = Math.ceil(currentValue + (movePixels * (moveDiagonally ? diagonalPercentage : 1)));
 
-  if (isHero && value > maxLimit && checkTile < 2) {
-    goToNextTile(axis);
-    //Set player coordinate to start of next tile
-    return {
-      value: minLimit,
-      changeTile: true
-    };
+  // Character is going beyond the board bounds
+  if (value > maxLimit) {
+    if (isHero && checkTile < 2) { // TODO: Use a constant for the max tiles
+      goToNextTile(axis);
+      // Set player coordinates to start of next tile
+      return {
+        value: minLimit,
+        changeTile: true,
+        collisions: []
+      };
+    } else if (!isHero) {
+      // Take AI to next tile and set their position on the new tile
+      takeBunnyToGroupTile(character);
+
+      // Return the current value so the bunny doesn't continue moving
+      // This will also prevent it overriding the new group location being set
+      // in the takeBunnyToGroupTile method
+      return {
+        value: currentValue,
+        collisions: []
+      };
+    }
   }
 
   const useX = isXAxis ? value : currentX;
   const useY = isXAxis ? currentY : value;
+  const collisions = getEntityCollisions(character, useX, useY, direction, goToTargetPosition, failedAttempts);
+  const maxCollisionValue = getCollisionMaxValue({ x: useX, y: useY }, direction, character, collisions);
+  let minValue = _min([maxLimit, value]);
 
-  // Ensure new position isn't colliding with any entities
-  const sceneryLimit = checkSceneryCollision(character, useX, useY, direction);
-  const foodLimit = checkFoodCollision(character, useX, useY, direction);
-  const bunnyLimit = checkBunnyCollision(character, useX, useY, direction);
+  if (maxCollisionValue) {
+    minValue = _min([minValue, maxCollisionValue]);
+  }
 
   return {
-    value: _min([maxLimit, value, sceneryLimit, foodLimit, bunnyLimit])
+    value: minValue,
+    collisions
   };
+}
+
+export function getSquareDiagonalPercentage(side) {
+  return (side * Math.sqrt(2)) / (side * 2);
 }
 
 /**
@@ -712,7 +805,7 @@ export function moveEntityForward(character, axis, currentX, currentY, direction
  * @return {object} - Returns the value to move, and also potentially if the
  *                    tile needs to be changed
  */
-export function moveEntityBack(character, axis, currentX, currentY, direction) {
+export function moveEntityBack(character, axis, currentX, currentY, direction, moveDiagonally, goToTargetPosition, failedAttempts = []) {
   const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
   const tile = tree.get('tile');
   const movePixels = tree.get('movePixels');
@@ -723,27 +816,47 @@ export function moveEntityBack(character, axis, currentX, currentY, direction) {
   const minLimit = 0 - ((isXAxis ? bunnyRect.width : bunnyRect.height) / 2);
   const maxLimit = isXAxis ? boardWidth - (bunnyRect.width / 2) : boardHeight - (bunnyRect.height / 2);
   const checkTile = tile[isXAxis ? 'y' : 'x'];
-  let value = (isXAxis ? currentX : currentY) - movePixels;
+  const currentValue = isXAxis ? currentX : currentY;
+  const diagonalPercentage = getSquareDiagonalPercentage(movePixels);
+  let value = Math.ceil(currentValue - (movePixels * (moveDiagonally ? diagonalPercentage : 1)));
 
-  if (isHero && value < minLimit && checkTile > 1) {
-    goToPreviousTile(axis);
-    //Set player coordinate to end of previous tile
-    return {
-      value: maxLimit,
-      changeTile: true
-    };
+  // Character is going beyond the board bounds
+  if (value < minLimit) {
+    if (isHero && checkTile > 1) { // TODO: Use a constant for the min tiles
+      goToPreviousTile(axis);
+      // Set player coordinates to end of previous tile
+      return {
+        value: maxLimit,
+        changeTile: true,
+        collisions: []
+      };
+    } else if (!isHero) {
+      // Take AI to next tile and set their position on the new tile
+      takeBunnyToGroupTile(character);
+
+      // Return the current value so the bunny doesn't continue moving
+      // This will also prevent it overriding the new group location being set
+      // in the takeBunnyToGroupTile method
+      return {
+        value: currentValue,
+        collisions: []
+      };
+    }
   }
 
   const useX = isXAxis ? value : currentX;
   const useY = isXAxis ? currentY : value;
+  const collisions = getEntityCollisions(character, useX, useY, direction, goToTargetPosition, failedAttempts);
+  const minCollisionValue = getCollisionMaxValue({ x: useX, y: useY }, direction, character, collisions);
+  let maxValue = _max([minLimit, value]);
 
-  // Ensure new position isn't colliding with any entities
-  const sceneryLimit = checkSceneryCollision(character, useX, useY, direction);
-  const foodLimit = checkFoodCollision(character, useX, useY, direction);
-  const bunnyLimit = checkBunnyCollision(character, useX, useY, direction);
+  if (minCollisionValue) {
+    maxValue = _max([maxValue, minCollisionValue]);
+  }
 
   return {
-    value: _max([minLimit, value, sceneryLimit, foodLimit, bunnyLimit])
+    value: maxValue,
+    collisions
   };
 }
 
@@ -776,27 +889,17 @@ function getCharacterWithNextPosition(character, x, y) {
  *                 If character is colliding with a food item, this max value
  *                 will be whatever that collision point is.
  */
-export function checkFoodCollision(character, x, y, direction) {
-  const useCharacter = getCharacterWithNextPosition(character, x, y);
-  return checkCollisions(useCharacter, x, y, direction, 'food');
-}
+export function checkFoodCollision(character, direction) {
+  const tile = tree.get('tile');
+  const items = tile.food.filter(item => !item.collected);
+  const collisions = checkCollisions(character, direction, items);
 
-/**
- * Check if character is collidiing with any scenery items
- *
- * @param  {object} character - The character entity that is moving
- * @param  {int} x - The character's current X position
- * @param  {int} y - The character's current Y position
- * @param  {string} direction - The direction the character is moving, ex: 'up'
- *
- * @return {int} - The max possible value based on the direction the character
- *                 is moving.
- *                 If character is colliding with a scenery item, this max value
- *                 will be whatever that collision point is.
- */
-export function checkSceneryCollision(character, x, y, direction) {
-  const useCharacter = getCharacterWithNextPosition(character, x, y);
-  return checkCollisions(useCharacter, x, y, direction, 'scenery');
+  // If we're not moving, a space action is happening
+  if (character.isHero && collisions.length && !direction) {
+    _forEach(collisions, item => collectItem('food', item.id));
+  }
+
+  return collisions;
 }
 
 /**
@@ -812,9 +915,80 @@ export function checkSceneryCollision(character, x, y, direction) {
  *                 If character is colliding with another bunny, this max value
  *                 will be whatever that collision point is.
  */
-export function checkBunnyCollision(character, x, y, direction) {
-  const useCharacter = getCharacterWithNextPosition(character, x, y);
-  return checkCollisions(useCharacter, x, y, direction, 'bunny');
+export function checkBunnyCollision(character, direction, goToTargetPosition) {
+  const isHero = character.isHero;
+  const tile = tree.get('tile');
+  const heroCollisions = tree.select('heroCollisions');
+  // When checking collisions for hero, compare against other AI bunnies on the tile
+  // Otherwise, when checking AI collisions, ensure they're not colliding with hero
+  // or any other AIs
+  const bunniesOnTile = _filter(tree.get('bunniesOnTile'), bunny => {
+    return bunny.id != character.props.id;
+  });
+
+  // If moving AI, check for hero collisions when not going to a target location
+  if (!isHero && !goToTargetPosition) {
+    const heroCursor = tree.get('hero');
+    bunniesOnTile.push({
+      id: 'Hero',
+      position: heroCursor.position,
+      height: heroCursor.height,
+      width: heroCursor.width
+    });
+  }
+
+  const collisions = checkCollisions(character, direction, bunniesOnTile);
+
+  if (collisions.length) {
+    // If we're not moving, a space action is happening
+    if (!direction && character.isHero) {
+      _forEach(collisions, item => collectBunny(item.id));
+    }
+  }
+
+  const collisionIds = collisions.map(item => item.id);
+
+  if (!_isEqual(heroCollisions.get(), collisionIds)) {
+    heroCollisions.set(collisionIds);
+  }
+
+  return collisions;
+}
+
+/**
+ * Check if character is collidiing with any scenery items
+ *
+ * @param  {object} character - The character entity that is moving
+ * @param  {int} x - The character's current X position
+ * @param  {int} y - The character's current Y position
+ * @param  {string} direction - The direction the character is moving, ex: 'up'
+ *
+ * @return {int} - The max possible value based on the direction the character
+ *                 is moving.
+ *                 If character is colliding with a scenery item, this max value
+ *                 will be whatever that collision point is.
+ */
+export function checkSceneryCollision(character, direction, type) {
+  const tile = tree.get('tile');
+  const items = tile.scenery.filter(item => !item.collected && (type ? item.type == type : true));
+  const collisions = checkCollisions(character, direction, items);
+
+  // If we're not moving, a space action is happening
+  if (collisions.length) {
+    _forEach(collisions, item => {
+      if (character.isHero) {
+        if (item.takeToTile && !direction) {
+          handleBurrowAction(item);
+        }
+      } else {
+        if (item.type == SceneryConstants.BURROW_TYPE) {
+          takeBunnyToGroupTile(character);
+        }
+      }
+    });
+  }
+
+  return collisions;
 }
 
 /**

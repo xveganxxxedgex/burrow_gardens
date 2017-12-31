@@ -56,9 +56,37 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Create inventory state/logic~~
 
+~~Fix faster diagonal movement~~
+
 Move AI to group area once they've been friended
 
+Remove bunny collision with hero when going to target position
+
+Fix character image facing left for a split second when first moving down
+
+Add to bunny collect popover that the bunny is going to the group area so the player understands why they may leave the screen
+
+Maybe add a cute animation like a binky when a bunny is added to the group, to play before they head to the group tile
+
 When repopulating produce, need to ensure nothing is colliding with that position before placing it there (ensure food doesn't populate where an AI is)
+
+Add tree elements that lose produce when hero stomps while colliding with them
+
+Add logic to handle collision detection for trees or other non-block objects (how to handle collisions with visually blank areas in image/div)
+
+Add logic for produce falling from trees
+
+Add areas where hero has to jump
+
+Add logic to handle jump actions (move player up and over in the direction they're facing)
+
+Add house to map with collision detection on door area
+
+Create tile(s) for inside the house
+
+Create art and objects with collision for inside the house
+
+Add unit tests
 
 Create characters
 

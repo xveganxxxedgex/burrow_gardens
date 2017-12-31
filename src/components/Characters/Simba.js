@@ -23,6 +23,8 @@ export default class Simba {
     this.height = constants.BUNNY_HEIGHT;
     this.width = constants.BUNNY_WIDTH;
     this.id = 1;
+    this.groupTile = { x: 1, y: 2 };
+    this.groupPosition = { x: 725, y: 150 };
     this.bunnyImages = {
       left: bunnyLeftImg,
       up: bunnyUpImg,

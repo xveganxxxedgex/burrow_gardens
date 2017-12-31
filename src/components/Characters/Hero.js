@@ -11,14 +11,12 @@ import {
   setActiveTile,
   collectItem,
   toggleShowMenu,
-  checkFoodCollision,
-  checkBunnyCollision,
-  checkSceneryCollision,
   moveEntityBack,
   moveEntityForward,
   setHeroLastDirection,
   getOppositeDirection,
-  updateHeroSize
+  updateHeroSize,
+  getEntityCollisions
 } from 'actions';
 
 import bunnyLeftImg from 'images/bunny1.png';
@@ -62,8 +60,7 @@ const KEYBOARD_EVENTS = {
   hero: ['hero'],
   boardDimensions: ['boardDimensions'],
   tile: ['tile'],
-  showMenu: ['showMenu'],
-  movePixels: ['movePixels']
+  showMenu: ['showMenu']
 })
 class Hero extends Component {
   constructor(props, context) {
@@ -235,9 +232,7 @@ class Hero extends Component {
     if (keyEvent == 'space') {
       if (!moving.length) {
         const useCharacter = this.getCharacterWithDimensions();
-        checkFoodCollision(useCharacter, x, y);
-        checkBunnyCollision(useCharacter, x, y);
-        checkSceneryCollision(useCharacter, x, y);
+        getEntityCollisions(useCharacter, x, y);
       }
 
       return;
@@ -367,22 +362,22 @@ class Hero extends Component {
       switch(moving[m]) {
         case 'up':
           // Move player up on the Y axis
-          const movePlayerUp = moveEntityBack(useCharacter, 'y', newX, newY, moving[m]);
+          const movePlayerUp = moveEntityBack(useCharacter, 'y', newX, newY, moving[m], moving.length > 1);
           newY = movePlayerUp.value;
           break;
         case 'down':
           // Move player down on the Y axis
-          const movePlayerDown = moveEntityForward(useCharacter, 'y', newX, newY, moving[m]);
+          const movePlayerDown = moveEntityForward(useCharacter, 'y', newX, newY, moving[m], moving.length > 1);
           newY = movePlayerDown.value;
           break;
         case 'left':
           // Move player left on the X axis
-          const movePlayerLeft = moveEntityBack(useCharacter, 'x', newX, newY, moving[m]);
+          const movePlayerLeft = moveEntityBack(useCharacter, 'x', newX, newY, moving[m], moving.length > 1);
           newX = movePlayerLeft.value;
           break;
         case 'right':
           // Move player right on the X axis
-          const movePlayerRight = moveEntityForward(useCharacter, 'x', newX, newY, moving[m]);
+          const movePlayerRight = moveEntityForward(useCharacter, 'x', newX, newY, moving[m], moving.length > 1);
           newX = movePlayerRight.value;
           break;
       }
