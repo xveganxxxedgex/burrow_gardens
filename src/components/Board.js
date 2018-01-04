@@ -91,13 +91,7 @@ class Board extends Component {
         <BackgroundWrapper tile={tile} />
         <SceneryWrapper tile={tile} />
         <FoodWrapper tile={tile} />
-        {bunniesOnTile.map((item, itemIndex) => {
-          // TODO: Ensure bunny isn't overlapping/colliding with any other
-          // element before populating on the board
-          return (
-            <Bunny {...item} key={`bunny-${itemIndex}`} index={itemIndex} />
-          );
-        })}
+        <BunniesWrapper tile={tile} bunniesOnTile={bunniesOnTile} />
         <Hero />
       </div>
     );
@@ -168,6 +162,28 @@ class FoodWrapper extends Component {
         {tile.food.map((item, itemIndex) => {
           return (
             <FoodItem {...item} key={`food-${itemIndex}`} index={itemIndex} />
+          );
+        })}
+      </div>
+    )
+  }
+}
+
+class BunniesWrapper extends Component {
+  shouldComponentUpdate(nextProps) {
+    const tileChanged = !_isEqual([nextProps.tile.x, nextProps.tile.y], [this.props.tile.x, this.props.tile.y]);
+    const bunniesChanged = !_isEqual(nextProps.bunniesOnTile, this.props.bunniesOnTile);
+    return tileChanged || bunniesChanged;
+  }
+
+  render() {
+    const { bunniesOnTile } = this.props;
+
+    return (
+      <div className="bunny-wrapper">
+        {bunniesOnTile.map((item, itemIndex) => {
+          return (
+            <Bunny {...item} key={`bunny-${itemIndex}`} index={itemIndex} />
           );
         })}
       </div>

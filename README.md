@@ -58,9 +58,11 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Fix faster diagonal movement~~
 
-Move AI to group area once they've been friended
+~~Move AI to group area once they've been friended~~
 
-Remove bunny collision with hero when going to target position
+~~Remove bunny collision with other bunnies (including hero) when going to target position~~
+
+Add logic so hero doesn't collide with bunnies going to their target position
 
 Fix character image facing left for a split second when first moving down
 

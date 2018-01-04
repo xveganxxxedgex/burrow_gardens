@@ -1,6 +1,7 @@
 import React from 'react';
 import tree from 'state';
 import _capitalize from 'lodash/capitalize';
+import _differenceWith from 'lodash/differenceWith';
 import _filter from 'lodash/filter';
 import _find from 'lodash/find';
 import _findIndex from 'lodash/findIndex';
@@ -10,6 +11,7 @@ import _max from 'lodash/max';
 import _maxBy from 'lodash/maxBy';
 import _min from 'lodash/min';
 import _minBy from 'lodash/minBy';
+import _orderBy from 'lodash/orderBy';
 import _union from 'lodash/union';
 import _uniq from 'lodash/uniq';
 import { findDOMNode } from 'react-dom';
@@ -197,6 +199,13 @@ export function getBackgroundCell(cell) {
   return Backgrounds[type];
 }
 
+/**
+ * Finds the closest exit in the direction of the target tile
+ *
+ * @param  {object} targetTile - The tile the character will go to
+ *
+ * @return {string} - The direction of the exit
+ */
 export function findTileExit(targetTile) {
   const tile = tree.get('tile');
   let preferredExit;
@@ -216,6 +225,13 @@ export function findTileExit(targetTile) {
   return preferredExit && tile.exits[preferredExit] ? preferredExit : Object.keys(tile.exits)[0];
 }
 
+/**
+ * Get the X, Y coordinates of the exit
+ *
+ * @param  {object} targetTile - The tile the character will go to
+ *
+ * @return {object} - The { x, y } coordinates of the exit position
+ */
 export function getExitPosition(targetTile) {
   const tile = tree.get('tile');
   const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
@@ -242,6 +258,431 @@ export function getExitPosition(targetTile) {
   }
 
   return goToPosition;
+}
+
+/**
+ * Returns collisions within the path axis that the character will move on
+ *
+ * @param  {object} character - The character that will go towards the exit position
+ * @param  {object} exitPosition - The position the character will go towards
+ *
+ * @return {array} - All collisions in the path between the character and the
+ *                   exit position
+ */
+export function findCollisionsInPath(character, exitPosition) {
+  const collisionEntities = getCollisionEntities(true);
+  const characterRect = getElementRect(character);
+  const direction = getTargetDirection(characterRect, exitPosition);
+  const axis = getAxisFromDirection(direction);
+  const oppositeAxis = axis == 'x' ? 'y' : 'x';
+  const isMovingBack = entityIsMovingBack(direction);
+
+  const collisionsInPath = _filter(collisionEntities, entity => {
+    const isInAxis = isCollidingInAxis(oppositeAxis, characterRect, entity);
+    const exitMethodParams = [axis, entity, characterRect, exitPosition];
+    const isBetweenExit = isMovingBack ? isBetweenCharacterAndBackwardExit(...exitMethodParams) : isBetweenCharacterAndForwardExit(...exitMethodParams);
+    return isBetweenExit && isInAxis;
+  });
+
+  return collisionsInPath;
+}
+
+/**
+ * Returns all collision entities on a tile
+ *
+ * @param  {boolean} filterCollected - If only uncollected entities should be returned
+ *
+ * @return {array} - The collision entities
+ */
+export function getCollisionEntities(filterCollected) {
+  const tile = tree.get('tile');
+  const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
+  const sceneryEntities = _filter(tile.scenery, entity => {
+    // Remove burrow and tile border entities
+    const isBurrow = entity.type != SceneryConstants.BURROW_TYPE;
+    const isBorder = entity.position.x == 0 || entity.position.y == 0 || entity.position.x == boardWidth - entity.width || entity.position.y == boardHeight - entity.height;
+    return !isBurrow && !isBorder;
+  });
+
+  const foodEntities = !filterCollected ? tile.food : _filter(tile.food, food => !food.collected);
+
+  return _union(foodEntities, sceneryEntities);
+}
+
+/**
+ * Returns the direction the character should move based on the axis and
+ * current and target positions
+ *
+ * @param  {string}  axis - The axis to get the direction for (ex: 'x' or 'y')
+ * @param  {object} characterPosition - The character's current position
+ * @param  {object} targetPosition - The position the character is heading to
+ *
+ * @return {string} - The direction the character should go
+ */
+export function getDirectionForAxis(axis, characterPosition, targetPosition) {
+  const backwardDirection = getBackwardDirection(axis);
+  const forwardDirection = getForwardDirection(axis);
+  return characterPosition[axis] < targetPosition[axis] ? forwardDirection : backwardDirection;
+}
+
+/**
+ * Returns the direction the character should move based on where their
+ * current and target positions are
+ *
+ * @param  {object} characterPosition - The character's current position
+ * @param  {object} targetPosition - The position the character is heading to
+ *
+ * @return {string} - Which direction the character should go
+ */
+export function getTargetDirection(characterPosition, targetPosition) {
+  const { x, y } = characterPosition;
+  // Go the direction the most far away
+  const xDifference = targetPosition.x - x;
+  const yDifference = targetPosition.y - y;
+
+  if (Math.abs(xDifference) > Math.abs(yDifference)) {
+    // Go direction on X axis
+    return xDifference > 0 ? 'right' : 'left';
+  }
+
+  // Go direction on Y axis
+  return yDifference > 0 ? 'down' : 'up';
+}
+
+/**
+ * Returns if an entity is colliding with the axis
+ *
+ * @param  {string}  axis - The axis the character is moving on (ex: 'x' or 'y')
+ * @param  {object}  characterRect - The character rect object containing x, y,
+ *                                   right, bottom, height and width
+ * @param  {object}  entity - The collision entity to check
+ *
+ * @return {Boolean} - If the entity is colliding with the axis path
+ */
+export function isCollidingInAxis(axis, characterRect, entity) {
+  const entityRect = getElementRect(entity);
+  const rectEnd = axis == 'x' ? 'right' : 'bottom';
+
+  return entityRect[axis] < characterRect[rectEnd] && entityRect[rectEnd] > characterRect[axis];
+}
+
+/**
+ * Returns if the entity is between the character's current position and the
+ * exit position going forward on the axis
+ *
+ * @param  {string}  axis - The axis the character is moving on (ex: 'x' or 'y')
+ * @param  {object}  entity - The collision entity to check
+ * @param  {object}  characterRect - The character rect object containing x, y,
+ *                                   right, bottom, height and width
+ * @param  {[type]}  exitPosition - The exit position the character is heading towards
+ *
+ * @return {Boolean} - If the entity is between the character and the exit
+ */
+export function isBetweenCharacterAndForwardExit(axis, entity, characterRect, exitPosition) {
+  const entityRect = getElementRect(entity);
+  return entityRect[axis] < exitPosition[axis] && entityRect[axis] > characterRect[axis];
+}
+
+/**
+ * Returns if the entity is between the character's current position and the
+ * exit position going back on the axis
+ *
+ * @param  {string}  axis - The axis the character is moving on (ex: 'x' or 'y')
+ * @param  {object}  entity - The collision entity to check
+ * @param  {object}  characterRect - The character rect object containing x, y,
+ *                                   right, bottom, height and width
+ * @param  {[type]}  exitPosition - The exit position the character is heading towards
+ *
+ * @return {Boolean} - If the entity is between the character and the exit
+ */
+export function isBetweenCharacterAndBackwardExit(axis, entity, characterRect, exitPosition) {
+  // exit is on right
+  const entityRect = getElementRect(entity);
+  return exitPosition[axis] < entityRect[axis] && characterRect[axis] < entityRect[axis];
+}
+
+/**
+ * Returns if the character is at the target position for a given axis
+ *
+ * @param  {string} direction - The direction the character is moving
+ * @param  {object} currentPosition - The character's current position
+ * @param  {object} targetPosition - The position the character is moving towards
+ *
+ * @return {boolean} - If the character is at the target axis position
+ */
+export function checkIfAtTargetPosition(direction, currentPosition, targetPosition) {
+  const axis = getAxisFromDirection(direction);
+  const isMovingBack = entityIsMovingBack(direction);
+  const atTargetCoordinate = isMovingBack ? currentPosition[axis] <= targetPosition[axis] : currentPosition[axis] >= targetPosition[axis];
+  return atTargetCoordinate;
+}
+
+/**
+ * Returns the nearest open gap that avoids collisions in the path to the exit position
+ *
+ * @param  {object} character - The character to take to the exit position
+ * @param  {object} exitPosition - The {x, y} to take the character to
+ *
+ * @return {object} - The nearest open gap that the character should move towards
+ */
+export function getClosestOpenGap(character, exitPosition) {
+  const collisionsInPath = findCollisionsInPath(character, exitPosition);
+  const collisionEntities = getCollisionEntities(true);
+
+  if (!collisionsInPath.length) {
+    return exitPosition;
+  }
+
+  const boardDimensions = tree.get('boardDimensions');
+  const characterRect = getElementRect(character);
+  const direction = getTargetDirection(characterRect, exitPosition);
+  const axis = getAxisFromDirection(direction);
+  const oppositeAxis = axis == 'x' ? 'y' : 'x';
+  const isMovingBack = entityIsMovingBack(direction);
+  const valueLogic = isMovingBack ? 'max' : 'min';
+  const backwardDimension = getBackwardDimension(oppositeAxis);
+  const forwardDimension = getForwardDimension(oppositeAxis);
+  const dimensionVar = getDimensionFromAxis(oppositeAxis);
+  const valueMethods = {
+    min: _minBy,
+    max: _maxBy
+  };
+
+  const closestCollision = valueMethods[valueLogic](collisionsInPath, entity => {
+    return entity.position[axis];
+  });
+
+  const { closest, collisions: consecutiveCollisions } = findConsecutiveCollisions(closestCollision, collisionEntities, characterRect.height, characterRect.width);
+
+  // Find nearest gaps that have enough room for the character to move through
+  const validBackwardGap = closest[backwardDimension].min.position[oppositeAxis] > characterRect[dimensionVar] * 2;
+  const forwardCollisionRect = getElementRect(closest[forwardDimension].max);
+  const validForwardGap = forwardCollisionRect[forwardDimension] < boardDimensions[dimensionVar] - characterRect[dimensionVar] * 2;
+  const forwardGap = { [axis]: forwardCollisionRect[axis], [oppositeAxis]: forwardCollisionRect[forwardDimension] };
+  let goToOpenGap = validBackwardGap
+    ? {
+      [axis]: closest[backwardDimension].min.position[axis],
+      [oppositeAxis]: closest[backwardDimension].min.position[oppositeAxis] - characterRect[dimensionVar]
+    }
+    : forwardGap;
+
+  // If both backward and forward paths are valid, find the one closest to the
+  // characters current position
+  if (validBackwardGap && validForwardGap) {
+    const distanceFromBackwardToCharacter = closest[backwardDimension].min.position[oppositeAxis] - characterRect[oppositeAxis];
+    const distanceFromForwardToCharacter = characterRect[oppositeAxis] - closest[forwardDimension].max.position[oppositeAxis];
+
+    if (distanceFromForwardToCharacter < distanceFromBackwardToCharacter) {
+      goToOpenGap = forwardGap;
+    }
+  }
+
+  // Need to see if character is stuck inside a collision cluster and need to move out
+  // before proceeding to the target position
+  const minMaxLogic = goToOpenGap[oppositeAxis] < characterRect[oppositeAxis] ? 'min' : 'max';
+  const backwardDimensionOnAxis = getBackwardDimension(axis);
+  const forwardDimensionOnAxis = getForwardDimension(axis);
+  const closestForwardOnAxis = closest[forwardDimensionOnAxis][minMaxLogic];
+  const closestBackwardOnAxis = closest[backwardDimensionOnAxis][minMaxLogic];
+  const goAroundCollision = isMovingBack ? closestForwardOnAxis : closestBackwardOnAxis;
+  const axisDirection = isMovingBack ? backwardDimensionOnAxis : forwardDimensionOnAxis;
+  const oppositeAxisDirection = isMovingBack ? forwardDimensionOnAxis : backwardDimensionOnAxis;
+  const otherAxisDirection = isMovingBack ? backwardDimension : forwardDimension;
+  const collisionIsBeforeCharacter = isMovingBack
+    ? goAroundCollision.position[axis] > characterRect[axisDirection]
+    : goAroundCollision.position[axis] < characterRect[axisDirection];
+
+  if (collisionIsBeforeCharacter) {
+    const collisionRectOnAxis = getElementRect(closest[oppositeAxisDirection][minMaxLogic]);
+    // Check if outermost collision is closer to the gap than character
+    const collisionToGapDistance = closest[oppositeAxisDirection][minMaxLogic].position[oppositeAxis] - goToOpenGap[oppositeAxis];
+    const characterToGapDistance = characterRect[oppositeAxis] - goToOpenGap[oppositeAxis];
+
+    if (Math.abs(collisionToGapDistance) < Math.abs(characterToGapDistance)) {
+      // Collision is in the way of where character needs to go, so go around it
+      goToOpenGap = {
+        [axis]: closest[oppositeAxisDirection][minMaxLogic].position[axis] - characterRect[getDimensionFromAxis(axis)],
+        [oppositeAxis]: collisionRectOnAxis[otherAxisDirection]
+      };
+    }
+  }
+
+  return goToOpenGap;
+}
+
+/**
+ * Returns backwards direction string based on axis
+ *
+ * @param  {string} axis - The axis to get the direction for (ex: 'x' or 'y')
+ *
+ * @return {string} - The string of the backward direction
+ */
+export function getBackwardDirection(axis) {
+  return axis == 'x' ? 'left' : 'up';
+}
+
+/**
+ * Returns forwards direction string based on axis
+ *
+ * @param  {string} axis - The axis to get the direction for (ex: 'x' or 'y')
+ *
+ * @return {string} - The string of the forward direction
+ */
+export function getForwardDirection(axis) {
+  return axis == 'x' ? 'right' : 'down';
+}
+
+/**
+ * Returns backwards dimension string based on axis
+ *
+ * @param  {string} axis - The axis to get the dimension for (ex: 'x' or 'y')
+ *
+ * @return {string} - The string of the backward dimension
+ */
+export function getBackwardDimension(axis) {
+  return axis == 'x' ? 'left' : 'top';
+}
+
+/**
+ * Returns forwards dimension string based on axis
+ *
+ * @param  {string} axis - The axis to get the dimension for (ex: 'x' or 'y')
+ *
+ * @return {string} - The string of the forward dimension
+ */
+export function getForwardDimension(axis) {
+  return axis == 'x' ? 'right' : 'bottom';
+}
+
+/**
+ * Returns the appropriate height or width dimension to use depending on axis
+ *
+ * @param  {string} axis - The axis to get the dimension for (ex: 'x' or 'y')
+ *
+ * @return {string} - The string of the dimension
+ */
+export function getDimensionFromAxis(axis) {
+  return axis == 'x' ? 'width' : 'height';
+}
+
+/**
+ * Finds clusters of consecutive collisions
+ *
+ * This will find all collision entities that are close to each other based on
+ * the height and width threshholds.
+ *
+ * Will loop through recursively to find all neighbouring collisions each time
+ * a new unique one is added
+ *
+ * @param  {object} startingEntity - The first collision to start/branch from
+ * @param  {array} collisionEntities - All possible collision entities on the tile
+ * @param  {number} heightThreshold - The height distance between entities to determine if collisions are consecutive
+ * @param  {number} widthThreshold - The width distance between entities to determine if collisions are consecutive
+ * @param  {array} foundCollisions - The found consecutive collisions
+ * @param  {object} closestCollisions - The collisions on the outermost edges of the cluster
+ *
+ * @return {object} - Object containing the entities in the cluster, and the
+ * outermost entities
+ */
+export function findConsecutiveCollisions(startingEntity, collisionEntities, heightThreshold, widthThreshold, foundCollisions, closestCollisions) {
+  const entityRect = getElementRect(startingEntity);
+  foundCollisions = foundCollisions || [startingEntity];
+  const remainingCollisions = _differenceWith(collisionEntities, foundCollisions, _isEqual);
+  closestCollisions = closestCollisions || {
+    top: {
+      min: startingEntity,
+      max: startingEntity
+    },
+    bottom: {
+      min: startingEntity,
+      max: startingEntity
+    },
+    left: {
+      min: startingEntity,
+      max: startingEntity
+    },
+    right: {
+      min: startingEntity,
+      max: startingEntity
+    }
+  };
+
+  _forEach(remainingCollisions, ce => {
+    const collisionEntityRect = getElementRect(ce);
+    const bottomCollision = collisionEntityRect.y < entityRect.bottom + heightThreshold;
+    const topCollision = collisionEntityRect.bottom > entityRect.y - heightThreshold;
+    const rightCollision = collisionEntityRect.x < entityRect.right + widthThreshold;
+    const leftCollision = collisionEntityRect.right > entityRect.x - widthThreshold;
+    const isConsecutiveCollision = bottomCollision && topCollision && rightCollision && leftCollision;
+
+    if (isConsecutiveCollision) {
+      foundCollisions.push(ce);
+      // Recursively call for each new item to see the consecutive values of
+      // that entity, add them to the master collisions array and remove duplicates
+      const childConsecutiveCollisions = findConsecutiveCollisions(ce, remainingCollisions, heightThreshold, widthThreshold, foundCollisions, closestCollisions);
+      foundCollisions = _uniq(_union(foundCollisions, childConsecutiveCollisions.collisions));
+      const closestChild = childConsecutiveCollisions.closest;
+      closestCollisions = getClosestCollisions(closestChild, ce, closestCollisions);
+    }
+  });
+
+  return {
+    collisions: foundCollisions,
+    closest: closestCollisions
+  };
+}
+
+/**
+ * Returns the outermost entities in a collision cluster
+ *
+ * @param  {object} closestChild - The outermost values for the children
+ * @param  {object} closestParent - The parent collision that the children were branched from
+ * @param  {object} closestCollisions - The current outermost entities
+ *
+ * @return {object} - The new outer entities
+ */
+export function getClosestCollisions(closestChild, closestParent, closestCollisions) {
+  const dimensions = [
+    { dimension: 'top', axis: 'y' },
+    { dimension: 'bottom', axis: 'y' },
+    { dimension: 'left', axis: 'x' },
+    { dimension: 'right', axis: 'x' }
+  ];
+
+  _forEach(dimensions, d => {
+    const { dimension, axis } = d;
+    const oppositeAxis = axis == 'x' ? 'y' : 'x';
+    const movingString = ['top', 'left'].indexOf(dimension) > -1 ? 'back' : 'forward';
+    const valueMethods = { back: _minBy, forward: _maxBy };
+    const closestCollision = closestCollisions[dimension];
+    const newCollision = valueMethods[movingString]([closestChild[dimension].min, closestChild[dimension].max, closestParent], entity => entity.position[axis]);
+    const childCollision = closestChild[dimension];
+
+    // If new collision min/max is more updated, use that instead for both values
+    if (newCollision.position[axis] < closestCollision.min.position[axis] || newCollision.position[axis] > closestCollision.max.position[axis]) {
+      closestCollisions[dimension] = { min: newCollision, max: newCollision };
+    }
+
+    // Replace min/max values for opposite axis if child or parent values are more updated
+    // This will ensure that we get the min/max on opposite axis, even when the main axis hasn't changed
+    if (closestCollision.min.position[axis] == childCollision.min.position[axis] && childCollision.min.position[oppositeAxis] < closestCollision.min.position[oppositeAxis]) {
+      closestCollisions[dimension].min = childCollision.min;
+    }
+
+    if (closestCollision.max.position[axis] == childCollision.max.position[axis] && childCollision.max.position[oppositeAxis] > closestCollision.max.position[oppositeAxis]) {
+      closestCollisions[dimension].max = childCollision.max;
+    }
+
+    if (closestCollision.min.position[axis] == closestParent.position[axis] && closestParent.position[oppositeAxis] < closestCollision.min.position[oppositeAxis]) {
+      closestCollisions[dimension].min = closestParent;
+    }
+
+    if (closestCollision.max.position[axis] == closestParent.position[axis] && closestParent.position[oppositeAxis] > closestCollision.max.position[oppositeAxis]) {
+      closestCollisions[dimension].max = closestParent;
+    }
+  });
+
+  return closestCollisions;
 }
 
 /**
@@ -339,7 +780,7 @@ export function collectBunny(bunnyId) {
   const newSkill = bunny.giveSkill && _find(skills, skill => skill.name == bunny.giveSkill);
 
   bunniesCursor.set([bunnyIndex, 'hasCollected'], true);
-  
+
   setPopover({
     title: 'New Friend',
     text: (
@@ -411,10 +852,10 @@ export function getOppositeDirection(direction) {
  *
  * @return {object} - The position/dimensions for the element
  */
-function getElementRect(element) {
+export function getElementRect(element) {
   const rect = {
-    x: element.x || (element.position && element.position.x),
-    y: element.y || (element.position && element.position.y),
+    x: element.x || (element.position && element.position.x) || (element.props && element.props.position && element.props.position.x),
+    y: element.y || (element.position && element.position.y) || (element.props && element.props.position && element.props.position.y),
     height: element.height || element.props.height,
     width: element.width || element.props.width
   };
@@ -478,13 +919,13 @@ export function checkCollisions(character, direction, items) {
   return collisions;
 }
 
-export function getEntityCollisions(character, useX, useY, direction, goToTargetPosition, failedAttempts = []) {
+export function getEntityCollisions(character, useX, useY, direction, goToTargetPosition) {
   const useCharacter = getCharacterWithNextPosition(character, useX, useY);
-  const sceneryCollisions = checkSceneryCollision(useCharacter, direction);
+  const sceneryCollisions = checkSceneryCollision(useCharacter, direction, character.position);
   const foodCollisions = checkFoodCollision(useCharacter, direction);
-  const bunnyCollisions = checkBunnyCollision(useCharacter, direction, goToTargetPosition);
-  const failedCoordinateCollisions = checkCollisions(useCharacter, direction, failedAttempts);
-  const collisions = _union(sceneryCollisions, foodCollisions, bunnyCollisions, failedCoordinateCollisions);
+  // Don't collide with bunnies when character is going to target position
+  const bunnyCollisions = goToTargetPosition ? [] : checkBunnyCollision(useCharacter, direction);
+  const collisions = _union(sceneryCollisions, foodCollisions, bunnyCollisions);
   return collisions;
 }
 
@@ -735,7 +1176,7 @@ export function getMaxBoardYLimit(usingBurrow) {
  * @return {object} - Returns the value to move, and also potentially if the
  *                    tile needs to be changed
  */
-export function moveEntityForward(character, axis, currentX, currentY, direction, moveDiagonally, goToTargetPosition, failedAttempts = []) {
+export function moveEntityForward(character, axis, currentX, currentY, direction, moveDiagonally, goToTargetPosition) {
   const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
   const tile = tree.get('tile');
   const movePixels = tree.get('movePixels');
@@ -775,12 +1216,16 @@ export function moveEntityForward(character, axis, currentX, currentY, direction
 
   const useX = isXAxis ? value : currentX;
   const useY = isXAxis ? currentY : value;
-  const collisions = getEntityCollisions(character, useX, useY, direction, goToTargetPosition, failedAttempts);
+  const collisions = getEntityCollisions(character, useX, useY, direction, goToTargetPosition);
   const maxCollisionValue = getCollisionMaxValue({ x: useX, y: useY }, direction, character, collisions);
   let minValue = _min([maxLimit, value]);
 
   if (maxCollisionValue) {
     minValue = _min([minValue, maxCollisionValue]);
+  }
+
+  if (goToTargetPosition) {
+    minValue = _min([minValue, goToTargetPosition[axis]]);
   }
 
   return {
@@ -805,7 +1250,7 @@ export function getSquareDiagonalPercentage(side) {
  * @return {object} - Returns the value to move, and also potentially if the
  *                    tile needs to be changed
  */
-export function moveEntityBack(character, axis, currentX, currentY, direction, moveDiagonally, goToTargetPosition, failedAttempts = []) {
+export function moveEntityBack(character, axis, currentX, currentY, direction, moveDiagonally, goToTargetPosition) {
   const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
   const tile = tree.get('tile');
   const movePixels = tree.get('movePixels');
@@ -846,12 +1291,16 @@ export function moveEntityBack(character, axis, currentX, currentY, direction, m
 
   const useX = isXAxis ? value : currentX;
   const useY = isXAxis ? currentY : value;
-  const collisions = getEntityCollisions(character, useX, useY, direction, goToTargetPosition, failedAttempts);
+  const collisions = getEntityCollisions(character, useX, useY, direction, goToTargetPosition);
   const minCollisionValue = getCollisionMaxValue({ x: useX, y: useY }, direction, character, collisions);
   let maxValue = _max([minLimit, value]);
 
   if (minCollisionValue) {
     maxValue = _max([maxValue, minCollisionValue]);
+  }
+
+  if (goToTargetPosition) {
+    maxValue = _max([maxValue, goToTargetPosition[axis]]);
   }
 
   return {
@@ -915,7 +1364,7 @@ export function checkFoodCollision(character, direction) {
  *                 If character is colliding with another bunny, this max value
  *                 will be whatever that collision point is.
  */
-export function checkBunnyCollision(character, direction, goToTargetPosition) {
+export function checkBunnyCollision(character, direction) {
   const isHero = character.isHero;
   const tile = tree.get('tile');
   const heroCollisions = tree.select('heroCollisions');
@@ -927,7 +1376,7 @@ export function checkBunnyCollision(character, direction, goToTargetPosition) {
   });
 
   // If moving AI, check for hero collisions when not going to a target location
-  if (!isHero && !goToTargetPosition) {
+  if (!isHero) {
     const heroCursor = tree.get('hero');
     bunniesOnTile.push({
       id: 'Hero',
@@ -959,8 +1408,6 @@ export function checkBunnyCollision(character, direction, goToTargetPosition) {
  * Check if character is collidiing with any scenery items
  *
  * @param  {object} character - The character entity that is moving
- * @param  {int} x - The character's current X position
- * @param  {int} y - The character's current Y position
  * @param  {string} direction - The direction the character is moving, ex: 'up'
  *
  * @return {int} - The max possible value based on the direction the character
@@ -968,9 +1415,9 @@ export function checkBunnyCollision(character, direction, goToTargetPosition) {
  *                 If character is colliding with a scenery item, this max value
  *                 will be whatever that collision point is.
  */
-export function checkSceneryCollision(character, direction, type) {
+export function checkSceneryCollision(character, direction) {
   const tile = tree.get('tile');
-  const items = tile.scenery.filter(item => !item.collected && (type ? item.type == type : true));
+  const items = tile.scenery.filter(item => !item.collected);
   const collisions = checkCollisions(character, direction, items);
 
   // If we're not moving, a space action is happening
@@ -979,10 +1426,6 @@ export function checkSceneryCollision(character, direction, type) {
       if (character.isHero) {
         if (item.takeToTile && !direction) {
           handleBurrowAction(item);
-        }
-      } else {
-        if (item.type == SceneryConstants.BURROW_TYPE) {
-          takeBunnyToGroupTile(character);
         }
       }
     });
