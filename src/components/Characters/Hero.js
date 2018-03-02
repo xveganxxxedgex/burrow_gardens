@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { findDOMNode } from 'react-dom';
 import { branch } from 'baobab-react/higher-order';
 
 import * as constants from 'components/Characters/constants';
@@ -8,8 +7,6 @@ import Bunny from 'components/Characters/Bunny';
 
 import {
   updateHeroPosition,
-  setActiveTile,
-  collectItem,
   toggleShowMenu,
   moveEntityBack,
   moveEntityForward,
@@ -105,7 +102,7 @@ class Hero extends Component {
 
   componentWillUpdate(nextProps, nextState) {
     const { hero } = nextProps;
-    const { moving, isLoaf, isFlopped } = nextState;
+    const { moving, isFlopped } = nextState;
 
     if (moving != this.state.moving) {
       const lastDirection = moving.length ? moving[moving.length - 1] : hero.lastDirection;
@@ -362,23 +359,19 @@ class Hero extends Component {
       switch(moving[m]) {
         case 'up':
           // Move player up on the Y axis
-          const movePlayerUp = moveEntityBack(useCharacter, 'y', newX, newY, moving[m], moving.length > 1);
-          newY = movePlayerUp.value;
+          newY = moveEntityBack(useCharacter, 'y', newX, newY, moving[m], moving.length > 1).value;
           break;
         case 'down':
           // Move player down on the Y axis
-          const movePlayerDown = moveEntityForward(useCharacter, 'y', newX, newY, moving[m], moving.length > 1);
-          newY = movePlayerDown.value;
+          newY = moveEntityForward(useCharacter, 'y', newX, newY, moving[m], moving.length > 1).value;
           break;
         case 'left':
           // Move player left on the X axis
-          const movePlayerLeft = moveEntityBack(useCharacter, 'x', newX, newY, moving[m], moving.length > 1);
-          newX = movePlayerLeft.value;
+          newX = moveEntityBack(useCharacter, 'x', newX, newY, moving[m], moving.length > 1).value;
           break;
         case 'right':
           // Move player right on the X axis
-          const movePlayerRight = moveEntityForward(useCharacter, 'x', newX, newY, moving[m], moving.length > 1);
-          newX = movePlayerRight.value;
+          newX = moveEntityForward(useCharacter, 'x', newX, newY, moving[m], moving.length > 1).value;
           break;
       }
     }
@@ -411,7 +404,8 @@ class Hero extends Component {
         isLoaf={this.state.isLoaf}
         isMoving={this.state.moving.length}
         bunnyImages={this.bunnyImages}
-        id="Hero" />
+        id="Hero"
+      />
     );
   }
 }

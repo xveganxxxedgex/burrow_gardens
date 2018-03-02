@@ -16,8 +16,6 @@ class FoodItem extends Component {
       height,
       width,
       image,
-      index,
-      children,
       inMenu
     } = this.props;
     const style = {

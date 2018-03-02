@@ -15,8 +15,7 @@
     "plugins": [
         "react",
         "jasmine",
-        "import",
-        "testcafe"
+        "import"
     ],
     "globals": {
         "$": false,
@@ -24,14 +23,14 @@
         "module": true
     },
     "rules": {
-        "indent": [1, 2],
+        "indent": [1, 2, {"SwitchCase": 1}],
         "no-console": 0,
         "no-empty": 0,
         "no-unused-vars": [1, {"vars": "all", "args": "after-used"}],
         "prefer-const": 1,
         "quotes": [1, "single"],
 
-        "import/extensions": 1,
+        "import/extensions": 0,
         "jsx-quotes": 1,
         "react/jsx-closing-bracket-location": 1,
         "react/jsx-curly-spacing": 1,

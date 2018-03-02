@@ -1,24 +1,18 @@
 import React, { Component } from 'react';
-import { findDOMNode } from 'react-dom';
 import { branch } from 'baobab-react/higher-order';
 import { Popover } from 'react-bootstrap';
 import _isEqual from 'lodash/isEqual';
 
 import Hero from 'components/Characters/Hero';
-import Scenery from 'components/Scenery';
 import MenuModal from 'components/MenuModal';
 import SceneryItem from 'components/Scenery/SceneryItem';
 import FoodItem from 'components/Food/FoodItem';
 import Bunny from 'components/Characters/Bunny';
-import grassImage from 'images/grass.png';
 
 import {
   setBoardDimensions,
   setActiveTile,
-  getCharacter,
-  getFoodItem,
   getBackgroundCell,
-  getSceneryItem,
   toggleShowMenu
 } from 'actions';
 
@@ -42,17 +36,17 @@ class Board extends Component {
     setActiveTile();
   }
 
+  componentDidMount() {
+    window.addEventListener('resize', this.getBoardBounds);
+
+    this.getBoardBounds();
+  }
+
   componentWillReceiveProps(nextProps) {
     // If player just won the game, open the modal to notify them
     if (nextProps.wonGame && this.props.wonGame != nextProps.wonGame && !nextProps.showMenu) {
       toggleShowMenu();
     }
-  }
-
-  componentDidMount() {
-    window.addEventListener('resize', this.getBoardBounds);
-
-    this.getBoardBounds();
   }
 
   componentWillUnmount() {
@@ -66,7 +60,7 @@ class Board extends Component {
   }
 
   render() {
-    const { popover, tile, showMenu, bunniesOnTile, wonGame, showWonGameModal } = this.props;
+    const { popover, tile, showMenu, bunniesOnTile } = this.props;
 
     if (!Object.keys(tile).length) {
       return <div>Loading...</div>;

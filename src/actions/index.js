@@ -1,9 +1,11 @@
 import React from 'react';
 import tree from 'state';
 import _capitalize from 'lodash/capitalize';
+import _cloneDeep from 'lodash/cloneDeep';
 import _differenceWith from 'lodash/differenceWith';
 import _filter from 'lodash/filter';
 import _find from 'lodash/find';
+import _findKey from 'lodash/findKey';
 import _findIndex from 'lodash/findIndex';
 import _forEach from 'lodash/forEach';
 import _isEqual from 'lodash/isEqual';
@@ -16,7 +18,6 @@ import _union from 'lodash/union';
 import _uniq from 'lodash/uniq';
 import { findDOMNode } from 'react-dom';
 
-import * as Tiles from 'Maps';
 import * as FoodItems from 'components/Food';
 import * as Characters from 'components/Characters';
 import * as Backgrounds from 'components/Backgrounds';
@@ -269,19 +270,19 @@ export function getExitPosition(targetTile) {
  * @return {array} - All collisions in the path between the character and the
  *                   exit position
  */
-export function findCollisionsInPath(character, exitPosition) {
+export function findCollisionsInPath(character, exitPosition, direction) {
   const collisionEntities = getCollisionEntities(true);
   const characterRect = getElementRect(character);
-  const direction = getTargetDirection(characterRect, exitPosition);
+  direction = direction || getTargetDirection(characterRect, exitPosition).direction;
   const axis = getAxisFromDirection(direction);
-  const oppositeAxis = axis == 'x' ? 'y' : 'x';
+  const oppositeAxis = getOppositeAxis(axis);
   const isMovingBack = entityIsMovingBack(direction);
 
   const collisionsInPath = _filter(collisionEntities, entity => {
     const isInAxis = isCollidingInAxis(oppositeAxis, characterRect, entity);
-    const exitMethodParams = [axis, entity, characterRect, exitPosition];
-    const isBetweenExit = isMovingBack ? isBetweenCharacterAndBackwardExit(...exitMethodParams) : isBetweenCharacterAndForwardExit(...exitMethodParams);
-    return isBetweenExit && isInAxis;
+    const isInPath = isMovingBack ? entity.position[axis] < characterRect[axis] : entity.position[axis] > characterRect[axis];
+    const isBetweenExit = isMovingBack ? entity.position[axis] > exitPosition[axis] : entity.position[axis] < exitPosition[axis];
+    return isInPath && isInAxis && isBetweenExit;
   });
 
   return collisionsInPath;
@@ -333,37 +334,205 @@ export function getDirectionForAxis(axis, characterPosition, targetPosition) {
  * @param  {object} targetPosition - The position the character is heading to
  *
  * @return {string} - Which direction the character should go
+ *
+ * TODO: Refactor
  */
-export function getTargetDirection(characterPosition, targetPosition) {
+export function getTargetDirection(characterPosition, targetPosition, avoidCollisions, lastDirection) {
   const { x, y } = characterPosition;
+  const { collisions } = targetPosition;
   // Go the direction the most far away
   const xDifference = targetPosition.x - x;
   const yDifference = targetPosition.y - y;
+  const moveOnAxis = Math.abs(xDifference) > Math.abs(yDifference) ? 'x' : 'y';
+  const axisDirections = {
+    x: xDifference > 0 ? 'right' : 'left',
+    y: yDifference > 0 ? 'down' : 'up'
+  };
+  let direction = axisDirections[moveOnAxis];
+  let newTargetPosition = _cloneDeep(targetPosition);
 
-  if (Math.abs(xDifference) > Math.abs(yDifference)) {
-    // Go direction on X axis
-    return xDifference > 0 ? 'right' : 'left';
+  if (!avoidCollisions) {
+    return {
+      direction,
+      newTargetPosition
+    };
   }
 
-  // Go direction on Y axis
-  return yDifference > 0 ? 'down' : 'up';
+  const collisionsInFirstDirection = findCollisionsInPath(characterPosition, targetPosition, direction);
+  // Don't let AI go in the opposite direction of the last directon they used
+  let goingOppositeOfLastDirection = direction == getOppositeDirection(lastDirection);
+
+  // Use the first direction if it doesn't have any collisions except from the
+  // target position, and if it's not the opposite of the characters last direction
+  if (!collisionsInFirstDirection.length && !goingOppositeOfLastDirection) {
+    return {
+      direction,
+      newTargetPosition
+    };
+  }
+
+  // Get the collision furthest away, for the entire cluster for the first direction
+  const furthestClusterCollisionFirstDirection = getFurthestCollisionInDirection(collisions, direction, characterPosition, newTargetPosition, true);
+  // Get the collision furthest away, only within the path of the first direction
+  const collisionInFirstDirection = getFurthestCollisionInDirection(collisions, direction, characterPosition, newTargetPosition);
+
+  // Try going on the opposite axis to get around the collisions
+  const oppositeAxis = getOppositeAxis(moveOnAxis);
+  const otherAxisDirection = axisDirections[oppositeAxis];
+  const secondDirectionIsOppositeOfLastDirection = otherAxisDirection == getOppositeDirection(lastDirection);
+
+  // Return if the first direction is not the opposite of the last direction,
+  // and if either the closest collision is the known furthest one for the cluster,
+  // or if the second direction is trying to take us back on the last direction
+  if (!goingOppositeOfLastDirection && (_isEqual(furthestClusterCollisionFirstDirection, collisionInFirstDirection) || secondDirectionIsOppositeOfLastDirection)) {
+    return {
+      direction,
+      newTargetPosition
+    };
+  }
+
+  // Update the return value to use the new direction and target position
+  direction = otherAxisDirection;
+  goingOppositeOfLastDirection = direction == getOppositeDirection(lastDirection);
+
+  // See if there are any collisions in the second direction
+  const collisionsInSecondDirection = findCollisionsInPath(characterPosition, targetPosition, direction);
+
+  // Use the second direction if there are no collisions
+  if (!goingOppositeOfLastDirection && !collisionsInSecondDirection.length) {
+    return {
+      direction,
+      newTargetPosition
+    };
+  }
+
+  const offsetDimension = getDimensionFromAxis(oppositeAxis); // height/width
+  const isMovingBack = entityIsMovingBack(direction);
+  const forwardDimension = getForwardDimension(oppositeAxis); // right/bottom
+  const sortLogic = isMovingBack ? 'asc' : 'desc';
+
+  // If second direction has consecutive collisions blocking the way, find the nearest
+  // gap of those using the third direction
+  const consecutiveCollisionsInSecondDirection = _orderBy(_filter(collisions, entity => {
+    return entity.position[oppositeAxis] == newTargetPosition[oppositeAxis] + characterPosition[offsetDimension];
+  }), entity => entity.position[oppositeAxis], [sortLogic]);
+
+  if (consecutiveCollisionsInSecondDirection.length) {
+    const closestGapOnSecondDirection = consecutiveCollisionsInSecondDirection[0];
+
+    _forEach(consecutiveCollisionsInSecondDirection, entity => {
+      // There's not a big enough gap for the character to get through,
+      // so set this as the new maximum so they can go around it
+      if (isMovingBack) {
+        if (entity[forwardDimension] > closestGapOnSecondDirection[oppositeAxis] - characterPosition[offsetDimension]) {
+          newTargetPosition = entity.position;
+        }
+      } else {
+        if (entity[oppositeAxis] < closestGapOnSecondDirection[forwardDimension] + characterPosition[offsetDimension]) {
+          newTargetPosition = entity.position;
+        }
+      }
+    });
+  }
+
+  const oppositeOfFirstDirection = getOppositeDirection(axisDirections[moveOnAxis]);
+  const furthestCollisionInClusterForThirdDirection = getFurthestCollisionInDirection(collisions, oppositeOfFirstDirection, characterPosition, newTargetPosition, true);
+  const collisionInThirdDirection = getFurthestCollisionInDirection(collisions, oppositeOfFirstDirection, characterPosition, newTargetPosition);
+
+  // Go third direction if the closest collision using the third
+  // direction is not the furthest in that direction for the entire cluster
+  if (!_isEqual(collisionInThirdDirection, furthestCollisionInClusterForThirdDirection)) {
+    direction = oppositeOfFirstDirection;
+    newTargetPosition = collisionInThirdDirection;
+  }
+
+  return {
+    direction,
+    newTargetPosition
+  };
+}
+
+// TODO: See if this is still even needed
+export function getFurthestCollisionInDirection(collisions, direction, characterPosition, newTargetPosition, checkEntireCluster) {
+  const moveOnAxis = getAxisFromDirection(direction);
+  const oppositeAxis = getOppositeAxis(moveOnAxis);
+  const isMovingBack = entityIsMovingBack(direction);
+  const offsetDimension = getDimensionFromAxis(moveOnAxis);
+  let newPosition = _cloneDeep(newTargetPosition);
+
+  // Find collisions that are in the way of the diretion we want to go,
+  // then set the new target position to go past that entity.
+  // This will ensure we take an alternative route if our two preferred
+  // directions have collisions
+  _forEach(collisions, entity => {
+    const entityRect = getElementRect(entity);
+    const collisionClearedPosition = entityRect[moveOnAxis] - characterPosition[offsetDimension];
+    // Need to see if this is not already the furthest entity in the cluster
+    if (newPosition[moveOnAxis] != entityRect[moveOnAxis]) {
+      if (isMovingBack) {
+        /*
+        This is to check if the collision is in the direction they will go next,
+        and that the collision is in the way, but is not the furthest in the cluster
+
+        This makes it so the entity will move left in the below situation, where X is
+        the character position and N is where we need to go to avoid the collisions:
+            ------
+             X   -
+           N------
+         */
+        if (checkEntireCluster || entityRect[oppositeAxis] > characterPosition[oppositeAxis]) {
+          // Find the collision furthest in the direction we need to go
+          if (collisionClearedPosition < newPosition[moveOnAxis]) {
+            newPosition = {
+              [moveOnAxis]: checkEntireCluster ? entityRect[moveOnAxis] : collisionClearedPosition,
+              [oppositeAxis]: entityRect[oppositeAxis]
+            };
+          }
+        }
+      } else {
+        if (checkEntireCluster || entityRect[oppositeAxis] < characterPosition[oppositeAxis]) {
+          const forwardDimension = getForwardDimension(moveOnAxis);
+          // Find the collision furthest in the direction we need to go
+          if (entityRect[forwardDimension] > newPosition[moveOnAxis]) {
+            newPosition = {
+              [moveOnAxis]: checkEntireCluster ? entityRect[moveOnAxis] : entityRect[forwardDimension],
+              [oppositeAxis]: entityRect[oppositeAxis]
+            };
+          }
+        }
+      }
+    }
+  });
+
+  return newPosition;
+}
+
+/**
+ * Returns the axis opposite of the one provided
+ *
+ * @param  {string}  axis - The axis to get the opposite axis for
+ *
+ * @return {string} - The opposite axis
+ */
+export function getOppositeAxis(axis) {
+  return isXAxis(axis) ? 'y' : 'x';
 }
 
 /**
  * Returns if an entity is colliding with the axis
  *
  * @param  {string}  axis - The axis the character is moving on (ex: 'x' or 'y')
- * @param  {object}  characterRect - The character rect object containing x, y,
+ * @param  {object}  entityRect - The entity rect object containing x, y,
  *                                   right, bottom, height and width
- * @param  {object}  entity - The collision entity to check
+ * @param  {object}  collision - The collision entity to check
  *
  * @return {Boolean} - If the entity is colliding with the axis path
  */
-export function isCollidingInAxis(axis, characterRect, entity) {
-  const entityRect = getElementRect(entity);
-  const rectEnd = axis == 'x' ? 'right' : 'bottom';
+export function isCollidingInAxis(axis, entityRect, collision, offset = 0) {
+  const collisionRect = getElementRect(collision);
+  const rectEnd = isXAxis(axis) ? 'right' : 'bottom';
 
-  return entityRect[axis] < characterRect[rectEnd] && entityRect[rectEnd] > characterRect[axis];
+  return collisionRect[axis] < entityRect[rectEnd] + offset && collisionRect[rectEnd] > entityRect[axis] - offset;
 }
 
 /**
@@ -378,9 +547,9 @@ export function isCollidingInAxis(axis, characterRect, entity) {
  *
  * @return {Boolean} - If the entity is between the character and the exit
  */
-export function isBetweenCharacterAndForwardExit(axis, entity, characterRect, exitPosition) {
+export function isBetweenCharacterAndForwardExit(axis, entity, characterRect, exitPosition, offset) {
   const entityRect = getElementRect(entity);
-  return entityRect[axis] < exitPosition[axis] && entityRect[axis] > characterRect[axis];
+  return entityRect[axis] > characterRect[axis] && entityRect[axis] < exitPosition[axis] + offset;
 }
 
 /**
@@ -395,10 +564,9 @@ export function isBetweenCharacterAndForwardExit(axis, entity, characterRect, ex
  *
  * @return {Boolean} - If the entity is between the character and the exit
  */
-export function isBetweenCharacterAndBackwardExit(axis, entity, characterRect, exitPosition) {
-  // exit is on right
+export function isBetweenCharacterAndBackwardExit(axis, entity, characterRect, exitPosition, offset) {
   const entityRect = getElementRect(entity);
-  return exitPosition[axis] < entityRect[axis] && characterRect[axis] < entityRect[axis];
+  return entityRect[axis] > exitPosition[axis] - offset && entityRect[axis] < characterRect[axis];
 }
 
 /**
@@ -417,97 +585,661 @@ export function checkIfAtTargetPosition(direction, currentPosition, targetPositi
   return atTargetCoordinate;
 }
 
-/**
- * Returns the nearest open gap that avoids collisions in the path to the exit position
- *
- * @param  {object} character - The character to take to the exit position
- * @param  {object} exitPosition - The {x, y} to take the character to
- *
- * @return {object} - The nearest open gap that the character should move towards
- */
-export function getClosestOpenGap(character, exitPosition) {
+export function getClosestOpenGap(character, exitPosition, attemptedGaps) {
   const collisionsInPath = findCollisionsInPath(character, exitPosition);
-  const collisionEntities = getCollisionEntities(true);
 
+  // No collisions are in the path of the direction the character will go,
+  // so go straight to the exit position
   if (!collisionsInPath.length) {
-    return exitPosition;
+    return { gap: exitPosition };
   }
 
-  const boardDimensions = tree.get('boardDimensions');
   const characterRect = getElementRect(character);
-  const direction = getTargetDirection(characterRect, exitPosition);
+  const { direction } = getTargetDirection(characterRect, exitPosition);
+  const openGap = findGapInDirection(direction, collisionsInPath, character, exitPosition, attemptedGaps);
+  return openGap;
+}
+
+function getDistanceSumFromGap(character, entity = {}, exitPosition = {}) {
+  const characterRect = getElementRect(character);
+  const entityRect = getElementRect(entity);
+  const distanceToCharacter = Math.abs(characterRect.x - entityRect.x) + Math.abs(characterRect.y - entityRect.y) || 0;
+  const distanceToExit = Math.abs(exitPosition.x - entityRect.x) + Math.abs(exitPosition.y - entityRect.y) || 0;
+  return distanceToCharacter + distanceToExit;
+}
+
+export function getClosestValidGap(character, exitPosition, collisionCluster, collisionsNearGaps) {
+  const sortedCollisions = _orderBy(collisionsNearGaps, entity => getDistanceSumFromGap(character, entity, exitPosition));
+  const withoutCollisionsInPath = _find(sortedCollisions, entity => {
+    const gapNearCollision = getGapPosition(character, entity, collisionCluster);
+    const collisionsInPath = findCollisionsInPath(character, gapNearCollision);
+    return !collisionsInPath.length || (collisionsInPath.length == 1 && _isEqual(collisionsInPath[0], entity));
+  });
+
+  return withoutCollisionsInPath || sortedCollisions[0];
+}
+
+export function findGapInDirection(direction, collisions, character, exitPosition, attemptedGaps) {
+  const collisionEntities = getCollisionEntities(true);
+  const characterRect = getElementRect(character);
   const axis = getAxisFromDirection(direction);
-  const oppositeAxis = axis == 'x' ? 'y' : 'x';
   const isMovingBack = entityIsMovingBack(direction);
   const valueLogic = isMovingBack ? 'max' : 'min';
-  const backwardDimension = getBackwardDimension(oppositeAxis);
-  const forwardDimension = getForwardDimension(oppositeAxis);
-  const dimensionVar = getDimensionFromAxis(oppositeAxis);
   const valueMethods = {
     min: _minBy,
     max: _maxBy
   };
 
-  const closestCollision = valueMethods[valueLogic](collisionsInPath, entity => {
+  // Check if there's any gaps along the axis that has the collision
+  const closestCollision = valueMethods[valueLogic](collisions, entity => {
     return entity.position[axis];
   });
+  const { collisions: consecutiveCollisions } = findConsecutiveCollisions(closestCollision, collisionEntities, characterRect.height, characterRect.width);
+  const collisionsNearGaps = getCollisionsNearGaps(character, consecutiveCollisions, attemptedGaps);
 
-  const { closest, collisions: consecutiveCollisions } = findConsecutiveCollisions(closestCollision, collisionEntities, characterRect.height, characterRect.width);
+  if (collisionsNearGaps.length) {
+    const closestCollisionNearGap = collisionsNearGaps.length == 1 ? collisionsNearGaps[0] : getClosestValidGap(character, exitPosition, consecutiveCollisions, collisionsNearGaps);
+    const gapPosition = getGapPosition(character, closestCollisionNearGap, consecutiveCollisions);
 
-  // Find nearest gaps that have enough room for the character to move through
-  const validBackwardGap = closest[backwardDimension].min.position[oppositeAxis] > characterRect[dimensionVar] * 2;
-  const forwardCollisionRect = getElementRect(closest[forwardDimension].max);
-  const validForwardGap = forwardCollisionRect[forwardDimension] < boardDimensions[dimensionVar] - characterRect[dimensionVar] * 2;
-  const forwardGap = { [axis]: forwardCollisionRect[axis], [oppositeAxis]: forwardCollisionRect[forwardDimension] };
-  let goToOpenGap = validBackwardGap
-    ? {
-      [axis]: closest[backwardDimension].min.position[axis],
-      [oppositeAxis]: closest[backwardDimension].min.position[oppositeAxis] - characterRect[dimensionVar]
-    }
-    : forwardGap;
-
-  // If both backward and forward paths are valid, find the one closest to the
-  // characters current position
-  if (validBackwardGap && validForwardGap) {
-    const distanceFromBackwardToCharacter = closest[backwardDimension].min.position[oppositeAxis] - characterRect[oppositeAxis];
-    const distanceFromForwardToCharacter = characterRect[oppositeAxis] - closest[forwardDimension].max.position[oppositeAxis];
-
-    if (distanceFromForwardToCharacter < distanceFromBackwardToCharacter) {
-      goToOpenGap = forwardGap;
-    }
+    return {
+      gap: gapPosition,
+      collision: closestCollisionNearGap
+    };
   }
 
-  // Need to see if character is stuck inside a collision cluster and need to move out
-  // before proceeding to the target position
-  const minMaxLogic = goToOpenGap[oppositeAxis] < characterRect[oppositeAxis] ? 'min' : 'max';
-  const backwardDimensionOnAxis = getBackwardDimension(axis);
+  return { gap: exitPosition };
+}
+
+/**
+ * Returns corner and diagonal that character cannot go past
+ *
+ * For example:
+ *        __
+ *         | <- character would never be able to go past this corner from their
+ *              current position if going up and to the right
+ *
+ * X
+ *
+ * @param  {object} character - The character object, containing their current position
+ * @param  {object} collision - The collision entity to get the corner/diagonal for
+ *
+ * @return {array} - Sorted array containing the sides constructing the invalid corner and diagonal
+ */
+export function getCollisionCorner(character, collision) {
+  const characterRect = getElementRect(character);
+  const collisionRect = getElementRect(collision);
+  const sides = [];
+  let diagonalX = 'left';
+  let diagonalY = 'top';
+
+  if (characterRect.right <= collisionRect.x) {
+    sides.push({ side: 'left', isDiagonal: false });
+    diagonalX = 'right';
+  } else {
+    sides.push({ side: 'right', isDiagonal: false });
+  }
+
+  if (characterRect.bottom <= collisionRect.y) {
+    sides.push({ side: 'up', isDiagonal: false });
+    diagonalY = 'bottom';
+  } else {
+    sides.push({ side: 'down', isDiagonal: false });
+  }
+
+  sides.push({ side: `${diagonalY}-${diagonalX}`, isDiagonal: true });
+
+  return _orderBy(sides, 'side');
+}
+
+/**
+ * Returns the opposite corner of a given corner
+ *
+ * For example:
+ * This:
+ * |__
+ *
+ * Would return:
+ *  __
+ *   |
+ * @param  {array} corner - The corner to get the opposite for
+ *
+ * @return {array} - Sorted array containing the sides for the opposite corner
+ */
+export function getOppositeCorner(corner) {
+  const oppositeCorner = [
+    { side: getOppositeDirection(corner[0].side), isDiagonal: false },
+    { side: getOppositeDirection(corner[1].side), isDiagonal: false }
+  ];
+
+  return _orderBy(oppositeCorner, 'side');
+}
+
+/**
+ * Checks if the sides with collisions contains a corner
+ *
+ * @param  {array} sidesWithCollisions - The sides of an entity that have collision neighbours
+ *
+ * @return {string|null} - The key/name of the corner if there is one, or null
+ */
+function checkIfIsCorner(sidesWithCollisions) {
+  const corners = {
+    'bottom-right': ['left', 'up'],
+    'top-right': ['down', 'left'],
+    'bottom-left': ['right', 'up'],
+    'top-left': ['down', 'right']
+  };
+  return _findKey(corners, corner => arrayContainsAll(sidesWithCollisions, corner, 'side'));
+}
+
+/**
+ * Returns if a corner is an outer corner, ie not an invalid corner that the character cannot go past
+ *
+ * @param  {object} entity - The collision entity to check the corner
+ * @param  {array} sidesWithCollisions - The sides of the entity that have collision neighbours
+ * @param  {array} collisions - The current collision cluster that the entity belongs to
+ * @param  {object} character - The character object, containing their current position
+ *
+ * @return {bool} - Whether the collision is an outer corner and has no other collisions
+ *                  outside of it
+ */
+export function checkIfIsOuterCorner(entity, sidesWithCollisions, collisions, character) {
+  const entityRect = getElementRect(entity);
+  const characterRect = getElementRect(character);
+  const isCorner = checkIfIsCorner(sidesWithCollisions);
+
+  if (!isCorner) {
+    return false;
+  }
+
+  const characterInsideX = isCorner.includes('left') ? entityRect.right <= characterRect.x : entityRect.x >= characterRect.right;
+  const characterInsideY = isCorner.includes('top') ? entityRect.bottom <= characterRect.y : entityRect.y >= characterRect.bottom;
+
+  if (characterInsideX && characterInsideY) {
+    return false;
+  }
+
+  const collisionOutsideOfCorner = _find(collisions, collision => {
+    const collisionRect = getElementRect(collision);
+    const isPastX = isCorner.includes('left') ? collisionRect.x <= entityRect.x : collisionRect.x >= entityRect.x;
+    const isPastY = isCorner.includes('top') ? collisionRect.y <= entityRect.y : collisionRect.y >= entityRect.y;
+    const isBetweenCharacterX = isCorner.includes('left') ? collisionRect.x >= characterRect.x : collisionRect.x <= characterRect.x;
+    const isBetweenCharacterY = isCorner.includes('top') ? collisionRect.y >= characterRect.y : collisionRect.y <= characterRect.y;
+    return !_isEqual(entity, collision) && isPastX && isPastY && (isBetweenCharacterX || isBetweenCharacterY);
+  });
+
+  return !collisionOutsideOfCorner;
+}
+
+/**
+ * Returns whether an array contains all values of a second array
+ *
+ * @param  {array} arr1 - The array that must contain all values of the second array
+ * @param  {array} arr2 - The array whos values all must exist in the primary array
+ * @param  {string} property1 -
+ *
+ * @return {bool} - If the first array contains all of the second array
+ */
+export function arrayContainsAll(arr1, arr2, property1) {
+  return arr2.every(val1 => _find(arr1, val2 => {
+    if (property1) {
+      return val2[property1] == val1;
+    }
+
+    return val2 == val1;
+  }));
+}
+
+/**
+ * Returns whether an entity has neighbours on opposite diagonals
+ * If true, this entity cannot be next to an open gap
+ *
+ * @param  {array} sidesWithCollisions - The sides of the entity that have collision neighbours
+ * @param  {object} character - The character object, containing their current position
+ * @param  {object} entity - The collision entity to check the diagonal collisions
+ * @param  {array} collisions - The current collision cluster that the entity belongs to
+ *
+ * @return {Boolean} - Whether the entity has collision neighbours on opposite diagonals
+ */
+export function hasOppositeDiagonals(sidesWithCollisions, character, entity, collisions) {
+  const characterRect = getElementRect(character);
+  const entityRect = getElementRect(entity);
+  /*
+  This checks neighbours like:
+    x
+      x
+        x
+  */
+  const forwardDiagonal = arrayContainsAll(sidesWithCollisions, ['top-left', 'bottom-right'], 'side');
+  /*
+  This checks neighbours like:
+        x
+      x
+    x
+  */
+  const backwardDiagonal = arrayContainsAll(sidesWithCollisions, ['top-right', 'bottom-left'], 'side');
+  const xDiagonalSide = characterRect.x < entityRect.x ? 'left' : 'right';
+  const yDiagonalSide = characterRect.y < entityRect.y ? 'top' : 'bottom';
+  const hasDiagonalsOnX = arrayContainsAll(sidesWithCollisions, [`top-${xDiagonalSide}`, `bottom-${xDiagonalSide}`], 'side');
+  const hasDiagonalsOnY = arrayContainsAll(sidesWithCollisions, [`${yDiagonalSide}-left`, `${yDiagonalSide}-right`], 'side');
+  let hasXDiagonal = hasDiagonalsOnX;
+  let hasYDiagonal = hasDiagonalsOnY;
+
+  // TODO: Refactor?
+  if (hasDiagonalsOnX) {
+    /*
+    This checks neighbours like:
+
+       x           x
+     x      OR       x
+       x           x
+    */
+    const isCollidingOnX = (collisionRect) => {
+      return xDiagonalSide == 'right'
+        ? collisionRect.x < entityRect.right + characterRect.width
+        : collisionRect.right < entityRect.x - characterRect.width;
+    };
+
+    const findXDiagonalCollision = (collision, position) => {
+      const collisionRect = getElementRect(collision);
+      const collidingOnY = position == 'top'
+        ? collisionRect.y < entityRect.y && collisionRect.bottom > entityRect.y - characterRect.height
+        : collisionRect.y > entityRect.y && collisionRect.y < entityRect.bottom + characterRect.height;
+      const collidingOnX = isCollidingOnX(collisionRect);
+      return !_isEqual(collision, entity) && collidingOnY && collidingOnX;
+    };
+
+    // Find the collisions to the top and bottom of the entity
+    const topCollision = _find(collisions, collision => {
+      return findXDiagonalCollision(collision, 'top');
+    });
+    const bottomCollision = _find(collisions, collision => {
+      return findXDiagonalCollision(collision, 'bottom');
+    });
+
+    const characterAboveTop = topCollision && characterRect.bottom < topCollision.position.y;
+    const characterBelowBottom = bottomCollision && characterRect.y > getElementRect(bottomCollision).bottom;
+    hasXDiagonal = !characterAboveTop && !characterBelowBottom;
+  }
+
+  if (hasDiagonalsOnY) {
+    /*
+    This checks neighbours like:
+
+       x          x   x
+     x   x   OR     x
+    */
+    const isCollidingOnY = (collisionRect) => {
+      return yDiagonalSide == 'bottom'
+        ? collisionRect.y < entityRect.bottom + characterRect.height
+        : collisionRect.bottom < entityRect.y - characterRect.height;
+    };
+
+    const findYDiagonalCollision = (collision, position) => {
+      const collisionRect = getElementRect(collision);
+      const collidingOnX = position == 'left'
+        ? collisionRect.x < entityRect.x && collisionRect.right > entityRect.x - characterRect.width
+        : collisionRect.x > entityRect.x && collisionRect.x < entityRect.right + characterRect.width;
+      const collidingOnY = isCollidingOnY(collisionRect);
+      return !_isEqual(collision, entity) && collidingOnY && collidingOnX;
+    };
+
+    // Find the collisions to the top and bottom of the entity
+    const leftCollision = _find(collisions, collision => {
+      return findYDiagonalCollision(collision, 'left');
+    });
+    const rightCollision = _find(collisions, collision => {
+      return findYDiagonalCollision(collision, 'bottom');
+    });
+
+    const characterBeforeLeft = leftCollision && characterRect.right < leftCollision.position.x;
+    const characterAfterRight = rightCollision && characterRect.x > getElementRect(rightCollision).right;
+    hasYDiagonal = !characterBeforeLeft && !characterAfterRight;
+  }
+
+  return forwardDiagonal || backwardDiagonal || hasXDiagonal || hasYDiagonal;
+}
+
+/**
+ * Returns whether an entity has neighbours on opposite sides
+ * If true, this entity cannot be next to an open gap
+ *
+ * @param  {array} sidesWithCollisions - The sides of the entity that have collision neighbours
+ *
+ * @return {Boolean} - Whether the entity has collision neighbours on opposite sides
+ */
+export function hasNeighboursOnOppositeSides(sidesWithCollisions) {
+  const hasBothOnXAxis = arrayContainsAll(sidesWithCollisions, ['left', 'right'], 'side');
+  const hasBothOnYAxis = arrayContainsAll(sidesWithCollisions, ['up', 'down'], 'side');
+  return hasBothOnXAxis || hasBothOnYAxis;
+}
+
+/**
+ * Returns whether an entity has collision neighbours on an invalid diagonal based
+ * on the characters current position
+ *
+ * @param  {array} sidesWithCollisions - The sides of the entity that have collision neighbours
+ * @param  {object} character - The character object, containing their current position
+ * @param  {object} entity - The collision entity to check the corner
+ * @param  {array} collisions - The current collision cluster that the entity belongs to
+ *
+ * @return {Boolean} - Whether entity has invalid diagonal collision
+ */
+export function hasInvalidDiagonal(sidesWithCollisions, character, entity, collisions) {
+  const characterRect = getElementRect(character);
+  const entityRect = getElementRect(entity);
+  const diagonalCollisions = _filter(sidesWithCollisions, collisionSide => collisionSide.isDiagonal);
+
+  if (!diagonalCollisions.length) {
+    return false;
+  }
+
+  let hasInvalidDiagonal = false;
+
+  // TODO: cleanup/refactor?
+  _forEach(diagonalCollisions, collision => {
+    const invalidCollisionSide = collision.side.includes('left') ? 'right' : 'left';
+
+    if (_find(sidesWithCollisions, sideObj => sideObj.side == invalidCollisionSide)) {
+      // Check if there are collisions outside of this diagonal
+      // If there are, character is stuck inside a collision cluster and this entity
+      // cannot be near an open gap
+      if (collision.side.includes('top')) {
+        const collisionBelowEntity = _find(collisions, collision => !_isEqual(collision, entity) && collision.position.y > entityRect.bottom);
+
+        if (collisionBelowEntity) {
+          hasInvalidDiagonal = true;
+        }
+      } else if (collision.side.includes('bottom')) {
+        const collisionAboveEntity = _find(collisions, collision => {
+          const collisionRect = getElementRect(collision);
+          return !_isEqual(collision, entity) && collisionRect.bottom > entityRect.y;
+        });
+
+        if (collisionAboveEntity) {
+          hasInvalidDiagonal = true;
+        }
+      }
+
+      if (collision.side.includes('left')) {
+        const collisionAfterEntity = _find(collisions, collision => !_isEqual(collision, entity) && collision.position.x > entityRect.right);
+
+        if (collisionAfterEntity) {
+          hasInvalidDiagonal = true;
+        }
+      } else if (collision.side.includes('right')) {
+        const collisionBeforeEntity = _find(collisions, collision => {
+          const collisionRect = getElementRect(collision);
+          return !_isEqual(collision, entity) && collisionRect.right > entityRect.x;
+        });
+
+        if (collisionBeforeEntity) {
+          hasInvalidDiagonal = true;
+        }
+      }
+
+      // Check if invalid diagonal based on the diagonal type and the characters
+      // current position relative to the entity with the collision neighbours
+      if (characterRect.y < entityRect.y) {
+        if (collision.side == 'top-left' && characterRect.x > entityRect.x - characterRect.width) {
+          hasInvalidDiagonal = true;
+        } else if (collision.side == 'top-right' && characterRect.x < entityRect.right + characterRect.width) {
+          hasInvalidDiagonal = true;
+        }
+      } else {
+        if (collision.side == 'bottom-left' && characterRect.x > entityRect.x - characterRect.width) {
+          hasInvalidDiagonal = true;
+        } else if (collision.side == 'bottom-right' && characterRect.x < entityRect.right + characterRect.width) {
+          hasInvalidDiagonal = true;
+        }
+      }
+
+      if (hasInvalidDiagonal) {
+        return;
+      }
+    }
+  })
+
+  return hasInvalidDiagonal;
+}
+
+/**
+ * Returns all collision entities that are neighbouring an open gap where the character can go through
+ *
+ * @param  {object} character - The character object, containing their current position
+ * @param  {array} entities - The current collision cluster that the entity belongs to
+ * @param  {array} attempted - Array of open gaps the character has already attempted
+ *
+ * @return {array} - Array of collisions in the cluster that are near open gaps
+ */
+export function getCollisionsNearGaps(character, entities, attempted) {
+  const characterRect = getElementRect(character);
+  const collisionsWithGaps = _filter(entities, entity => {
+    const sidesWithCollisions = getSidesWithCollisions(entity, entities, characterRect);
+    const cornerCollisions = getCollisionCorner(character, entity);
+    const cornerSides = cornerCollisions.filter(side => !side.isDiagonal);
+    let isNearGap = false;
+
+    // Collision doesn't have any neighbours
+    if (!sidesWithCollisions.length) {
+      isNearGap = true;
+    }
+
+    // Collision has a side with a collision, but those sides aren't corner collisions
+    if (sidesWithCollisions.length == 1 && !_find(cornerCollisions, collisionSide => collisionSide.side == sidesWithCollisions[0])) {
+      isNearGap = true;
+    }
+
+    if (sidesWithCollisions.length >= 2) {
+      const hasCollisionsOnOppositeSides = hasNeighboursOnOppositeSides(sidesWithCollisions);
+      const hasCollisionsOnOppositeDiagonals = hasOppositeDiagonals(sidesWithCollisions, character, entity, entities);
+
+      // Collisions that have neighbours to each side on an axis , or collisions on opposite diagonals can't have a gap nearby
+      if (!hasCollisionsOnOppositeSides && !hasCollisionsOnOppositeDiagonals) {
+        const collisionSides = sidesWithCollisions.filter(side => !side.isDiagonal);
+        const hasInvalidDiagonalCollision = hasInvalidDiagonal(sidesWithCollisions, character, entity, entities);
+        const oppositeCorner = getOppositeCorner(cornerSides);
+        const hasValidCornerCollisions = _isEqual(collisionSides, oppositeCorner);
+        const isCorner = checkIfIsCorner(sidesWithCollisions);
+        const isOuterCorner = checkIfIsOuterCorner(entity, sidesWithCollisions, entities, character);
+        isNearGap = !_isEqual(collisionSides, cornerSides) && (!hasInvalidDiagonalCollision || hasValidCornerCollisions) && (!isCorner || isOuterCorner);
+      }
+    }
+
+    // Ensure the gap is valid, hasn't already been attempted and the character is not currently at that position
+    if (isNearGap) {
+      const gapPosition = getGapPosition(character, entity, entities);
+      const isValidGap = checkIfValidGap(gapPosition, characterRect.height, characterRect.width);
+      const characterIsAtGap = _isEqual({ x: characterRect.x, y: characterRect.y }, gapPosition);
+      const hasAttempted = _find(attempted, collision => {
+        return collision.position.x == entity.position.x && collision.position.y == entity.position.y;
+      });
+      return isValidGap && !characterIsAtGap && !hasAttempted;
+    }
+
+    return isNearGap;
+  });
+
+  return collisionsWithGaps;
+}
+
+/**
+ * Returns the sides of an entity that have collision neighbours
+ *
+ * @param  {object} entity - The collision entity to get the sides that have collision neighbours
+ * @param  {array} entities - The current collision cluster that the entity belongs to
+ * @param  {object} characterRect - The character rect object, containing their current position, height and width
+ *
+ * @return {array} - Sorted array of the sides that have collision neighbours
+ */
+export function getSidesWithCollisions(entity, entities, characterRect) {
+  const sides = ['up', 'down', 'left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right'];
+  const entityRect = getElementRect(entity);
+  const sidesWithCollisions = [];
+
+  // Check each side explicitly for collisions
+  _forEach(sides, side => {
+    const axis = getAxisFromDirection(side);
+    const oppositeAxis = getOppositeAxis(axis);
+    const dimensionVar = getDimensionFromAxis(axis);
+    const isDiagonal = side.includes('-');
+    const offset = characterRect[dimensionVar];
+    const neighbourMethods = {
+      forward: hasNeighbourForward,
+      backward: hasNeighbourBackward
+    };
+    const neighbourLogic = ['right', 'down', 'top-left', 'top-right', 'bottom-right'].includes(side) ? 'forward' : 'backward';
+    const hasNeighbourOnSide = _find(entities, neighbour => {
+      const neighbourRect = getElementRect(neighbour);
+
+      if (isDiagonal) {
+        let isInXAxis = false;
+        let isInYAxis = false;
+
+        if (side.includes('left')) {
+          isInXAxis = hasNeighbourBackward(entityRect, neighbourRect, 'x', characterRect.width);
+        } else if (side.includes('right')) {
+          isInXAxis = hasNeighbourForward(entityRect, neighbourRect, 'x', characterRect.width);
+        }
+
+        if (side.includes('top')) {
+          isInYAxis = hasNeighbourBackward(entityRect, neighbourRect, 'y', characterRect.width);
+        } else if (side.includes('bottom')) {
+          isInYAxis = hasNeighbourForward(entityRect, neighbourRect, 'y', characterRect.height);
+        }
+
+        return isInXAxis && isInYAxis;
+      }
+
+      const isInAxis = isCollidingInAxis(oppositeAxis, entityRect, neighbourRect, isDiagonal ? offset : 0);
+      const hasNeighbourOnAxis = neighbourMethods[neighbourLogic](entityRect, neighbourRect, axis, offset);
+      return isInAxis && hasNeighbourOnAxis;
+    });
+
+    if (hasNeighbourOnSide) {
+      sidesWithCollisions.push({ side, isDiagonal });
+    }
+  });
+
+  return _orderBy(sidesWithCollisions, 'side');
+}
+
+/**
+ * Returns the open gap position next to the entity that is near an open gap
+ *
+ * @param  {object} character - The character object, containing their current position, height and width
+ * @param  {object} closestCollisionNearGap - The entity that is closest to an open gap
+ * @param  {array} collisions - The current collision cluster that the closestCollisionNearGap belongs to
+ *
+ * @return {object} - The position of the open gap relative to the entity
+ */
+export function getGapPosition(character, closestCollisionNearGap, collisions) {
+  const characterRect = getElementRect(character);
+  const closestCollisionRect = getElementRect(closestCollisionNearGap);
+  const sidesWithCollisions = getSidesWithCollisions(closestCollisionNearGap, collisions, characterRect);
+  const gapPos = {
+    x: closestCollisionRect.right,
+    y: closestCollisionRect.bottom,
+    height: characterRect.height,
+    width: characterRect.width
+  };
+
+  if (_find(sidesWithCollisions, sideObj => sideObj.side.includes('right'))) {
+    gapPos.x = closestCollisionRect.x - characterRect.width;
+  }
+
+  if (_find(sidesWithCollisions, sideObj => sideObj.side == 'down' || sideObj.side.includes('bottom'))) {
+    gapPos.y = closestCollisionRect.y - characterRect.height;
+  }
+
+  return gapPos;
+}
+
+/**
+ * Returns whether a gap position is valid
+ *
+ * @param  {object} gap - The gap position
+ * @param  {int} heightOffset - The height offset to use in the board bounds logic
+ * @param  {int} widthOffset - The width offset to use in the board bounds logic
+ *
+ * @return {bool} - Whether the gap is valid
+ */
+export function checkIfValidGap(gap, heightOffset, widthOffset) {
+  const gapRect = getElementRect(gap);
+  const isValidOnY = isInBoardBoundsOnAxis(gapRect, 'y', heightOffset);
+  const isValidOnX = isInBoardBoundsOnAxis(gapRect, 'x', widthOffset);
+  return isValidOnX && isValidOnY;
+}
+
+/**
+ * Returns whether a position is within the board bounds
+ *
+ * @param  {object} rect - The position rect to check
+ * @param  {string} axis - The axis to check
+ * @param  {int} offset - The offset to use in the board bounds logic
+ *
+ * @return {Boolean} - Whether the rect is within the board bounds
+ */
+export function isInBoardBoundsOnAxis(rect, axis, offset) {
+  const boardDimensions = tree.get('boardDimensions');
   const forwardDimensionOnAxis = getForwardDimension(axis);
-  const closestForwardOnAxis = closest[forwardDimensionOnAxis][minMaxLogic];
-  const closestBackwardOnAxis = closest[backwardDimensionOnAxis][minMaxLogic];
-  const goAroundCollision = isMovingBack ? closestForwardOnAxis : closestBackwardOnAxis;
-  const axisDirection = isMovingBack ? backwardDimensionOnAxis : forwardDimensionOnAxis;
-  const oppositeAxisDirection = isMovingBack ? forwardDimensionOnAxis : backwardDimensionOnAxis;
-  const otherAxisDirection = isMovingBack ? backwardDimension : forwardDimension;
-  const collisionIsBeforeCharacter = isMovingBack
-    ? goAroundCollision.position[axis] > characterRect[axisDirection]
-    : goAroundCollision.position[axis] < characterRect[axisDirection];
+  const isAfterBoardStart = rect[axis] > offset;
+  const isBeforeBoardEnd = rect[forwardDimensionOnAxis] < boardDimensions[forwardDimensionOnAxis] - offset;
+  return isAfterBoardStart && isBeforeBoardEnd;
+}
 
-  if (collisionIsBeforeCharacter) {
-    const collisionRectOnAxis = getElementRect(closest[oppositeAxisDirection][minMaxLogic]);
-    // Check if outermost collision is closer to the gap than character
-    const collisionToGapDistance = closest[oppositeAxisDirection][minMaxLogic].position[oppositeAxis] - goToOpenGap[oppositeAxis];
-    const characterToGapDistance = characterRect[oppositeAxis] - goToOpenGap[oppositeAxis];
+/**
+ * Returns whether a given value is before another based on whether the character is moving back
+ *
+ * @param  {int}  value1 - The first value to compare
+ * @param  {int}  value2 - The second value to compare
+ * @param  {bool} isMovingBack - If the character is moving backward
+ *
+ * @return {bool} - If value1 is before value2 based on whether the character is moving back
+ */
+export function valueIsBefore(value1, value2, isMovingBack) {
+  return isMovingBack ? value1 < value2 : value1 > value2;
+}
 
-    if (Math.abs(collisionToGapDistance) < Math.abs(characterToGapDistance)) {
-      // Collision is in the way of where character needs to go, so go around it
-      goToOpenGap = {
-        [axis]: closest[oppositeAxisDirection][minMaxLogic].position[axis] - characterRect[getDimensionFromAxis(axis)],
-        [oppositeAxis]: collisionRectOnAxis[otherAxisDirection]
-      };
-    }
+/**
+ * Returns if an entity has a neighbour in the forward direction based on the axis
+ *
+ * @param  {object} entityRect - The entity rect to check for forward neighbours
+ * @param  {object} neighbourRect - The potential neighbour rect
+ * @param  {string} axis - The axis to check
+ * @param  {int} offsetThreshold - The offset to use in the collision logic
+ * @param  {bool} useEquals - Whether equal comparison logic should be used
+ *
+ * @return {Boolean} - Whether the neighbourRect is a collision neighbour forward
+ */
+export function hasNeighbourForward(entityRect, neighbourRect, axis, offsetThreshold, useEquals) {
+  const forwardDimension = getForwardDimension(axis);
+
+  if (useEquals) {
+    return neighbourRect[axis] <= entityRect[forwardDimension] + offsetThreshold && neighbourRect[axis] >= entityRect[axis];
   }
 
-  return goToOpenGap;
+  return neighbourRect[axis] < entityRect[forwardDimension] + offsetThreshold && neighbourRect[axis] > entityRect[axis];
+}
+
+/**
+ * Returns if an entity has a neighbour in the backward direction based on the axis
+ *
+ * @param  {object} entityRect - The entity rect to check for backward neighbours
+ * @param  {object} neighbourRect - The potential neighbour rect
+ * @param  {string} axis - The axis to check
+ * @param  {int} offsetThreshold - The offset to use in the collision logic
+ * @param  {bool} useEquals - Whether equal comparison logic should be used
+ *
+ * @return {Boolean} - Whether the neighbourRect is a collision neighbour backward
+ */
+export function hasNeighbourBackward(entityRect, neighbourRect, axis, offsetThreshold, useEquals) {
+  const forwardDimension = getForwardDimension(axis);
+
+  if (useEquals) {
+    return neighbourRect[forwardDimension] >= entityRect[axis] - offsetThreshold && neighbourRect[axis] <= entityRect[axis];
+  }
+
+  return neighbourRect[forwardDimension] > entityRect[axis] - offsetThreshold && neighbourRect[axis] < entityRect[axis];
 }
 
 /**
@@ -518,7 +1250,7 @@ export function getClosestOpenGap(character, exitPosition) {
  * @return {string} - The string of the backward direction
  */
 export function getBackwardDirection(axis) {
-  return axis == 'x' ? 'left' : 'up';
+  return isXAxis(axis) ? 'left' : 'up';
 }
 
 /**
@@ -529,7 +1261,7 @@ export function getBackwardDirection(axis) {
  * @return {string} - The string of the forward direction
  */
 export function getForwardDirection(axis) {
-  return axis == 'x' ? 'right' : 'down';
+  return isXAxis(axis) ? 'right' : 'down';
 }
 
 /**
@@ -540,7 +1272,7 @@ export function getForwardDirection(axis) {
  * @return {string} - The string of the backward dimension
  */
 export function getBackwardDimension(axis) {
-  return axis == 'x' ? 'left' : 'top';
+  return isXAxis(axis) ? 'left' : 'top';
 }
 
 /**
@@ -551,7 +1283,7 @@ export function getBackwardDimension(axis) {
  * @return {string} - The string of the forward dimension
  */
 export function getForwardDimension(axis) {
-  return axis == 'x' ? 'right' : 'bottom';
+  return isXAxis(axis) ? 'right' : 'bottom';
 }
 
 /**
@@ -562,7 +1294,11 @@ export function getForwardDimension(axis) {
  * @return {string} - The string of the dimension
  */
 export function getDimensionFromAxis(axis) {
-  return axis == 'x' ? 'width' : 'height';
+  return isXAxis(axis) ? 'width' : 'height';
+}
+
+export function isXAxis(axis) {
+  return axis == 'x';
 }
 
 /**
@@ -590,30 +1326,26 @@ export function findConsecutiveCollisions(startingEntity, collisionEntities, hei
   const remainingCollisions = _differenceWith(collisionEntities, foundCollisions, _isEqual);
   closestCollisions = closestCollisions || {
     top: {
-      min: startingEntity,
-      max: startingEntity
+      min: _cloneDeep(entityRect),
+      max: _cloneDeep(entityRect)
     },
     bottom: {
-      min: startingEntity,
-      max: startingEntity
+      min: _cloneDeep(entityRect),
+      max: _cloneDeep(entityRect)
     },
     left: {
-      min: startingEntity,
-      max: startingEntity
+      min: _cloneDeep(entityRect),
+      max: _cloneDeep(entityRect)
     },
     right: {
-      min: startingEntity,
-      max: startingEntity
+      min: _cloneDeep(entityRect),
+      max: _cloneDeep(entityRect)
     }
   };
 
   _forEach(remainingCollisions, ce => {
-    const collisionEntityRect = getElementRect(ce);
-    const bottomCollision = collisionEntityRect.y < entityRect.bottom + heightThreshold;
-    const topCollision = collisionEntityRect.bottom > entityRect.y - heightThreshold;
-    const rightCollision = collisionEntityRect.x < entityRect.right + widthThreshold;
-    const leftCollision = collisionEntityRect.right > entityRect.x - widthThreshold;
-    const isConsecutiveCollision = bottomCollision && topCollision && rightCollision && leftCollision;
+    // need to ensure starting entity doesn't change when recursively calling
+    const isConsecutiveCollision = checkElementCollision(entityRect, ce, heightThreshold, widthThreshold, true);
 
     if (isConsecutiveCollision) {
       foundCollisions.push(ce);
@@ -622,7 +1354,7 @@ export function findConsecutiveCollisions(startingEntity, collisionEntities, hei
       const childConsecutiveCollisions = findConsecutiveCollisions(ce, remainingCollisions, heightThreshold, widthThreshold, foundCollisions, closestCollisions);
       foundCollisions = _uniq(_union(foundCollisions, childConsecutiveCollisions.collisions));
       const closestChild = childConsecutiveCollisions.closest;
-      closestCollisions = getClosestCollisions(closestChild, ce, closestCollisions);
+      closestCollisions = getClosestCollisions(closestChild, getElementRect(ce), closestCollisions);
     }
   });
 
@@ -651,33 +1383,29 @@ export function getClosestCollisions(closestChild, closestParent, closestCollisi
 
   _forEach(dimensions, d => {
     const { dimension, axis } = d;
-    const oppositeAxis = axis == 'x' ? 'y' : 'x';
+    const oppositeAxis = getOppositeAxis(axis);
     const movingString = ['top', 'left'].indexOf(dimension) > -1 ? 'back' : 'forward';
     const valueMethods = { back: _minBy, forward: _maxBy };
     const closestCollision = closestCollisions[dimension];
-    const newCollision = valueMethods[movingString]([closestChild[dimension].min, closestChild[dimension].max, closestParent], entity => entity.position[axis]);
-    const childCollision = closestChild[dimension];
+    const newCollision = valueMethods[movingString]([closestChild[dimension].min, closestChild[dimension].max, closestParent], entity => entity[axis]);
 
-    // If new collision min/max is more updated, use that instead for both values
-    if (newCollision.position[axis] < closestCollision.min.position[axis] || newCollision.position[axis] > closestCollision.max.position[axis]) {
-      closestCollisions[dimension] = { min: newCollision, max: newCollision };
+    if (movingString == 'back') {
+      if (newCollision[axis] < closestCollision.min[axis] || newCollision[axis] < closestCollision.max[axis]) {
+        closestCollisions[dimension].min = getElementRect(newCollision);
+        closestCollisions[dimension].max = getElementRect(newCollision);
+      }
+    } else {
+      if (newCollision[axis] > closestCollision.min[axis] || newCollision[axis] > closestCollision.max[axis]) {
+        closestCollisions[dimension].min = getElementRect(newCollision);
+        closestCollisions[dimension].max = getElementRect(newCollision);
+      }
     }
 
-    // Replace min/max values for opposite axis if child or parent values are more updated
-    // This will ensure that we get the min/max on opposite axis, even when the main axis hasn't changed
-    if (closestCollision.min.position[axis] == childCollision.min.position[axis] && childCollision.min.position[oppositeAxis] < closestCollision.min.position[oppositeAxis]) {
-      closestCollisions[dimension].min = childCollision.min;
-    }
-
-    if (closestCollision.max.position[axis] == childCollision.max.position[axis] && childCollision.max.position[oppositeAxis] > closestCollision.max.position[oppositeAxis]) {
-      closestCollisions[dimension].max = childCollision.max;
-    }
-
-    if (closestCollision.min.position[axis] == closestParent.position[axis] && closestParent.position[oppositeAxis] < closestCollision.min.position[oppositeAxis]) {
+    if (closestCollision.min[axis] == closestParent[axis] && closestParent[oppositeAxis] < closestCollision.min[oppositeAxis]) {
       closestCollisions[dimension].min = closestParent;
     }
 
-    if (closestCollision.max.position[axis] == closestParent.position[axis] && closestParent.position[oppositeAxis] > closestCollision.max.position[oppositeAxis]) {
+    if (closestCollision.max[axis] == closestParent[axis] && closestParent[oppositeAxis] > closestCollision.max[oppositeAxis]) {
       closestCollisions[dimension].max = closestParent;
     }
   });
@@ -700,7 +1428,7 @@ export function collectItem(type, itemId) {
   if (items[itemIndex].needsAbility && heroAbilities.indexOf(items[itemIndex].needsAbility) == -1) {
     setPopover({
       title: 'Skill Needed',
-      text: `You must learn a new skill to collect this item.`,
+      text: 'You must learn a new skill to collect this item.',
       popoverClass: 'info'
     });
     return;
@@ -769,7 +1497,7 @@ export function collectBunny(bunnyId) {
   if (bunnies[bunnyIndex].needsAbility && heroAbilities.indexOf(bunnies[bunnyIndex].needsAbility) == -1) {
     setPopover({
       title: 'Skill Needed',
-      text: `You must learn a new skill for this bunny to become your friend.`,
+      text: 'You must learn a new skill for this bunny to become your friend.',
       popoverClass: 'info'
     });
     return;
@@ -854,10 +1582,10 @@ export function getOppositeDirection(direction) {
  */
 export function getElementRect(element) {
   const rect = {
-    x: element.x || (element.position && element.position.x) || (element.props && element.props.position && element.props.position.x),
-    y: element.y || (element.position && element.position.y) || (element.props && element.props.position && element.props.position.y),
-    height: element.height || element.props.height,
-    width: element.width || element.props.width
+    x: element.x || (element.position && element.position.x) || (element.props && element.props.position && element.props.position.x) || 0,
+    y: element.y || (element.position && element.position.y) || (element.props && element.props.position && element.props.position.y) || 0,
+    height: element.height || (element.props && element.props.height) || 0,
+    width: element.width || (element.props && element.props.width) || 0
   };
 
   rect.right = rect.x + rect.width;
@@ -874,18 +1602,24 @@ export function getElementRect(element) {
  *
  * @param  {object}  element1 - First element to use in check
  * @param  {object}  element2 - Second element to use in check
- * @param  {Boolean} isMoving - If element1 is currently moving
  *
  * @return {Boolean} - If the two elements are colliding
  */
-export function checkElementCollision(element1, element2, isMoving) {
+export function checkElementCollision(element1, element2, heightOffset = 0, widthOffset = 0, excludeEquals) {
   const element1Rect = getElementRect(element1);
   const element2Rect = getElementRect(element2);
 
-  const elementHittingLeft = element1Rect.x <= element2Rect.right;
-  const elementHittingRight = element1Rect.right >= element2Rect.x;
-  const elementHittingTop = element1Rect.y <= element2Rect.bottom;
-  const elementHittingBottom = element1Rect.bottom >= element2Rect.y;
+  let elementHittingLeft = element1Rect.x - widthOffset <= element2Rect.right;
+  let elementHittingRight = element1Rect.right + widthOffset >= element2Rect.x;
+  let elementHittingTop = element1Rect.y - heightOffset <= element2Rect.bottom;
+  let elementHittingBottom = element1Rect.bottom + heightOffset >= element2Rect.y;
+
+  if (excludeEquals) {
+    elementHittingLeft = element1Rect.x - widthOffset < element2Rect.right;
+    elementHittingRight = element1Rect.right + widthOffset > element2Rect.x;
+    elementHittingTop = element1Rect.y - heightOffset < element2Rect.bottom;
+    elementHittingBottom = element1Rect.bottom + heightOffset > element2Rect.y;
+  }
 
   return elementHittingLeft && elementHittingRight && elementHittingTop && elementHittingBottom;
 }
@@ -909,7 +1643,7 @@ export function checkCollisions(character, direction, items) {
   const collisions = [];
 
   for (let t = 0; t < items.length; t++) {
-    const isColliding = checkElementCollision(character, items[t], direction);
+    const isColliding = checkElementCollision(character, items[t]);
 
     if (isColliding) {
       collisions.push(items[t]);
@@ -921,7 +1655,7 @@ export function checkCollisions(character, direction, items) {
 
 export function getEntityCollisions(character, useX, useY, direction, goToTargetPosition) {
   const useCharacter = getCharacterWithNextPosition(character, useX, useY);
-  const sceneryCollisions = checkSceneryCollision(useCharacter, direction, character.position);
+  const sceneryCollisions = checkSceneryCollision(useCharacter, direction);
   const foodCollisions = checkFoodCollision(useCharacter, direction);
   // Don't collide with bunnies when character is going to target position
   const bunnyCollisions = goToTargetPosition ? [] : checkBunnyCollision(useCharacter, direction);
@@ -1015,7 +1749,7 @@ export function handleBurrowAction(item) {
   if (item.needsAbility && heroAbilities.indexOf(item.needsAbility) == -1) {
     setPopover({
       title: 'Skill Needed',
-      text: `You must learn a new skill to perform this action.`,
+      text: 'You must learn a new skill to perform this action.',
       popoverClass: 'info'
     });
     return;
@@ -1058,9 +1792,9 @@ export function takeBunnyToGroupTile(character) {
  */
 export function goToNextTile(axis) {
   const tile = tree.get('tile');
-  const isXAxis = axis == 'x';
-  const tileX = tile.x + (isXAxis ? 0 : 1);
-  const tileY = tile.y + (isXAxis ? 1 : 0);
+  const isOnXAxis = isXAxis(axis);
+  const tileX = tile.x + (isOnXAxis ? 0 : 1);
+  const tileY = tile.y + (isOnXAxis ? 1 : 0);
   // Move to next tile
   setActiveTile(tileX, tileY);
 }
@@ -1072,9 +1806,9 @@ export function goToNextTile(axis) {
  */
 export function goToPreviousTile(axis) {
   const tile = tree.get('tile');
-  const isXAxis = axis == 'x';
-  const tileX = tile.x - (isXAxis ? 0 : 1);
-  const tileY = tile.y - (isXAxis ? 1 : 0);
+  const isOnXAxis = isXAxis(axis);
+  const tileX = tile.x - (isOnXAxis ? 0 : 1);
+  const tileY = tile.y - (isOnXAxis ? 1 : 0);
   // Move to next tile
   setActiveTile(tileX, tileY);
 }
@@ -1134,7 +1868,7 @@ export function getMinBoardYLimit(usingBurrow) {
  * @return {int} - The minimum spawn point
  */
 export function getMaxBoardXLimit(usingBurrow) {
-  const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
+  const { width: boardWidth } = tree.get('boardDimensions');
   // If they went through a burrow, set the max to be where the burrow starts
   // Otherwise, set to the edge of the board, minus half the character's width
   const offset = usingBurrow ? (SceneryConstants.BURROW_WIDTH + CharacterConstants.BUNNY_WIDTH) : (CharacterConstants.BUNNY_WIDTH / 2);
@@ -1157,7 +1891,7 @@ export function getMaxBoardXLimit(usingBurrow) {
  * @return {int} - The minimum spawn point
  */
 export function getMaxBoardYLimit(usingBurrow) {
-  const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
+  const { height: boardHeight } = tree.get('boardDimensions');
   // If they went through a burrow, set the max to be where the burrow starts
   // Otherwise, set to the edge of the board, minus half the character's height
   const offset = usingBurrow ? (SceneryConstants.BURROW_HEIGHT + CharacterConstants.BUNNY_HEIGHT) : (CharacterConstants.BUNNY_HEIGHT / 2);
@@ -1177,18 +1911,17 @@ export function getMaxBoardYLimit(usingBurrow) {
  *                    tile needs to be changed
  */
 export function moveEntityForward(character, axis, currentX, currentY, direction, moveDiagonally, goToTargetPosition) {
-  const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
   const tile = tree.get('tile');
   const movePixels = tree.get('movePixels');
 
   const isHero = character.isHero;
-  const isXAxis = axis == 'x';
-  const minLimit = isXAxis ? getMinBoardXLimit() : getMinBoardYLimit();
-  const maxLimit = isXAxis ? getMaxBoardXLimit() : getMaxBoardYLimit();
-  const checkTile = tile[isXAxis ? 'y' : 'x'];
-  const currentValue = isXAxis ? currentX : currentY;
+  const isOnXAxis = isXAxis(axis);
+  const minLimit = isOnXAxis ? getMinBoardXLimit() : getMinBoardYLimit();
+  const maxLimit = isOnXAxis ? getMaxBoardXLimit() : getMaxBoardYLimit();
+  const checkTile = tile[isOnXAxis ? 'y' : 'x'];
+  const currentValue = isOnXAxis ? currentX : currentY;
   const diagonalPercentage = getSquareDiagonalPercentage(movePixels);
-  let value = Math.ceil(currentValue + (movePixels * (moveDiagonally ? diagonalPercentage : 1)));
+  const value = Math.ceil(currentValue + (movePixels * (moveDiagonally ? diagonalPercentage : 1)));
 
   // Character is going beyond the board bounds
   if (value > maxLimit) {
@@ -1214,8 +1947,8 @@ export function moveEntityForward(character, axis, currentX, currentY, direction
     }
   }
 
-  const useX = isXAxis ? value : currentX;
-  const useY = isXAxis ? currentY : value;
+  const useX = isOnXAxis ? value : currentX;
+  const useY = isOnXAxis ? currentY : value;
   const collisions = getEntityCollisions(character, useX, useY, direction, goToTargetPosition);
   const maxCollisionValue = getCollisionMaxValue({ x: useX, y: useY }, direction, character, collisions);
   let minValue = _min([maxLimit, value]);
@@ -1232,10 +1965,6 @@ export function moveEntityForward(character, axis, currentX, currentY, direction
     value: minValue,
     collisions
   };
-}
-
-export function getSquareDiagonalPercentage(side) {
-  return (side * Math.sqrt(2)) / (side * 2);
 }
 
 /**
@@ -1256,14 +1985,14 @@ export function moveEntityBack(character, axis, currentX, currentY, direction, m
   const movePixels = tree.get('movePixels');
 
   const isHero = character.isHero;
-  const isXAxis = axis == 'x';
+  const isOnXAxis = isXAxis(axis);
   const bunnyRect = findDOMNode(character).getBoundingClientRect();
-  const minLimit = 0 - ((isXAxis ? bunnyRect.width : bunnyRect.height) / 2);
-  const maxLimit = isXAxis ? boardWidth - (bunnyRect.width / 2) : boardHeight - (bunnyRect.height / 2);
-  const checkTile = tile[isXAxis ? 'y' : 'x'];
-  const currentValue = isXAxis ? currentX : currentY;
+  const minLimit = 0 - ((isOnXAxis ? bunnyRect.width : bunnyRect.height) / 2);
+  const maxLimit = isOnXAxis ? boardWidth - (bunnyRect.width / 2) : boardHeight - (bunnyRect.height / 2);
+  const checkTile = tile[isOnXAxis ? 'y' : 'x'];
+  const currentValue = isOnXAxis ? currentX : currentY;
   const diagonalPercentage = getSquareDiagonalPercentage(movePixels);
-  let value = Math.ceil(currentValue - (movePixels * (moveDiagonally ? diagonalPercentage : 1)));
+  const value = Math.ceil(currentValue - (movePixels * (moveDiagonally ? diagonalPercentage : 1)));
 
   // Character is going beyond the board bounds
   if (value < minLimit) {
@@ -1289,8 +2018,8 @@ export function moveEntityBack(character, axis, currentX, currentY, direction, m
     }
   }
 
-  const useX = isXAxis ? value : currentX;
-  const useY = isXAxis ? currentY : value;
+  const useX = isOnXAxis ? value : currentX;
+  const useY = isOnXAxis ? currentY : value;
   const collisions = getEntityCollisions(character, useX, useY, direction, goToTargetPosition);
   const minCollisionValue = getCollisionMaxValue({ x: useX, y: useY }, direction, character, collisions);
   let maxValue = _max([minLimit, value]);
@@ -1310,6 +2039,17 @@ export function moveEntityBack(character, axis, currentX, currentY, direction, m
 }
 
 /**
+ * Returns the diagonal percentage of a square
+ *
+ * @param  {number} side - The length of the side in the square
+ *
+ * @return {number} - The diagonal percentage
+ */
+export function getSquareDiagonalPercentage(side) {
+  return (side * Math.sqrt(2)) / (side * 2);
+}
+
+/**
  * Returns the character with their position at the top level
  *
  * @param  {object} character - The character to alter
@@ -1318,7 +2058,7 @@ export function moveEntityBack(character, axis, currentX, currentY, direction, m
  *
  * @return {object} - The new character object
  */
-function getCharacterWithNextPosition(character, x, y) {
+export function getCharacterWithNextPosition(character, x, y) {
   return {
     ...character,
     position: { x, y }
@@ -1366,7 +2106,6 @@ export function checkFoodCollision(character, direction) {
  */
 export function checkBunnyCollision(character, direction) {
   const isHero = character.isHero;
-  const tile = tree.get('tile');
   const heroCollisions = tree.select('heroCollisions');
   // When checking collisions for hero, compare against other AI bunnies on the tile
   // Otherwise, when checking AI collisions, ensure they're not colliding with hero
@@ -1417,7 +2156,7 @@ export function checkBunnyCollision(character, direction) {
  */
 export function checkSceneryCollision(character, direction) {
   const tile = tree.get('tile');
-  const items = tile.scenery.filter(item => !item.collected);
+  const items = tile.scenery;
   const collisions = checkCollisions(character, direction, items);
 
   // If we're not moving, a space action is happening

@@ -9,14 +9,12 @@ class SceneryItem extends Component {
 
   render() {
     const {
-      type,
       position: { x, y },
       sceneryClass,
       height,
       width,
       image,
-      index,
-      children
+      index
     } = this.props;
     const style = {
       top: y + 'px',

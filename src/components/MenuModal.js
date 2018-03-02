@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
 import { branch } from 'baobab-react/higher-order';
-import { Modal, Grid, Row, Col, Thumbnail, Label, Glyphicon, Tabs, Tab } from 'react-bootstrap';
+import { Modal, Label, Glyphicon, Tabs, Tab } from 'react-bootstrap';
 import _orderBy from 'lodash/orderBy';
 
 import FoodItem from 'components/Food/FoodItem';
 import * as Food from 'components/Food';
-
-import { getFoodItem } from 'actions';
 
 import 'less/MenuModal.less';
 
@@ -15,7 +13,7 @@ class MenuModal extends Component {
     super(props, context);
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     return nextProps.show != this.props.show;
   }
 
@@ -135,7 +133,7 @@ class FoodList extends Component {
             {food.hasCollected &&
               <div className="flex flex-grow flex-column">
                 <div className="inventory-item-cell-image flex flex-grow">
-                  <FoodItem {...foodObj} inMenu={true} type={useFoodType} inMenu={true} />
+                  <FoodItem {...foodObj} inMenu type={useFoodType} />
                   <Label bsStyle={food.count ? 'primary' : 'default'} className="inventory-item-stock">
                     {food.count}
                   </Label>

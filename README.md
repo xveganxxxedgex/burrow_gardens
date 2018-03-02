@@ -62,11 +62,13 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Remove bunny collision with other bunnies (including hero) when going to target position~~
 
-Add logic so hero doesn't collide with bunnies going to their target position
+~~Add to bunny collect popover that the bunny is going to the group area so the player understands why they may leave the screen~~
+
+~~Add logic so hero doesn't collide with bunnies going to their target position~~
+
+Add logic to prevent AI from getting stuck - if they get stuck, make them stop moving to the destination
 
 Fix character image facing left for a split second when first moving down
-
-Add to bunny collect popover that the bunny is going to the group area so the player understands why they may leave the screen
 
 Maybe add a cute animation like a binky when a bunny is added to the group, to play before they head to the group tile
 

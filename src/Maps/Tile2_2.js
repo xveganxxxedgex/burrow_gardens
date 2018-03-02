@@ -1,29 +1,33 @@
 import * as Food from 'components/Food';
 import * as Scenery from 'components/Scenery';
 
-let left1 = [];
-for (let i = 0; i < 480; i = i + 40) {
-  left1.push(new Scenery.Bush({ x: 0, y: i }));
-}
+const exits = {
+  top: { start: 460, end: 720 },
+  left: { start: 480, end: 600 }
+};
 
-let right1 = [];
-for (let i = 0; i < 560; i = i + 40) {
-  right1.push(new Scenery.Bush({ x: 1160, y: i }));
-}
-
-let top1 = [];
-for (let i = 0; i < 460; i = i + 40) {
-  top1.push(new Scenery.Bush({ x: i, y: 0 }));
-}
-
-let top2 = [];
-for (let i = 720; i < 1200; i = i + 40) {
-  top2.push(new Scenery.Bush({ x: i, y: 0 }));
-}
-
-let bottom1 = [];
+const left = [];
 for (let i = 0; i < 1200; i = i + 40) {
-  bottom1.push(new Scenery.Bush({ x: i, y: 560 }));
+  if (i < exits.left.start || i >= exits.left.end) {
+    left.push(new Scenery.Bush({ x: 0, y: i }));
+  }
+}
+
+const right = [];
+for (let i = 0; i < 560; i = i + 40) {
+  right.push(new Scenery.Bush({ x: 1160, y: i }));
+}
+
+const top = [];
+for (let i = 0; i < 1200; i = i + 40) {
+  if (i < exits.top.start || i >= exits.top.end) {
+    top.push(new Scenery.Bush({ x: i, y: 0 }));
+  }
+}
+
+const bottom = [];
+for (let i = 0; i < 1200; i = i + 40) {
+  bottom.push(new Scenery.Bush({ x: i, y: 560 }));
 }
 
 const Tile = {
@@ -45,11 +49,10 @@ const Tile = {
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1']
   ],
   scenery: [
-    ...left1,
-    ...right1,
-    ...top1,
-    ...top2,
-    ...bottom1
+    ...left,
+    ...right,
+    ...top,
+    ...bottom
   ],
   food: [
   ],
