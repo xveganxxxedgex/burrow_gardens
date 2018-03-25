@@ -9,7 +9,6 @@ import _max from 'lodash/max';
 import _random from 'lodash/random';
 import _sample from 'lodash/sample';
 import _uniq from 'lodash/uniq';
-import _uniqWith from 'lodash/uniqWith';
 
 import { MOVEMENT_DURATION } from 'components/Characters/constants';
 import { BURROW_TYPE } from 'components/Scenery/constants';
@@ -23,12 +22,13 @@ import {
   entityIsMovingBack,
   isMovingOnYAxis,
   getAxisFromDirection,
-  getClosestOpenGap,
+  findPathToExit,
   getTargetDirection,
   checkIfAtTargetPosition,
   getDirectionForAxis,
   takeBunnyToGroupTile,
-  getElementRect
+  getElementRect,
+  removeBunnyCollisionWithHero
 } from 'actions';
 
 import 'less/Characters.less';
@@ -64,7 +64,6 @@ class Bunny extends Component {
       lastDirection: _sample(this.directions),
       goToPosition: null,
       maxBounds: this.getMaxBoundsFromStartPosition(position, boardHeight, boardWidth),
-      attemptedGaps: []
     };
   }
 
@@ -111,20 +110,24 @@ class Bunny extends Component {
     if (hasCollected && hasCollected != this.props.hasCollected) {
       if (groupTile.x != tile.x || groupTile.y != tile.y) {
         const goToPosition = getExitPosition(groupTile);
-        const closestOpenGap = getClosestOpenGap(this, goToPosition, this.state.attemptedGaps);
+        const pathToExit = findPathToExit(this, goToPosition);
 
-        const newState = {
-          goToPosition: closestOpenGap.gap,
-          maxBounds: this.getMaxBoundsFromStartPosition(goToPosition, boardHeight, boardWidth, true),
-        };
+        if (pathToExit) {
+          // Unset them as colliding with the hero
+          removeBunnyCollisionWithHero(this.props.id);
+          const newPosition = pathToExit[0];
+          pathToExit.splice(0, 1);
 
-        if (closestOpenGap.collision) {
-          newState.attemptedGaps = _uniqWith([...this.state.attemptedGaps, closestOpenGap.collision], _isEqual)
+          const newState = {
+            goToPosition: newPosition,
+            path: pathToExit,
+            maxBounds: this.getMaxBoundsFromStartPosition(goToPosition, boardHeight, boardWidth, true)
+          };
+
+          this.setState(newState, () => {
+            this.stopMovingCharacter(true);
+          });
         }
-
-        this.setState(newState, () => {
-          this.stopMovingCharacter(true);
-        });
       }
     }
 
@@ -142,7 +145,7 @@ class Bunny extends Component {
   }
 
   componentWillUpdate(nextProps, nextState) {
-    const { moving } = nextState;
+    const { moving, goToPosition } = nextState;
 
     if (moving != this.state.moving) {
       const lastDirection = moving.length ? moving[moving.length - 1] : this.state.lastDirection;
@@ -151,7 +154,7 @@ class Bunny extends Component {
         this.setLastDirection(lastDirection);
       }
 
-      if (nextState || !moving.length) {
+      if (!moving.length && (!goToPosition || !nextState)) {
         clearTimeout(this.movingTimeout);
         this.movingTimeout = null;
       }
@@ -248,8 +251,7 @@ class Bunny extends Component {
   }
 
   getDirection() {
-    const { moving, goToPosition } = this.state;
-    const { position } = this.props;
+    const { goToPosition } = this.state;
     const randomDirection = _sample(this.directions);
 
     // If character doesn't have a target position, randomize their direction
@@ -258,31 +260,7 @@ class Bunny extends Component {
     }
 
     const characterRect = getElementRect(this);
-    // Try to go in the direction of the target position based on characters current position
-    const lastDirection = moving.length ? this.state.lastDirection : null;
-    const { direction: preferredDirection, newTargetPosition } = getTargetDirection(characterRect, goToPosition, true, lastDirection);
-
-    // If we need to go an alternate route due to collisions in the preferred direction(s),
-    // update the target position
-    if (!_isEqual(newTargetPosition, goToPosition)) {
-      this.setState({ goToPosition: newTargetPosition });
-    }
-
-    // If we can't go our preferred direction, try to go the next best route
-    const alternativeDirection = this.getNextBestDirection(position, newTargetPosition, preferredDirection);
-
-    return moving.indexOf(preferredDirection) == -1 ? preferredDirection : alternativeDirection;
-  }
-
-  getNextBestDirection(currentPosition, targetPosition, direction) {
-    const { x, y } = currentPosition;
-
-    // Move on opposite axis to try to get around collision
-    if (isMovingOnYAxis(direction)) {
-      return targetPosition.x > x ? 'right' : 'left';
-    }
-
-    return targetPosition.y > y ? 'down' : 'up';
+    return getTargetDirection(characterRect, goToPosition);
   }
 
   moveAI() {
@@ -312,7 +290,9 @@ class Bunny extends Component {
   }
 
   stopMovingCharacter(moveAgain, clearTimeouts) {
-    this.setState({ moving: [] });
+    if (!this.state.goToPosition) {
+      this.setState({ moving: [] });
+    }
 
     if (moveAgain) {
       this.moveAI();
@@ -321,10 +301,6 @@ class Bunny extends Component {
     if (clearTimeouts) {
       this.clearTimeouts();
     }
-  }
-
-  setGoToPosition(goToPosition = null) {
-    this.setState({ goToPosition });
   }
 
   shouldContinueMoving(newAxisValue, boundsDirection, oldPos) {
@@ -346,19 +322,20 @@ class Bunny extends Component {
 
         // Check to see if there's collisions in the next potential direction
         if (atTargetOtherAxisPosition) {
-          const exitPosition = getExitPosition(this.props.groupTile);
-          const closestOpenGap = getClosestOpenGap(this, exitPosition, this.state.attemptedGaps);
-          const newState = { goToPosition: closestOpenGap.gap };
+          const path = this.state.path;
+          const newPosition = path[0];
+          path.splice(0, 1);
 
-          if (closestOpenGap.collision) {
-            newState.attemptedGaps = _uniqWith([...this.state.attemptedGaps, closestOpenGap.collision], _isEqual)
-          }
+          this.setState({
+            goToPosition: newPosition,
+            path,
+          });
 
-          this.setState(newState);
+          return false;
         }
       }
 
-      return canMove && !atTargetAxisPosition;
+      return canMove;
     }
 
     return canMove && !collidingWithHero;
@@ -374,13 +351,11 @@ class Bunny extends Component {
 
   moveCharacter() {
     const { moving, goToPosition } = this.state;
-    const {
-      position: { x, y }
-    } = this.props;
+    const { position: { x, y } } = this.props;
+    const newPosition = { x, y };
 
     let continueMoving = false;
     let collisions = [];
-    const newPosition = { x, y };
     const moveMethods = {
       back: {
         move: moveEntityBack,

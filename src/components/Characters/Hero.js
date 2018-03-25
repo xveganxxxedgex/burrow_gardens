@@ -225,11 +225,25 @@ class Hero extends Component {
       return;
     }
 
+
+    // If idle status changed, set it to state
+    if (this.state.isLoaf || this.state.isFlopped) {
+      const newState = {};
+
+      if (this.state.isLoaf) {
+        newState.isLoaf = false;
+      } else {
+        newState.isFlopped = false;
+      }
+
+      this.setState(newState);
+    }
+
     // Handle space for collision actions
     if (keyEvent == 'space') {
       if (!moving.length) {
         const useCharacter = this.getCharacterWithDimensions();
-        getEntityCollisions(useCharacter, x, y);
+        getEntityCollisions(useCharacter, x, y, null, null, true);
       }
 
       return;
@@ -238,23 +252,6 @@ class Hero extends Component {
     const oppositeDirection = getOppositeDirection(keyEvent);
     const directionIndex = moving.indexOf(keyEvent);
     const oppositeDirectionIndex = moving.indexOf(oppositeDirection);
-    const newState = {};
-    let updateIdleState = false;
-
-    if (this.state.isLoaf) {
-      newState.isLoaf = false;
-      updateIdleState = true;
-    }
-
-    if (this.state.isFlopped) {
-      newState.isFlopped = false;
-      updateIdleState = true;
-    }
-
-    // If idle status changed, set it to state
-    if (updateIdleState) {
-      this.setState(newState);
-    }
 
     // If player is moving in a new direction that isn't an opposite of another
     // diretion they're already moving, update the state
