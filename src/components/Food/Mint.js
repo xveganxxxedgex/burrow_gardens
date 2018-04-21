@@ -1,4 +1,4 @@
-import image from 'images/mint.png';
+import image from 'images/food/mint.png';
 
 export default class Mint {
   constructor(position, id) {

@@ -1,4 +1,4 @@
-import image from 'images/basil.png';
+import image from 'images/food/basil.png';
 
 export default class Basil {
   constructor(position, id) {

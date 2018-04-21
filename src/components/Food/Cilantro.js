@@ -1,4 +1,4 @@
-import image from 'images/cilantro.png';
+import image from 'images/food/cilantro.png';
 
 export default class Cilantro {
   constructor(position, id) {

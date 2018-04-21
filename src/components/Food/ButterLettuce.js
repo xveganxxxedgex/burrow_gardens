@@ -1,4 +1,4 @@
-import image from 'images/butterlettuce.png';
+import image from 'images/food/butter_lettuce.png';
 
 export default class ButterLettuce {
   constructor(position, id) {

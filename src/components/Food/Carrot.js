@@ -1,4 +1,4 @@
-import image from 'images/carrot.png';
+import image from 'images/food/carrot.png';
 
 export default class Carrot {
   constructor(position, id) {

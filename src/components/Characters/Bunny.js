@@ -19,7 +19,7 @@ import {
   updateCharacterPosition,
   getOppositeDirection,
   getExitPosition,
-  entityIsMovingBack,
+  isBackwardsDirection,
   isMovingOnYAxis,
   getAxisFromDirection,
   findPathToExit,
@@ -49,6 +49,7 @@ class Bunny extends Component {
     this.moveAI = this.moveAI.bind(this);
     this.moveCharacter = this.moveCharacter.bind(this);
     this.stopMovingCharacter = this.stopMovingCharacter.bind(this);
+    this.takeBunnyToTargetTile = this.takeBunnyToTargetTile.bind(this);
 
     this.directions = ['up', 'down', 'left', 'right'];
 
@@ -64,6 +65,7 @@ class Bunny extends Component {
       lastDirection: _sample(this.directions),
       goToPosition: null,
       maxBounds: this.getMaxBoundsFromStartPosition(position, boardHeight, boardWidth),
+      goToGroupTile: false
     };
   }
 
@@ -109,8 +111,16 @@ class Bunny extends Component {
     // Bunny just joined the group, navigate them to the group area
     if (hasCollected && hasCollected != this.props.hasCollected) {
       if (groupTile.x != tile.x || groupTile.y != tile.y) {
-        const goToPosition = getExitPosition(groupTile);
-        const pathToExit = findPathToExit(this, goToPosition);
+        const newState = { goToGroupTile: true };
+        // See if the preferred exit in the direction of the target tile has a valid path
+        let goToPosition = getExitPosition(this, groupTile);
+        let pathToExit = findPathToExit(this, goToPosition);
+
+        if (!pathToExit) {
+          // Try finding a path to the closest exit possible
+          goToPosition = getExitPosition(this, null);
+          pathToExit = findPathToExit(this, goToPosition);
+        }
 
         if (pathToExit) {
           // Unset them as colliding with the hero
@@ -118,16 +128,14 @@ class Bunny extends Component {
           const newPosition = pathToExit[0];
           pathToExit.splice(0, 1);
 
-          const newState = {
-            goToPosition: newPosition,
-            path: pathToExit,
-            maxBounds: this.getMaxBoundsFromStartPosition(goToPosition, boardHeight, boardWidth, true)
-          };
-
-          this.setState(newState, () => {
-            this.stopMovingCharacter(true);
-          });
+          newState.goToPosition = newPosition;
+          newState.path = pathToExit;
+          newState.maxBounds = this.getMaxBoundsFromStartPosition(goToPosition, boardHeight, boardWidth, true);
         }
+
+        this.setState(newState, () => {
+          this.stopMovingCharacter(true);
+        });
       }
     }
 
@@ -169,6 +177,10 @@ class Bunny extends Component {
   }
 
   componentWillUnmount() {
+    if (this.state.goToGroupTile) {
+      this.takeBunnyToTargetTile();
+    }
+
     this.clearTimeouts();
   }
 
@@ -179,9 +191,9 @@ class Bunny extends Component {
     const bottomBounds = maxHeight ? Math.min(bottomPadding, maxHeight) : bottomPadding;
 
     return {
-      up: setToBounds ? 0 : Math.max(position.y - 100, 0),
+      up: setToBounds ? -this.props.height : Math.max(position.y - 100, 0),
       down: setToBounds && maxHeight ? maxHeight : bottomBounds,
-      left: setToBounds ? 0 : Math.max(position.x - 200, 0),
+      left: setToBounds ? -this.props.width : Math.max(position.x - 200, 0),
       right: setToBounds && maxWidth ? maxWidth : rightBounds
     };
   }
@@ -314,9 +326,9 @@ class Bunny extends Component {
     if (goToPosition) {
       // Stop moving if we're at the target axis position so we can change direction if needed
       const atTargetAxisPosition = checkIfAtTargetPosition(boundsDirection, oldPos, goToPosition);
-      const otherAxis = checkAxis == 'x' ? 'y' : 'x';
 
       if (atTargetAxisPosition) {
+        const otherAxis = checkAxis == 'x' ? 'y' : 'x';
         const otherAxisDirection = getDirectionForAxis(otherAxis, oldPos, goToPosition);
         const atTargetOtherAxisPosition = checkIfAtTargetPosition(otherAxisDirection, oldPos, goToPosition);
 
@@ -342,11 +354,13 @@ class Bunny extends Component {
   }
 
   isInBounds(newPos, boundsDirection) {
-    if (entityIsMovingBack(boundsDirection)) {
-      return newPos > this.state.maxBounds[boundsDirection];
+    const { goToPosition } = this.state;
+
+    if (isBackwardsDirection(boundsDirection)) {
+      return goToPosition ? newPos >= this.state.maxBounds[boundsDirection] : newPos > this.state.maxBounds[boundsDirection];
     }
 
-    return newPos < this.state.maxBounds[boundsDirection];
+    return goToPosition ? newPos <= this.state.maxBounds[boundsDirection] : newPos < this.state.maxBounds[boundsDirection];
   }
 
   moveCharacter() {
@@ -374,7 +388,7 @@ class Bunny extends Component {
     for (let m = 0; m < moving.length; m++) {
       const direction = moving[m];
       const axis = getAxisFromDirection(direction);
-      const isMovingBack = entityIsMovingBack(direction);
+      const isMovingBack = isBackwardsDirection(direction);
       const useMoveLogic = isMovingBack ? 'back' : 'forward';
       const movePlayer = moveMethods[useMoveLogic].move(this, axis, newPosition.x, newPosition.y, direction, moving.length > 1, goToPosition);
       const newValue = moveMethods[useMoveLogic].value([movePlayer.value, this.state.maxBounds[direction]]);
@@ -391,12 +405,8 @@ class Bunny extends Component {
       const burrowCollision = _find(collisions, collision => collision.type == BURROW_TYPE);
 
       if (burrowCollision) {
-        setTimeout(() => {
-          // Take character to group tile after the position has updated
-          // This is to ensure character doesn't disappear too early
-          takeBunnyToGroupTile(this);
-          this.stopMovingCharacter(false, true);
-        }, MOVEMENT_DURATION);
+        this.setState({ goToPosition: null, path: null, goToGroupTile: false });
+        this.takeBunnyToTargetTile();
       }
     }
 
@@ -409,6 +419,15 @@ class Bunny extends Component {
     } else {
       this.stopMovingCharacter(true);
     }
+  }
+
+  takeBunnyToTargetTile() {
+    setTimeout(() => {
+      // Take character to group tile after the position has updated
+      // This is to ensure character doesn't disappear too early
+      takeBunnyToGroupTile(this);
+      this.stopMovingCharacter(false, true);
+    }, MOVEMENT_DURATION);
   }
 
   checkIfIsHero() {

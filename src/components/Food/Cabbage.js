@@ -1,4 +1,4 @@
-import image from 'images/cabbage.png';
+import image from 'images/food/cabbage.png';
 
 export default class Cabbage {
   constructor(position, id) {

@@ -8,6 +8,7 @@ import _forEach from 'lodash/forEach';
 import _isEqual from 'lodash/isEqual';
 import _max from 'lodash/max';
 import _min from 'lodash/min';
+import _minBy from 'lodash/minBy';
 import _union from 'lodash/union';
 import { findDOMNode } from 'react-dom';
 
@@ -198,10 +199,15 @@ export function getBackgroundCell(cell) {
  *
  * @param  {object} targetTile - The tile the character will go to
  *
- * @return {string} - The direction of the exit
+ * @return {bool|string} - The direction of the exit, or false if already on the target tile
  */
 export function findTileExit(targetTile) {
   const tile = tree.get('tile');
+
+  if (tile.x === targetTile.x && tile.y === targetTile.y) {
+    return false;
+  }
+
   let preferredExit;
 
   // Determine the best direction to head to based on where the group tile is in comparison to the current tile
@@ -222,33 +228,64 @@ export function findTileExit(targetTile) {
 /**
  * Get the X, Y coordinates of the exit
  *
+ * @param  {object} character - The character moving to the exit position
  * @param  {object} targetTile - The tile the character will go to
  *
  * @return {object} - The { x, y } coordinates of the exit position
  */
-export function getExitPosition(targetTile) {
+export function getExitPosition(character, targetTile) {
   const tile = tree.get('tile');
   const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
-  const useExit = findTileExit(targetTile);
+  const characterRect = getElementRect(character);
   const goToPosition = {};
 
-  switch (useExit) {
-    case 'top':
-      goToPosition.x = tile.exits[useExit].start;
-      goToPosition.y = 0; // Top of the board
-      break;
-    case 'bottom':
-      goToPosition.x = tile.exits[useExit].start;
-      goToPosition.y = boardHeight; // Bottom of the board
-      break;
-    case 'left':
-      goToPosition.x = 0; // Left of the board
-      goToPosition.y = tile.exits[useExit].start;
-      break;
-    case 'right':
-      goToPosition.x = boardWidth; // Right of the board
-      goToPosition.y = tile.exits[useExit].start;
-      break;
+  if (targetTile) {
+    // Get the tile in the direction of the target tile
+    const useExit = findTileExit(targetTile);
+
+    switch (useExit) {
+      case 'top':
+        goToPosition.x = tile.exits[useExit].start;
+        goToPosition.y = -characterRect.height; // Top of the board
+        break;
+      case 'bottom':
+        goToPosition.x = tile.exits[useExit].start;
+        goToPosition.y = boardHeight; // Bottom of the board
+        break;
+      case 'left':
+        goToPosition.x = -characterRect.width; // Left of the board
+        goToPosition.y = tile.exits[useExit].start;
+        break;
+      case 'right':
+        goToPosition.x = boardWidth; // Right of the board
+        goToPosition.y = tile.exits[useExit].start;
+        break;
+    }
+  } else {
+    const exits = [];
+
+    _forEach(tile.exits, (sideExit, side) => {
+      const axis = getAxisFromDirection(side);
+      const oppositeAxis = getOppositeAxis(axis);
+      const isBackwardDimension = isBackwardsDirection(side);
+      const offsetDimension = getDimensionFromAxis(oppositeAxis);
+      const axisValue = isBackwardDimension ? -characterRect[offsetDimension] : (isXAxis(axis) ? boardWidth : boardHeight);
+
+      if (characterRect[oppositeAxis] >= sideExit.start && characterRect[oppositeAxis] <= sideExit.end) {
+        // If character is in the direct path of an exit, use that instead of the offset increments
+        exits.push({ [axis]: axisValue, [oppositeAxis]: characterRect[oppositeAxis] });
+      } else {
+        // Find all possible positions in exit gap in case there's collisions in the way of some
+        for (let i = sideExit.start; i < sideExit.end; i += characterRect[offsetDimension]) {
+          exits.push({ [axis]: axisValue, [oppositeAxis]: i });
+        }
+      }
+    });
+
+    // Get the closest available exit
+    const closestExit = _minBy(exits, exit => heuristic(characterRect, exit));
+    goToPosition.x = closestExit.x;
+    goToPosition.y = closestExit.y;
   }
 
   return goToPosition;
@@ -298,8 +335,6 @@ export function getDirectionForAxis(axis, characterPosition, targetPosition) {
  * @param  {object} targetPosition - The position the character is heading to
  *
  * @return {string} - Which direction the character should go
- *
- * TODO: Refactor
  */
 export function getTargetDirection(currentPosition, targetPosition, lastDirection) {
   const { x, y } = currentPosition;
@@ -313,7 +348,7 @@ export function getTargetDirection(currentPosition, targetPosition, lastDirectio
     y: getDirectionForAxis('y', currentPosition, targetPosition)
   };
   let direction = axisDirections[moveOnAxis];
-  
+
   if (direction == lastDirection) {
     direction = axisDirections[getOppositeAxis(moveOnAxis)];
   }
@@ -333,23 +368,6 @@ export function getOppositeAxis(axis) {
 }
 
 /**
- * Returns if an entity is colliding with the axis
- *
- * @param  {string}  axis - The axis the character is moving on (ex: 'x' or 'y')
- * @param  {object}  entityRect - The entity rect object containing x, y,
- *                                   right, bottom, height and width
- * @param  {object}  collision - The collision entity to check
- *
- * @return {Boolean} - If the entity is colliding with the axis path
- */
-export function isCollidingInAxis(axis, entityRect, collision, offset = 0) {
-  const collisionRect = getElementRect(collision);
-  const rectEnd = isXAxis(axis) ? 'right' : 'bottom';
-
-  return collisionRect[axis] < entityRect[rectEnd] + offset && collisionRect[rectEnd] > entityRect[axis] - offset;
-}
-
-/**
  * Returns if the character is at the target position for a given axis
  *
  * @param  {string} direction - The direction the character is moving
@@ -360,17 +378,17 @@ export function isCollidingInAxis(axis, entityRect, collision, offset = 0) {
  */
 export function checkIfAtTargetPosition(direction, currentPosition, targetPosition) {
   const axis = getAxisFromDirection(direction);
-  const isMovingBack = entityIsMovingBack(direction);
+  const isMovingBack = isBackwardsDirection(direction);
   const atTargetCoordinate = isMovingBack ? currentPosition[axis] <= targetPosition[axis] : currentPosition[axis] >= targetPosition[axis];
   return atTargetCoordinate;
 }
 
-function getNeighboursOfPosition(position, heightOffset, widthOffset, height, width) {
+export function getNeighboursOfPosition(position, height, width) {
   const posRect = getElementRect({ ...position, height, width });
   const forwardX = posRect.right;
-  const backwardX = position.x - widthOffset;
+  const backwardX = position.x - width;
   const forwardY = posRect.bottom;
-  const backwardY = position.y - heightOffset;
+  const backwardY = position.y - height;
 
   const neighbours = {
     left: { x: backwardX, y: position.y, height, width }, // left
@@ -378,22 +396,24 @@ function getNeighboursOfPosition(position, heightOffset, widthOffset, height, wi
     top: { x: position.x, y: backwardY, height, width }, // top
     bottom: { x: position.x, y: forwardY, height, width } // bottom
   };
-  
+
   return neighbours;
 }
 
-function isAtExitPosition(pos, exitPosition) {
+export function isAtExitPosition(pos, exitPosition, characterRect) {
   const boardDimensions = tree.get('boardDimensions');
 
-  if (exitPosition.x === 0) {
+  if (exitPosition.x === -characterRect.width) { // left
     return pos.x <= exitPosition.x;
-  } else if (exitPosition.x === boardDimensions.width) {
+  } else if (exitPosition.x === boardDimensions.width) { // right
     return pos.x >= exitPosition.x;
-  } else if (exitPosition.y === 0) {
+  } else if (exitPosition.y === -characterRect.height) { // top
     return pos.y <= exitPosition.y;
-  } else if (exitPosition.y === boardDimensions.height) {
+  } else if (exitPosition.y === boardDimensions.height) { // bottom
     return pos.y >= exitPosition.y;
   }
+
+  return pos.x === exitPosition.x && pos.y === exitPosition.y;
 }
 
 export function getCharacterCollisions(character) {
@@ -402,8 +422,6 @@ export function getCharacterCollisions(character) {
   return checkCollisions(characterRect, collisions);
 }
 
-// https://www.redblobgames.com/pathfinding/a-star/introduction.html
-// http://gregtrowbridge.com/a-basic-pathfinding-algorithm/
 export function findPathToExit(character, exitPos) {
   const characterRect = getElementRect(character);
   const collisions = getCollisionEntities(true);
@@ -412,41 +430,42 @@ export function findPathToExit(character, exitPos) {
   const widthOffset = characterRect.width;
   const location = {
     position: { x: characterRect.x, y: characterRect.y },
-    path: []
+    path: [],
+    visitOrder: 0,
+    sortKey: 0
   };
   const positionCosts = {
     [`${characterRect.x}_${characterRect.y}`]: 0
   };
   const queue = [location];
+  let visitOrder = queue.length;
 
   while (queue.length) {
+    queue.sort((a, b) => a.sortKey == b.sortKey ? a.visitOrder - b.visitOrder: a.sortKey - b.sortKey);
     const currentLocation = queue.shift();
 
-    if (isAtExitPosition(currentLocation.position, exitPosition)) {
+    if (isAtExitPosition(currentLocation.position, exitPosition, characterRect)) {
       return currentLocation.path;
     }
 
     const currentPos = `${currentLocation.position.x}_${currentLocation.position.y}`;
-    const neighbours = getNeighboursOfPosition(currentLocation.position, 40, 40, heightOffset, widthOffset);
+    const neighbours = getNeighboursOfPosition(currentLocation.position, heightOffset, widthOffset);
 
     Object.keys(neighbours).forEach(neighbourSide => {
       const neighbourPos = neighbours[neighbourSide];
       const nextPos = `${neighbourPos.x}_${neighbourPos.y}`;
-      const newCost = positionCosts[currentPos] + heuristic(currentLocation.position, neighbourPos);
-      
+      const newCost = getStepCost(positionCosts[currentPos], currentLocation.position, exitPosition, neighbourPos);
+
       if (!positionCosts[nextPos] || newCost < positionCosts[nextPos]) {
         positionCosts[nextPos] = newCost;
-        
+
         // Neighbour is within map bounds and is not a collision entity
-        if (checkIfValidGap(neighbourPos, exitPosition)) {
+        if (checkIfValidGap(neighbourPos, exitPosition, characterRect)) {
           const isOverlappingEntity = checkCollisions(neighbourPos, collisions, true, true);
-          
+          let useNeighbourPos;
+
           if (!isOverlappingEntity) {
-            const useNeighbourPos = { x: neighbourPos.x, y: neighbourPos.y };
-            queue.push({
-              position: useNeighbourPos,
-              path: [...currentLocation.path, useNeighbourPos]
-            });
+            useNeighbourPos = { x: neighbourPos.x, y: neighbourPos.y };
           } else {
             const collisionRect = getElementRect(isOverlappingEntity);
             const collidingOnYAxis = ['top', 'bottom'].includes(neighbourSide);
@@ -457,31 +476,38 @@ export function findPathToExit(character, exitPos) {
             const useX = collidingOnYAxis ? collisionXOffset : (neighbourSide == 'right' ? collisionCharacterXOffset : collisionRect.right);
             const useY = !collidingOnYAxis ? collisionYOffset : (neighbourSide == 'bottom' ? collisionCharacterYOffset : collisionRect.bottom);
             const neighbourBorderPosition = { x: useX, y: useY };
-            
+
             const neighbourBorderPos = `${neighbourBorderPosition.x}_${neighbourBorderPosition.y}`;
-            const neighbourBorderCost = positionCosts[currentPos] + heuristic(currentLocation.position, neighbourBorderPosition);
-            
+            const neighbourBorderCost = getStepCost(positionCosts[currentPos], currentLocation.position, exitPosition, neighbourBorderPosition);
+
             if (!positionCosts[neighbourBorderPos] || neighbourBorderCost < positionCosts[neighbourBorderPos]) {
               positionCosts[neighbourBorderPos] = neighbourBorderCost;
-              
+
               // Neighbour is within map bounds
-              if (checkIfValidGap(neighbourBorderPosition, exitPosition)) {
+              if (checkIfValidGap(neighbourBorderPosition, exitPosition, characterRect)) {
                 const neighbourBorderHasOtherCollision = checkCollisions({
                   ...neighbourBorderPosition,
-                  height: neighbourPos.height, 
+                  height: neighbourPos.height,
                   width: neighbourPos.width
                 }, collisions, true, true);
-                
-                // Try this path if the position on the collision border does not have another 
+
+                // Try this path if the position on the collision border does not have another
                 // colliding entity
                 if (!neighbourBorderHasOtherCollision) {
-                  queue.push({
-                    position: neighbourBorderPosition,
-                    path: [...currentLocation.path, neighbourBorderPosition]
-                  });
+                  useNeighbourPos = neighbourBorderPosition;
                 }
               }
             }
+          }
+
+          if (useNeighbourPos) {
+            const costKey = `${useNeighbourPos.x}_${useNeighbourPos.y}`;
+            queue.push({
+              position: useNeighbourPos,
+              path: [...currentLocation.path, useNeighbourPos],
+              visitOrder: visitOrder++,
+              sortKey: positionCosts[costKey]
+            });
           }
         }
       }
@@ -491,7 +517,11 @@ export function findPathToExit(character, exitPos) {
   return false;
 }
 
-function heuristic(a, b) {
+export function getStepCost(currentCost, startPos, endPos, stepPos) {
+  return currentCost + heuristic(startPos, stepPos) + heuristic(endPos, stepPos);
+}
+
+export function heuristic(a, b) {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
 
@@ -504,11 +534,11 @@ function heuristic(a, b) {
  *
  * @return {bool} - Whether the gap is valid
  */
-export function checkIfValidGap(gap, exitPosition) {
+export function checkIfValidGap(gap, exitPosition, characterRect) {
   const gapRect = getElementRect(gap);
-  const isValidOnY = isInBoardBoundsOnAxis(gapRect, 'y');
-  const isValidOnX = isInBoardBoundsOnAxis(gapRect, 'x');
-  const atExitPosition = isAtExitPosition(gap, exitPosition);
+  const isValidOnY = isInBoardBoundsOnAxis(gapRect, 'y', true);
+  const isValidOnX = isInBoardBoundsOnAxis(gapRect, 'x', true);
+  const atExitPosition = isAtExitPosition(gap, exitPosition, characterRect);
   return atExitPosition || (isValidOnX && isValidOnY);
 }
 
@@ -521,12 +551,13 @@ export function checkIfValidGap(gap, exitPosition) {
  *
  * @return {Boolean} - Whether the rect is within the board bounds
  */
-export function isInBoardBoundsOnAxis(rect, axis) {
+export function isInBoardBoundsOnAxis(rect, axis, useAxisDimension) {
   const boardDimensions = tree.get('boardDimensions');
   const forwardDimensionOnAxis = getForwardDimension(axis);
   const boundsDimension = getDimensionFromAxis(axis);
   const isAfterBoardStart = rect[axis] >= 0;
-  const isBeforeBoardEnd = rect[forwardDimensionOnAxis] <= boardDimensions[boundsDimension];
+  const useDimension = useAxisDimension ? axis : forwardDimensionOnAxis;
+  const isBeforeBoardEnd = rect[useDimension] < boardDimensions[boundsDimension];
   return isAfterBoardStart && isBeforeBoardEnd;
 }
 
@@ -791,10 +822,14 @@ export function getElementRect(element) {
  *
  * @param  {object}  element1 - First element to use in check
  * @param  {object}  element2 - Second element to use in check
+ * @param  {number}  heightOffset - The height offset to use for detecting collision area
+ * @param  {number}  widthOffset - The width offset to use for detecting collision area
+ * @param  {bool}  excludeEquals - Whether equals comparison check should be excluded
+ *                                 Value should be false if equals comparison should be performed
  *
  * @return {Boolean} - If the two elements are colliding
  */
-export function checkElementCollision(element1, element2, heightOffset = 0, widthOffset = 0, excludeEquals) {
+export function checkElementCollision(element1, element2, heightOffset = 0, widthOffset = 0, excludeEquals = false) {
   const element1Rect = getElementRect(element1);
   const element2Rect = getElementRect(element2);
 
@@ -856,15 +891,15 @@ export function getEntityCollisions(character, useX, useY, direction, goToTarget
 }
 
 export function isMovingOnYAxis(direction) {
-  return ['up', 'down'].indexOf(direction) > -1;
+  return ['top', 'bottom', 'up', 'down'].indexOf(direction) > -1;
 }
 
 export function getAxisFromDirection(direction) {
   return isMovingOnYAxis(direction) ? 'y' : 'x';
 }
 
-export function entityIsMovingBack(direction) {
-  return ['up', 'left'].indexOf(direction) > -1;
+export function isBackwardsDirection(direction) {
+  return ['top', 'up', 'left'].indexOf(direction) > -1;
 }
 
 export function getCollisionMaxValue(currentPosition, direction, character, collisions) {
@@ -917,7 +952,7 @@ export function getCollisionMaxValue(currentPosition, direction, character, coll
   });
 
   if (maxDirectionValue) {
-    if (entityIsMovingBack(direction)) {
+    if (isBackwardsDirection(direction)) {
       maxValue = Math.max(maxValue, maxDirectionValue);
     } else {
       maxValue = Math.min(maxValue, maxDirectionValue);
@@ -975,6 +1010,7 @@ export function takeBunnyToGroupTile(character) {
   const { id, groupTile, groupPosition } = character.props;
   updateBunnyTile(id, groupTile);
   updateCharacterPosition(id, groupPosition);
+  updateBunnyGoingToTile(id);
 }
 
 /**
@@ -1098,6 +1134,8 @@ export function getMaxBoardYLimit(usingBurrow) {
  * @param  {int} currentX - Character's current X position
  * @param  {int} currentY - Character's current Y position
  * @param  {string} direction - The direction the character is moving, ex: 'down'
+ * @param  {bool} moveDiagonally - If the character is moving diagonally
+ * @param  {bool} goToTargetPosition - If the character is moving towards a target position
  *
  * @return {object} - Returns the value to move, and also potentially if the
  *                    tile needs to be changed
@@ -1302,10 +1340,10 @@ export function checkBunnyCollision(character, direction, bypassBunnyCollisionUp
   // Otherwise, when checking AI collisions, ensure they're not colliding with hero
   // or any other AIs
   const bunniesOnTile = _filter(tree.get('bunniesOnTile'), bunny => {
-    return bunny.id != character.props.id && 
+    return bunny.id != character.props.id &&
       // Only collide with bunnies that have not been collected, or that are already at their group tile
       // This prevents hero from colliding with bunnies going to their group tile
-      (!bunny.hasCollected || _isEqual(bunny.onTile, bunny.groupTile));
+      (!bunny.hasCollected || !bunny.goingToTile);
   });
 
   // If moving AI, check for hero collisions when not going to a target location
@@ -1344,6 +1382,14 @@ export function removeBunnyCollisionWithHero(bunnyId) {
   if (bunnyIndex > -1) {
     heroCollisions.splice([bunnyIndex, 1]);
   }
+}
+
+export function updateBunnyGoingToTile(bunnyId) {
+  const bunniesCursor = tree.select('bunnies');
+  const bunnies = bunniesCursor.get();
+  const bunnyIndex = _findIndex(bunnies, bunny => bunny.id == bunnyId);
+
+  bunniesCursor.set([bunnyIndex, 'goingToTile'], !bunniesCursor.get([bunnyIndex, 'goingToTile']));
 }
 
 /**

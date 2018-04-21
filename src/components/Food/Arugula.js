@@ -1,4 +1,4 @@
-import image from 'images/arugula.png';
+import image from 'images/food/arugula.png';
 
 export default class Arugula {
   constructor(position, id) {

@@ -56,7 +56,8 @@ const Tile = {
   ],
   food: [],
   x: 2,
-  y: 1
+  y: 1,
+  exits
 };
 
 export default Tile;

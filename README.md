@@ -66,8 +66,11 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Add logic so hero doesn't collide with bunnies going to their target position~~
 
-Add logic so if the preferred exit does not have a path, try going to the nearest exit that does have a path.
-If no exits have valid paths, need logic so when the tile changes, the bunnies tile updates to go to their target tile
+~~Add logic so if the preferred exit does not have a path, try going to the nearest exit instead.~~
+
+~~If no exits have valid paths, need logic so when the tile changes, the bunnies tile updates to go to their target tile~~
+
+~~Organize images directory to have subfolders and update file usages accordingly~~
 
 Fix character image facing left for a split second when first moving down
 

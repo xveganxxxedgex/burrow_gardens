@@ -1,4 +1,4 @@
-import image from 'images/dandelion_greens.png';
+import image from 'images/food/dandelion_greens.png';
 
 export default class DandelionGreens {
   constructor(position, id) {

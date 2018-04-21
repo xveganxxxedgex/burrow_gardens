@@ -1,4 +1,4 @@
-import image from 'images/apple1.png';
+import image from 'images/food/apple1.png';
 
 export default class Apple {
   constructor(position, id) {

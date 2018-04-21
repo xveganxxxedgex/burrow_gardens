@@ -1,4 +1,4 @@
-import image from 'images/blueberries.png';
+import image from 'images/food/blueberries.png';
 
 export default class Blueberry {
   constructor(position, id) {

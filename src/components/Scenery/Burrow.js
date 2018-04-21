@@ -1,4 +1,4 @@
-import image from 'images/burrow.png';
+import image from 'images/scenery/burrow.png';
 
 import * as constants from './constants';
 

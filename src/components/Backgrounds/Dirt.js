@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import BackgroundCell from 'components/Backgrounds/BackgroundCell';
-import grassImage from 'images/grass.png';
+import grassImage from 'images/scenery/grass.png';
 
 class Dirt extends Component {
   constructor(props, context) {

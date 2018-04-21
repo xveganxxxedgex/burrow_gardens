@@ -1,4 +1,4 @@
-import image from 'images/endive.png';
+import image from 'images/food/endive.png';
 
 export default class Endive {
   constructor(position, id) {

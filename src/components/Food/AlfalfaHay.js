@@ -1,4 +1,4 @@
-import image from 'images/alfalfa_hay1.png';
+import image from 'images/food/alfalfa_hay1.png';
 
 export default class AlfalfaHay {
   constructor(position, id) {

@@ -1,4 +1,4 @@
-import image from 'images/Brick3.png';
+import image from 'images/scenery/brick.png';
 
 export default class Bush {
   constructor(position) {

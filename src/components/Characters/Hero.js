@@ -16,25 +16,25 @@ import {
   getEntityCollisions
 } from 'actions';
 
-import bunnyLeftImg from 'images/bunny1.png';
-import bunnyUpImg from 'images/bunnyup1.png';
-import bunnyDownImg from 'images/bunnydown1.png';
-import bunnyLeftGif from 'images/bunnygif.gif';
-import bunnyUpGif from 'images/bunnyupgif.gif';
-import bunnyDownGif from 'images/bunnydowngif.gif';
-import bunnyLoafImg from 'images/bunnyloaf.png';
-import bunnyLoafUpImg from 'images/bunnyuploaf.png';
-import bunnyLoafDownImg from 'images/bunnydownloaf.png';
-import bunnyFlopImg from 'images/bunnyflop.png';
-import bunnyFlopUpImg from 'images/bunnyupflop.png';
-import bunnyFlopDownImg from 'images/bunnydownflop.png';
+import bunnyLeftImg from 'images/bunnies/bunny.png';
+import bunnyUpImg from 'images/bunnies/bunny_up.png';
+import bunnyDownImg from 'images/bunnies/bunny_down.png';
+import bunnyLeftGif from 'images/bunnies/bunny_gif.gif';
+import bunnyUpGif from 'images/bunnies/bunny_up_gif.gif';
+import bunnyDownGif from 'images/bunnies/bunny_down_gif.gif';
+import bunnyLoafImg from 'images/bunnies/bunny_loaf.png';
+import bunnyLoafUpImg from 'images/bunnies/bunny_up_loaf.png';
+import bunnyLoafDownImg from 'images/bunnies/bunny_down_loaf.png';
+import bunnyFlopImg from 'images/bunnies/bunny_flop.png';
+import bunnyFlopUpImg from 'images/bunnies/bunny_up_flop.png';
+import bunnyFlopDownImg from 'images/bunnies/bunny_down_flop.png';
 
-import lopBunnyLeftImg from 'images/lopbunny1.png';
-import lopBunnyUpImg from 'images/lopbunnyup1.png';
-import lopBunnyDownImg from 'images/lopbunnydown1.png';
-import lopBunnyLeftGif from 'images/lopbunnygif.gif';
-import lopBunnyUpGif from 'images/lopbunnyupgif.gif';
-import lopBunnyDownGif from 'images/lopbunnydowngif.gif';
+import lopBunnyLeftImg from 'images/bunnies/lop_bunny.png';
+import lopBunnyUpImg from 'images/bunnies/lop_bunny_up.png';
+import lopBunnyDownImg from 'images/bunnies/lop_bunny_down.png';
+import lopBunnyLeftGif from 'images/bunnies/lop_bunny_gif.gif';
+import lopBunnyUpGif from 'images/bunnies/lop_bunny_up_gif.gif';
+import lopBunnyDownGif from 'images/bunnies/lop_bunny_down_gif.gif';
 
 const KEYBOARD_EVENTS = {
   // Direction keys
@@ -56,7 +56,6 @@ const KEYBOARD_EVENTS = {
 @branch({
   hero: ['hero'],
   boardDimensions: ['boardDimensions'],
-  tile: ['tile'],
   showMenu: ['showMenu']
 })
 class Hero extends Component {

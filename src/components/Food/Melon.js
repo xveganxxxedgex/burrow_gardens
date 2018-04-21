@@ -1,4 +1,4 @@
-import image from 'images/melon.png';
+import image from 'images/food/melon.png';
 
 export default class Melon {
   constructor(position, id) {

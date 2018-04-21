@@ -1,4 +1,4 @@
-import image from 'images/bokchoy.png';
+import image from 'images/food/bokchoy.png';
 
 export default class BokChoy {
   constructor(position, id) {
