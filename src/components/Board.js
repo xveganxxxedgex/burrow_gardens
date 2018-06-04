@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { branch } from 'baobab-react/higher-order';
 import { Popover } from 'react-bootstrap';
+import _flatten from 'lodash/flatten';
 import _isEqual from 'lodash/isEqual';
+import _union from 'lodash/union';
 
 import Hero from 'components/Characters/Hero';
 import MenuModal from 'components/MenuModal';
@@ -123,7 +125,9 @@ class BackgroundWrapper extends Component {
 
 class SceneryWrapper extends Component {
   shouldComponentUpdate(nextProps) {
-    return !_isEqual([nextProps.tile.x, nextProps.tile.y], [this.props.tile.x, this.props.tile.y]);
+    const tileChanged = !_isEqual([nextProps.tile.x, nextProps.tile.y], [this.props.tile.x, this.props.tile.y]);
+    const sceneryChanged = !_isEqual(nextProps.tile.scenery, this.props.tile.scenery);
+    return tileChanged || sceneryChanged;
   }
 
   render() {
@@ -131,11 +135,19 @@ class SceneryWrapper extends Component {
 
     return (
       <div className="scenery-wrapper">
-        {tile.scenery.map((item, itemIndex) => {
-          return (
+        {_flatten(tile.scenery.map((item, itemIndex) => {
+          let itemElements = [
             <SceneryItem {...item} key={`scenery-${itemIndex}`} index={itemIndex} />
-          );
-        })}
+          ];
+
+          if (item.collisionPoints) {
+            itemElements = _union(itemElements, item.collisionPoints.map((collisionItem, colIndex) => (
+              <SceneryItem {...collisionItem} key={`scenery-collision-${colIndex}`} index={colIndex} />
+            )))
+          }
+
+          return itemElements;
+        }))}
       </div>
     )
   }
@@ -175,11 +187,9 @@ class BunniesWrapper extends Component {
 
     return (
       <div className="bunny-wrapper">
-        {bunniesOnTile.map((item, itemIndex) => {
-          return (
-            <Bunny {...item} key={`bunny-${itemIndex}`} index={itemIndex} />
-          );
-        })}
+        {bunniesOnTile.map((item, itemIndex) => (
+          <Bunny {...item} key={`bunny-${itemIndex}`} index={itemIndex} />
+        ))}
       </div>
     )
   }

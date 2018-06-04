@@ -4,11 +4,13 @@ import _capitalize from 'lodash/capitalize';
 import _filter from 'lodash/filter';
 import _find from 'lodash/find';
 import _findIndex from 'lodash/findIndex';
+import _flatten from 'lodash/flatten';
 import _forEach from 'lodash/forEach';
 import _isEqual from 'lodash/isEqual';
 import _max from 'lodash/max';
 import _min from 'lodash/min';
 import _minBy from 'lodash/minBy';
+import _random from 'lodash/random';
 import _union from 'lodash/union';
 import { findDOMNode } from 'react-dom';
 
@@ -17,8 +19,10 @@ import * as Characters from 'components/Characters';
 import * as Backgrounds from 'components/Backgrounds';
 import * as SceneryItems from 'components/Scenery';
 
-import * as SceneryConstants from 'components/Scenery/constants';
-import * as CharacterConstants from 'components/Characters/constants';
+import { FALL_DURATION } from 'components/constants';
+import * as sceneryConstants from 'components/Scenery/constants';
+import * as characterConstants from 'components/Characters/constants';
+import * as mapConstants from 'Maps/constants';
 
 let popoverTimeout;
 
@@ -29,8 +33,13 @@ let popoverTimeout;
  *                           the hero
  */
 export function updateHeroPosition(newPos) {
-  const cursor = tree.select(['hero', 'position']);
-  cursor.set(newPos);
+  tree.set(['hero', 'position'], newPos);
+}
+
+export function changeMenuTab(activeTab) {
+  const currentTab = tree.get('activeMenuTab');
+  const newTab = activeTab || (currentTab < 3 ? currentTab + 1 : 1);
+  tree.set('activeMenuTab', newTab);
 }
 
 /**
@@ -139,6 +148,7 @@ export function setBoardDimensions(board) {
  */
 export function setActiveTile(x = 1, y = 1) {
   const cursor = tree.select('activeTile');
+  const bunnies = tree.get('bunnies');
   const previousTile = cursor.get();
   const previousTileCursor = tree.select(['tiles', `${previousTile.x}_${previousTile.y}`]);
   const itemQueue = tree.select('itemQueue');
@@ -153,6 +163,22 @@ export function setActiveTile(x = 1, y = 1) {
 
     // Clear the queue
     itemQueue.set([]);
+  }
+
+
+  const bunniesOnTile = _filter(bunnies, bunny => {
+    return bunny.onTile.x == x && bunny.onTile.y == y;
+  });
+
+  if (bunniesOnTile.length) {
+    bunniesOnTile.forEach(item => {
+      const closestEmptyPosition = getClosestEmptyPosition(item);
+
+      // Move bunny position if they're colliding with any items
+      if (closestEmptyPosition && !_isEqual(closestEmptyPosition, item.position)) {
+        updateCharacterPosition(item.id, closestEmptyPosition);
+      }
+    });
   }
 
   cursor.set({ x, y });
@@ -291,6 +317,16 @@ export function getExitPosition(character, targetTile) {
   return goToPosition;
 }
 
+export function getCollisionsWithCustomHitboxes(items) {
+  const customHitboxes = _flatten(_filter(items, item => item.collisionPoints).map(item => item.collisionPoints));
+
+  if (customHitboxes) {
+    return _union(items, customHitboxes);
+  }
+
+  return items;
+}
+
 /**
  * Returns all collision entities on a tile
  *
@@ -298,17 +334,24 @@ export function getExitPosition(character, targetTile) {
  *
  * @return {array} - The collision entities
  */
-export function getCollisionEntities(filterCollected) {
+export function getCollisionEntities(filterCollected, includeBunnies) {
   const tile = tree.get('tile');
   const sceneryEntities = _filter(tile.scenery, entity => {
     // Remove burrow entities
-    const isBurrow = entity.type == SceneryConstants.BURROW_TYPE;
+    const isBurrow = entity.type == sceneryConstants.BURROW_TYPE;
     return !isBurrow;
   });
 
-  const foodEntities = !filterCollected ? tile.food : _filter(tile.food, food => !food.collected);
+  const sceneryEntitiesWithHitboxes = getCollisionsWithCustomHitboxes(sceneryEntities);
 
-  return _union(foodEntities, sceneryEntities);
+  const foodEntities = !filterCollected ? tile.food : _filter(tile.food, food => !food.collected);
+  const collisionEntities = [foodEntities, sceneryEntitiesWithHitboxes];
+
+  if (includeBunnies) {
+    collisionEntities.push([...tree.get('bunniesOnTile'), tree.get('hero')]);
+  }
+
+  return getCollisionItems(_union(...collisionEntities));
 }
 
 /**
@@ -416,10 +459,38 @@ export function isAtExitPosition(pos, exitPosition, characterRect) {
   return pos.x === exitPosition.x && pos.y === exitPosition.y;
 }
 
-export function getCharacterCollisions(character) {
+export function getCollisions(entity, includeBunnies) {
+  const entityRect = getElementRect(entity);
+  const collisions = getCollisionEntities(true, includeBunnies);
+  return checkCollisions(entityRect, collisions);
+}
+
+export function getClosestEmptyPosition(character, includeBunnies) {
   const characterRect = getElementRect(character);
-  const collisions = getCollisionEntities(true);
-  return checkCollisions(characterRect, collisions);
+  const currentPos = { x: characterRect.x, y: characterRect.y };
+  const queue = [currentPos];
+  const positionsTried = [];
+
+  while (queue.length) {
+    const position = queue.shift();
+
+    if (!getCollisions(position, includeBunnies).length) {
+      return position;
+    }
+
+    const neighbours = getNeighboursOfPosition(position, character.height, character.width);
+    const posKey = `${position.x}_${position.y}`;
+    positionsTried.push(posKey);
+
+    _forEach(neighbours, neighbour => {
+      const neighbourPosKey = `${neighbour.x}_${neighbour.y}`;
+      if (!positionsTried.includes(neighbourPosKey)) {
+        queue.push(neighbour);
+      }
+    });
+  }
+
+  return currentPos;
 }
 
 export function findPathToExit(character, exitPos) {
@@ -459,7 +530,7 @@ export function findPathToExit(character, exitPos) {
       if (!positionCosts[nextPos] || newCost < positionCosts[nextPos]) {
         positionCosts[nextPos] = newCost;
 
-        // Neighbour is within map bounds and is not a collision entity
+        // Neighbour is within map bounds
         if (checkIfValidGap(neighbourPos, exitPosition, characterRect)) {
           const isOverlappingEntity = checkCollisions(neighbourPos, collisions, true, true);
           let useNeighbourPos;
@@ -467,12 +538,13 @@ export function findPathToExit(character, exitPos) {
           if (!isOverlappingEntity) {
             useNeighbourPos = { x: neighbourPos.x, y: neighbourPos.y };
           } else {
+            // This position is overlapping a collision entity, so set the position to the border of the collision
             const collisionRect = getElementRect(isOverlappingEntity);
             const collidingOnYAxis = ['top', 'bottom'].includes(neighbourSide);
             const collisionCharacterXOffset = collisionRect.x - neighbourPos.width;
             const collisionCharacterYOffset = collisionRect.y - neighbourPos.height;
-            const collisionXOffset = collisionRect.x < neighbourPos.x ? collisionRect.right : collisionCharacterXOffset;
-            const collisionYOffset = collisionRect.y < neighbourPos.y ? collisionRect.bottom : collisionCharacterYOffset;
+            const collisionXOffset = collisionRect.right < neighbourPos.x ? collisionRect.right : collisionCharacterXOffset;
+            const collisionYOffset = collisionRect.bottom < neighbourPos.y ? collisionRect.bottom : collisionCharacterYOffset;
             const useX = collidingOnYAxis ? collisionXOffset : (neighbourSide == 'right' ? collisionCharacterXOffset : collisionRect.right);
             const useY = !collidingOnYAxis ? collisionYOffset : (neighbourSide == 'bottom' ? collisionCharacterYOffset : collisionRect.bottom);
             const neighbourBorderPosition = { x: useX, y: useY };
@@ -646,11 +718,7 @@ export function collectItem(type, itemId) {
 
   // Hero doesn't have the required skill to add this item yet
   if (items[itemIndex].needsAbility && heroAbilities.indexOf(items[itemIndex].needsAbility) == -1) {
-    setPopover({
-      title: 'Skill Needed',
-      text: 'You must learn a new skill to collect this item.',
-      popoverClass: 'info'
-    });
+    showNeedsSkillPopover('to collect this item');
     return;
   }
 
@@ -715,11 +783,7 @@ export function collectBunny(bunnyId) {
 
   // Hero doesn't have the required skill to add this bunny yet
   if (bunnies[bunnyIndex].needsAbility && heroAbilities.indexOf(bunnies[bunnyIndex].needsAbility) == -1) {
-    setPopover({
-      title: 'Skill Needed',
-      text: 'You must learn a new skill for this bunny to become your friend.',
-      popoverClass: 'info'
-    });
+    showNeedsSkillPopover('for this bunny to become your friend');
     return;
   }
 
@@ -853,9 +917,10 @@ export function checkElementCollision(element1, element2, heightOffset = 0, widt
  * with any of them
  *
  * @param  {object} character - The character entity that is moving
- * @param  {int} x - The character's current X position
- * @param  {int} y - The character's current Y position
- * @param  {string} type - The type of entities to check for collisions, ex: 'food'
+ * @param  {array} items - The collision items to check
+ * @param  {bool} returnOnCollision - Whether to return on the first found collision
+ * @param  {bool} excludeEquals - Whether equals comparison check should be excluded
+ *                                Value should be false if equals comparison should be performed
  *
  * @return {int} - The max possible value based on the direction the character
  *                 is moving.
@@ -887,7 +952,7 @@ export function getEntityCollisions(character, useX, useY, direction, goToTarget
   // Don't collide with bunnies when character is going to target position
   const bunnyCollisions = goToTargetPosition ? [] : checkBunnyCollision(useCharacter, direction, bypassBunnyCollisionUpdate);
   const collisions = _union(sceneryCollisions, foodCollisions, bunnyCollisions);
-  return collisions;
+  return getCollisionItems(collisions);
 }
 
 export function isMovingOnYAxis(direction) {
@@ -962,6 +1027,14 @@ export function getCollisionMaxValue(currentPosition, direction, character, coll
   return maxValue;
 }
 
+export function showNeedsSkillPopover(message) {
+  setPopover({
+    title: 'Skill Needed',
+    text: `You must learn a new skill ${message}.`,
+    popoverClass: 'info'
+  });
+}
+
 /**
  * Handles when player interacts with a burrow entity
  *
@@ -974,11 +1047,7 @@ export function handleBurrowAction(item) {
 
   // Hero doesn't have the required skill to add this item yet
   if (item.needsAbility && heroAbilities.indexOf(item.needsAbility) == -1) {
-    setPopover({
-      title: 'Skill Needed',
-      text: 'You must learn a new skill to perform this action.',
-      popoverClass: 'info'
-    });
+    showNeedsSkillPopover('to perform this action');
     return;
   }
 
@@ -1058,7 +1127,7 @@ export function goToPreviousTile(axis) {
 export function getMinBoardXLimit(usingBurrow) {
   // If they went through a burrow, set the min to be where the burrow ends on the next tile
   // Otherwise, set to the edge of the board, minus half the character's height
-  return usingBurrow ? SceneryConstants.BURROW_WIDTH : 0 - (CharacterConstants.BUNNY_WIDTH / 2);
+  return usingBurrow ? sceneryConstants.BURROW_WIDTH : 0 - (characterConstants.BUNNY_WIDTH / 2);
 }
 
 /**
@@ -1078,7 +1147,7 @@ export function getMinBoardXLimit(usingBurrow) {
 export function getMinBoardYLimit(usingBurrow) {
   // If they went through a burrow, set the min to be where the burrow ends on the next tile
   // Otherwise, set to the edge of the board, minus half the character's height
-  return usingBurrow ? SceneryConstants.BURROW_HEIGHT : 0 - (CharacterConstants.BUNNY_HEIGHT / 2);
+  return usingBurrow ? sceneryConstants.BURROW_HEIGHT : 0 - (characterConstants.BUNNY_HEIGHT / 2);
 }
 
 /**
@@ -1099,7 +1168,7 @@ export function getMaxBoardXLimit(usingBurrow) {
   const { width: boardWidth } = tree.get('boardDimensions');
   // If they went through a burrow, set the max to be where the burrow starts
   // Otherwise, set to the edge of the board, minus half the character's width
-  const offset = usingBurrow ? (SceneryConstants.BURROW_WIDTH + CharacterConstants.BUNNY_WIDTH) : (CharacterConstants.BUNNY_WIDTH / 2);
+  const offset = usingBurrow ? (sceneryConstants.BURROW_WIDTH + characterConstants.BUNNY_WIDTH) : (characterConstants.BUNNY_WIDTH / 2);
   return boardWidth - offset;
 }
 
@@ -1122,7 +1191,7 @@ export function getMaxBoardYLimit(usingBurrow) {
   const { height: boardHeight } = tree.get('boardDimensions');
   // If they went through a burrow, set the max to be where the burrow starts
   // Otherwise, set to the edge of the board, minus half the character's height
-  const offset = usingBurrow ? (SceneryConstants.BURROW_HEIGHT + CharacterConstants.BUNNY_HEIGHT) : (CharacterConstants.BUNNY_HEIGHT / 2);
+  const offset = usingBurrow ? (sceneryConstants.BURROW_HEIGHT + characterConstants.BUNNY_HEIGHT) : (characterConstants.BUNNY_HEIGHT / 2);
   return boardHeight - offset;
 }
 
@@ -1152,10 +1221,11 @@ export function moveEntityForward(character, axis, currentX, currentY, direction
   const currentValue = isOnXAxis ? currentX : currentY;
   const diagonalPercentage = getSquareDiagonalPercentage(movePixels);
   const value = Math.ceil(currentValue + (movePixels * (moveDiagonally ? diagonalPercentage : 1)));
+  const maxTile = isOnXAxis ? 'MAX_Y_TILES' : 'MAX_X_TILES';
 
   // Character is going beyond the board bounds
   if (value > maxLimit) {
-    if (isHero && checkTile < 2) { // TODO: Use a constant for the max tiles
+    if (isHero && checkTile < mapConstants[maxTile]) {
       goToNextTile(axis);
       // Set player coordinates to start of next tile
       return {
@@ -1223,10 +1293,11 @@ export function moveEntityBack(character, axis, currentX, currentY, direction, m
   const currentValue = isOnXAxis ? currentX : currentY;
   const diagonalPercentage = getSquareDiagonalPercentage(movePixels);
   const value = Math.ceil(currentValue - (movePixels * (moveDiagonally ? diagonalPercentage : 1)));
+  const minTile = isOnXAxis ? 'MIN_Y_TILES' : 'MIN_X_TILES';
 
   // Character is going beyond the board bounds
   if (value < minLimit) {
-    if (isHero && checkTile > 1) { // TODO: Use a constant for the min tiles
+    if (isHero && checkTile > mapConstants[minTile]) {
       goToPreviousTile(axis);
       // Set player coordinates to end of previous tile
       return {
@@ -1392,6 +1463,10 @@ export function updateBunnyGoingToTile(bunnyId) {
   bunniesCursor.set([bunnyIndex, 'goingToTile'], !bunniesCursor.get([bunnyIndex, 'goingToTile']));
 }
 
+export function getCollisionItems(items) {
+  return items.filter(item => !item.nonColliding);
+}
+
 /**
  * Check if character is collidiing with any scenery items
  *
@@ -1405,21 +1480,114 @@ export function updateBunnyGoingToTile(bunnyId) {
  */
 export function checkSceneryCollision(character, direction) {
   const tile = tree.get('tile');
-  const items = tile.scenery;
+  const sceneryEntities = getCollisionsWithCustomHitboxes(tile.scenery);
+  const items = getCollisionItems(sceneryEntities);
   const collisions = checkCollisions(character, items);
 
-  // If we're not moving, a space action is happening
   if (collisions.length) {
     _forEach(collisions, item => {
       if (character.isHero) {
-        if (item.takeToTile && !direction) {
-          handleBurrowAction(item);
+        // If we're not moving, a space action is happening
+        if (!direction) {
+          if (item.takeToTile) {
+            handleBurrowAction(item);
+          } else if ((item.produce || item.produceAction) && getCollidingSide(character, item) === 'bottom') {
+            const heroAbilities = tree.get(['hero', 'abilities']);
+
+            // Hero doesn't have the required skill to trigger this event
+            if (item.needsAbility && !heroAbilities.includes(item.needsAbility)) {
+              showNeedsSkillPopover('to perform this action');
+              return;
+            }
+
+            const itemWithProduce = item.produce ? item : sceneryEntities.find(sceneryItem => sceneryItem.id === item.hitboxFor);
+            const produceItems = itemWithProduce.produce;
+            const untouchedProduceItems = tile.food.filter(foodItem => produceItems.includes(foodItem.id) && !foodItem.collected && foodItem.onItem);
+            if (untouchedProduceItems.length) {
+              shakeProduce(untouchedProduceItems[0], itemWithProduce);
+            }
+          }
         }
       }
     });
   }
 
   return collisions;
+}
+
+/**
+ * Returns the scenery object by its ID
+ *
+ * @param  {int|string} id - The ID to find the item by
+ *
+ * @return {object|null} - The found scenery item
+ */
+export function getItemById(id, type) {
+  const items = tree.get(['tile', type]);
+
+  if (!items || !items.length) {
+    return;
+  }
+
+  return _find(items, item => item.id == id);
+}
+
+export function shakeProduce(item, parent) {
+  const tile = tree.get('tile');
+  const hero = tree.select('hero');
+  const itemIndex = _findIndex(tile.food, foodItem => foodItem.id == item.id);
+  const parentIndex = _findIndex(tile.scenery, sceneryItem => sceneryItem.id == parent.id);
+  const parentRect = getElementRect(parent);
+  const itemRect = getElementRect(item);
+
+  const fallLeft = _random(0, 1);
+  const fallXOffset = _random(15, 40);
+  const fallToX = fallLeft ? itemRect.x - fallXOffset : itemRect.x + fallXOffset;
+  const fallToY = parentRect.bottom + _random(10, 40);
+  const tileItem = tree.select(['tiles', `${tile.x}_${tile.y}`, 'food', itemIndex]);
+  const tileParent = tree.select(['tiles', `${tile.x}_${tile.y}`, 'scenery', parentIndex]);
+  let fallToPos = { x: fallToX, y: fallToY };
+  const fallToObj = { ...fallToPos, height: item.height, width: item.width };
+  const willHaveCollision = getCollisions(fallToObj, true);
+
+  // Produce will fall to a position that has a collision, so fall to the closest open spot
+  if (willHaveCollision) {
+    fallToPos = getClosestEmptyPosition(fallToObj, true);
+  }
+
+  tileItem.merge({ fallTo: fallToPos, onItem: false });
+  tileParent.set('shake', true);
+  // Don't let hero move while produce is falling
+  hero.set('disableMove', true);
+
+  setTimeout(() => {
+    tileItem.merge({ fallTo: null, position: fallToPos });
+    tileParent.set('shake', false);
+    // Let hero move again when animation completes
+    hero.set('disableMove', false);
+  }, FALL_DURATION);
+}
+
+/**
+ * Returns the side of the collision entity that is colliding with the character
+ *
+ * @param  {object} character - The character entity
+ * @param  {object} collision - The collision entity
+ *
+ * @return {string} - The side the collision is colliding on
+ */
+export function getCollidingSide(character, collision) {
+  const characterRect = getElementRect(character);
+  const collisionRect = getElementRect(collision);
+  if (characterRect.bottom === collisionRect.y && characterRect.y < collisionRect.y) {
+    return 'top';
+  } else if (characterRect.y === collisionRect.bottom && characterRect.y > collisionRect.y) {
+    return 'bottom';
+  } else if (characterRect.right === collisionRect.x && characterRect.x < collisionRect.x) {
+    return 'left';
+  } else if (characterRect.x === collisionRect.right && characterRect.x > collisionRect.x) {
+    return 'right';
+  }
 }
 
 /**

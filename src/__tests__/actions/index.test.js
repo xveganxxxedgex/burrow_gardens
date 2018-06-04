@@ -2,7 +2,7 @@ import Baobab from 'baobab';
 
 import * as actions from '../../actions';
 import { __RewireAPI__ as ActionsRewire } from '../../actions';
-import * as SceneryConstants from 'components/Scenery/constants';
+import * as sceneryConstants from 'components/Scenery/constants';
 
 describe('Actions;', () => {
   const boardDimensions = {
@@ -1782,7 +1782,7 @@ describe('Actions;', () => {
           x: 1,
           y: 1,
           scenery: [
-            { type: SceneryConstants.BURROW_TYPE },
+            { type: sceneryConstants.BURROW_TYPE },
             { type: 'Bush' },
             { type: 'Tree' }
           ],

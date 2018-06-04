@@ -1,7 +1,7 @@
 import image from 'images/food/apple1.png';
 
 export default class Apple {
-  constructor(position, id) {
+  constructor(position, id, onItem) {
     this.position = position;
     this.height = 21;
     this.width = 17;
@@ -9,5 +9,6 @@ export default class Apple {
     this.collected = false;
     this.image = image;
     this.id = id;
+    this.onItem = onItem;
   }
 }

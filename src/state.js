@@ -58,6 +58,7 @@ const state = new Baobab({
     height: 40,
     width: 40,
     lastDirection: 'right',
+    disableMove: false,
     abilities: monkey({
       cursors: {
         bunnies: ['bunnies']
@@ -196,6 +197,7 @@ const state = new Baobab({
   movePixels: 20,
   popover: null,
   showMenu: true,
+  activeTab: 1,
   tiles,
   tile: monkey({
     cursors: {

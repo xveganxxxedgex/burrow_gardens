@@ -1,13 +1,17 @@
-import bunnyLeftImg from 'images/bunnies/bunny.png';
+import bunnyLeftImg from 'images/bunnies/bunny_left.png';
+import bunnyRightImg from 'images/bunnies/bunny_right.png';
 import bunnyUpImg from 'images/bunnies/bunny_up.png';
 import bunnyDownImg from 'images/bunnies/bunny_down.png';
-import bunnyLeftGif from 'images/bunnies/bunny_gif.gif';
+import bunnyLeftGif from 'images/bunnies/bunny_left_gif.gif';
+import bunnyRightGif from 'images/bunnies/bunny_right_gif.gif';
 import bunnyUpGif from 'images/bunnies/bunny_up_gif.gif';
 import bunnyDownGif from 'images/bunnies/bunny_down_gif.gif';
-import bunnyLoafImg from 'images/bunnies/bunny_loaf.png';
+import bunnyLoafLeftImg from 'images/bunnies/bunny_left_loaf.png';
+import bunnyLoafRightImg from 'images/bunnies/bunny_right_loaf.png';
 import bunnyLoafUpImg from 'images/bunnies/bunny_up_loaf.png';
 import bunnyLoafDownImg from 'images/bunnies/bunny_down_loaf.png';
-import bunnyFlopImg from 'images/bunnies/bunny_flop.png';
+import bunnyFlopLeftImg from 'images/bunnies/bunny_left_flop.png';
+import bunnyFlopRightImg from 'images/bunnies/bunny_right_flop.png';
 import bunnyFlopUpImg from 'images/bunnies/bunny_up_flop.png';
 import bunnyFlopDownImg from 'images/bunnies/bunny_down_flop.png';
 import bunnyCloseUpImg from 'images/bunnies/bunny_close_1.png'; // TODO: Use correct image for Simba
@@ -28,15 +32,19 @@ export default class Simba {
     this.groupPosition = { x: 725, y: 150 };
     this.bunnyImages = {
       left: bunnyLeftImg,
+      right: bunnyRightImg,
       up: bunnyUpImg,
       down: bunnyDownImg,
       leftGif: bunnyLeftGif,
+      rightGif: bunnyRightGif,
       upGif: bunnyUpGif,
       downGif: bunnyDownGif,
-      loaf: bunnyLoafImg,
+      loafLeft: bunnyLoafLeftImg,
+      loafRight: bunnyLoafRightImg,
       loafUp: bunnyLoafUpImg,
       loafDown: bunnyLoafDownImg,
-      flop: bunnyFlopImg,
+      flopLeft: bunnyFlopLeftImg,
+      flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
       flopDown: bunnyFlopDownImg,
       closeup: bunnyCloseUpImg

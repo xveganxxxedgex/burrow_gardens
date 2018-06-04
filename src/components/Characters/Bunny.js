@@ -20,7 +20,6 @@ import {
   getOppositeDirection,
   getExitPosition,
   isBackwardsDirection,
-  isMovingOnYAxis,
   getAxisFromDirection,
   findPathToExit,
   getTargetDirection,
@@ -230,15 +229,9 @@ class Bunny extends Component {
     let imageKey = 'left';
 
     if (isFlopped || isLoaf) {
-      imageKey = isFlopped ? 'flop' : 'loaf';
-
-      if (isMovingOnYAxis(useDirection)) {
-        imageKey = imageKey + _capitalize(useDirection);
-      }
+      imageKey = (isFlopped ? 'flop' : 'loaf') + _capitalize(useDirection);
     } else {
-      if (isMovingOnYAxis(useDirection)) {
-        imageKey = useDirection;
-      }
+      imageKey = useDirection;
 
       if (this.props.isMoving || this.state.moving.length) {
         imageKey = imageKey + 'Gif';

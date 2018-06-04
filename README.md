@@ -72,17 +72,21 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Organize images directory to have subfolders and update file usages accordingly~~
 
-Fix character image facing left for a split second when first moving down
+~~When repopulating produce, need to ensure nothing is colliding with that position before placing it there (ensure food doesn't populate where an AI is)~~
+
+~~Fix character image facing left for a split second when first moving down~~
+
+~~Add tree elements that lose produce when hero stomps while colliding with them~~
+
+~~Add logic to handle collision detection for trees or other non-block objects (how to handle collisions with visually blank areas in image/div)~~
+
+~~Add logic for produce falling from trees~~
+
+~~Ensure no items move to where the hero is to avoid weird collision movement issues~~
+
+~~Enable Tab events while menu is open to switch between the menu tabs~~
 
 Maybe add a cute animation like a binky when a bunny is added to the group, to play before they head to the group tile
-
-When repopulating produce, need to ensure nothing is colliding with that position before placing it there (ensure food doesn't populate where an AI is)
-
-Add tree elements that lose produce when hero stomps while colliding with them
-
-Add logic to handle collision detection for trees or other non-block objects (how to handle collisions with visually blank areas in image/div)
-
-Add logic for produce falling from trees
 
 Add areas where hero has to jump
 

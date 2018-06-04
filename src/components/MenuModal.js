@@ -6,6 +6,8 @@ import _orderBy from 'lodash/orderBy';
 import FoodItem from 'components/Food/FoodItem';
 import * as Food from 'components/Food';
 
+import { changeMenuTab } from 'actions';
+
 import 'less/MenuModal.less';
 
 class MenuModal extends Component {
@@ -40,23 +42,10 @@ export default MenuModal;
 @branch({
   produceList: ['produceList'],
   bunnies: ['bunnies'],
-  wonGame: ['wonGame']
+  wonGame: ['wonGame'],
+  activeTab: ['activeMenuTab']
 })
 class MenuTabs extends Component {
-  constructor(props, context) {
-    super(props, context);
-
-    this.changeTab = this.changeTab.bind(this);
-
-    this.state = {
-      activeTab: 1
-    };
-  }
-
-  changeTab(activeTab) {
-    this.setState({ activeTab });
-  }
-
   getWonGameContent() {
     return (
       <div className="main-menu-content">
@@ -75,7 +64,7 @@ class MenuTabs extends Component {
         <div className="h3">Welcome to Burrow Gardens!</div>
         <p>
           As the newest bunny in Burrow Gardens, your mission is to discover
-          all of the produce in the area, as well as get all bunny residents
+          all of the produce in the area, and to get all bunny residents
           to become your friend.
         </p>
         <p>
@@ -95,11 +84,11 @@ class MenuTabs extends Component {
   }
 
   render() {
-    const { produceList, bunnies, wonGame } = this.props;
+    const { produceList, bunnies, wonGame, activeTab } = this.props;
 
     return (
       <div className="flex menu-modal-content">
-        <Tabs activeKey={this.state.activeTab} onSelect={this.changeTab} className="tabs" id="menu-tabs">
+        <Tabs activeKey={activeTab} onSelect={changeMenuTab} className="tabs" id="menu-tabs">
           <Tab eventKey={1} title="Main Menu">
             {wonGame ? this.getWonGameContent() : this.getWelcomeContent()}
           </Tab>

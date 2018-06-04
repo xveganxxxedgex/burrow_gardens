@@ -32,7 +32,9 @@ for (let i = 40; i < 1200; i = i + 40) {
 
 const foodItems = [
   { type: 'AlfalfaHay', position: { x: 550, y: 455 } },
-  { type: 'Apple', position: { x: 800, y: 350 } },
+  { type: 'Apple', position: { x: 430, y: 160 }, id: 'tree_apple_1', onItem: 'tree_1' },
+  { type: 'Apple', position: { x: 530, y: 210 }, id: 'tree_apple_2', onItem: 'tree_1' },
+  { type: 'Apple', position: { x: 580, y: 140 }, id: 'tree_apple_3', onItem: 'tree_1' },
   { type: 'Arugula', position: { x: 800, y: 400 } },
   { type: 'Banana', position: { x: 800, y: 450 } },
   { type: 'Basil', position: { x: 850, y: 300 } },
@@ -47,7 +49,21 @@ const foodItems = [
   { type: 'DandelionGreens', position: { x: 900, y: 400 } },
   { type: 'Endive', position: { x: 900, y: 450 } },
   { type: 'Melon', position: { x: 900, y: 500 } },
-  { type: 'Mint', position: { x: 900, y: 350 } }
+  { type: 'Mint', position: { x: 900, y: 350 } },
+  { type: 'Papaya', position: { x: 800, y: 350 } },
+  { type: 'Parsley', position: { x: 950, y: 400 } },
+  { type: 'Peach', position: { x: 950, y: 450 } },
+  { type: 'Pear', position: { x: 800, y: 500 } },
+  { type: 'Pumpkin', position: { x: 840, y: 490 } },
+  { type: 'Radicchio', position: { x: 950, y: 500 } },
+  { type: 'Raspberry', position: { x: 1000, y: 510 } },
+  // { type: 'RedLeafLettuce', position: { x: 1000, y: 450 } },
+  // { type: 'RomaineLettuce', position: { x: 1000, y: 400 } },
+  // { type: 'Spinach', position: { x: 1000, y: 350 } },
+  // { type: 'Strawberry', position: { x: 1000, y: 300 } },
+  // { type: 'SwissChard', position: { x: 1050, y: 350 } },
+  // { type: 'TimothyHay', position: { x: 1050, y: 400 } },
+  // { type: 'Zucchini', position: { x: 1050, y: 450 } }
 ];
 
 const Tile = {
@@ -73,10 +89,11 @@ const Tile = {
     ...right,
     ...top,
     ...bottom,
-    new Scenery.Burrow({ x: 1138, y: 200 }, { x: 1, y: 2 }, 'left')
+    new Scenery.Burrow({ x: 1138, y: 200 }, { x: 1, y: 2 }, 'left'),
+    new Scenery.Tree({ x: 400, y: 100 }, 'tree_1', ['tree_apple_1', 'tree_apple_2', 'tree_apple_3'])
   ],
   food: foodItems.map((item, index) => {
-    return new Food[item.type](item.position, index + 1);
+    return new Food[item.type](item.position, item.id || index + 1, item.onItem);
   }),
   x: 1,
   y: 1,
