@@ -26,10 +26,6 @@
   -webkit-transition: none;
   transition: none;
 }
-.bunny.right img {
-  -webkit-transform: scaleX(-1);
-          transform: scaleX(-1);
-}
 .bunny img {
   height: 100%;
   width: 100%;
@@ -127,18 +123,6 @@
   margin: 0 auto;
   width: 100%;
   max-width: 45px;
-}
-.scenery {
-  position: absolute;
-  z-index: 1;
-}
-.scenery.burrow.right img {
-  -webkit-transform: scaleX(-1);
-          transform: scaleX(-1);
-}
-.scenery img {
-  height: 100%;
-  width: 100%;
 }
 .board {
   height: 600px;
