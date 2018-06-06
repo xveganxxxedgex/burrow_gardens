@@ -40,9 +40,6 @@
   height: auto;
   margin: 0 auto;
 }
-.menu-modal {
-  overflow: auto;
-}
 .menu-modal .menu-modal-content {
   height: 100%;
 }
@@ -51,6 +48,10 @@
 }
 .menu-modal .menu-modal-content .tabs .tab-content {
   padding-top: 10px;
+  height: calc(100% - 41px);
+}
+.menu-modal .menu-modal-content .tabs .tab-content .tab-pane {
+  height: 100%;
 }
 .menu-modal .menu-modal-content .tabs .tab-content .main-menu-content {
   padding: 10px 20px;
@@ -70,6 +71,13 @@
 }
 .menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell.disabled .inventory-item-cell-content {
   background-color: #ececec;
+}
+.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell.skill-chunk {
+  height: auto;
+  min-height: 100px;
+}
+.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell.skill-chunk .inventory-item-cell-content {
+  padding: 10px;
 }
 .menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content {
   border: 1px solid #ccc;
@@ -101,12 +109,12 @@
   text-align: center;
   font-size: 12px;
 }
-.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .unlock-icon {
+.menu-modal .menu-modal-content .collected-section .inventory-list .unlock-icon {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
 }
-.menu-modal .menu-modal-content .collected-section .inventory-list .inventory-item-cell .inventory-item-cell-content .unlock-icon .glyphicon {
+.menu-modal .menu-modal-content .collected-section .inventory-list .unlock-icon .glyphicon {
   -ms-flex-item-align: center;
       align-self: center;
   font-size: 36px;
