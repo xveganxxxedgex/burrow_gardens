@@ -1,7 +1,7 @@
 import image from 'images/food/parsley.png';
 
 export default class Parsley {
-  constructor(position, id) {
+  constructor({ position, id }) {
     this.position = position;
     this.height = 23;
     this.width = 20;

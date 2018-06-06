@@ -1,7 +1,7 @@
 import image from 'images/food/cilantro.png';
 
 export default class Cilantro {
-  constructor(position, id) {
+  constructor({ position, id }) {
     this.position = position;
     this.height = 23;
     this.width = 20;

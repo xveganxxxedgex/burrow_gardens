@@ -1,7 +1,7 @@
 import image from 'images/food/mint.png';
 
 export default class Mint {
-  constructor(position, id) {
+  constructor({ position, id }) {
     this.position = position;
     this.height = 16;
     this.width = 20;

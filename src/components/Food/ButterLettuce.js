@@ -1,7 +1,7 @@
 import image from 'images/food/butter_lettuce.png';
 
 export default class ButterLettuce {
-  constructor(position, id) {
+  constructor({ position, id }) {
     this.position = position;
     this.height = 20;
     this.width = 25;
@@ -9,5 +9,6 @@ export default class ButterLettuce {
     this.collected = false;
     this.image = image;
     this.id = id;
+    this.needsAbility = 'dig';
   }
 }

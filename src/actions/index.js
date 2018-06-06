@@ -19,7 +19,7 @@ import * as Characters from 'components/Characters';
 import * as Backgrounds from 'components/Backgrounds';
 import * as SceneryItems from 'components/Scenery';
 
-import { FALL_DURATION } from 'components/constants';
+import { FALL_DURATION, MENU_TABS } from 'components/constants';
 import * as sceneryConstants from 'components/Scenery/constants';
 import * as characterConstants from 'components/Characters/constants';
 import * as mapConstants from 'Maps/constants';
@@ -34,12 +34,17 @@ let popoverTimeout;
  */
 export function updateHeroPosition(newPos) {
   tree.set(['hero', 'position'], newPos);
+  tree.commit();
 }
 
 export function changeMenuTab(activeTab) {
   const currentTab = tree.get('activeMenuTab');
-  const newTab = activeTab || (currentTab < 3 ? currentTab + 1 : 1);
+  const newTab = activeTab || (currentTab < MENU_TABS ? currentTab + 1 : 1);
   tree.set('activeMenuTab', newTab);
+}
+
+export function toggleAudioMuted() {
+  tree.set('audioMuted', !tree.get('audioMuted'));
 }
 
 /**
@@ -150,15 +155,14 @@ export function setActiveTile(x = 1, y = 1) {
   const cursor = tree.select('activeTile');
   const bunnies = tree.get('bunnies');
   const previousTile = cursor.get();
-  const previousTileCursor = tree.select(['tiles', `${previousTile.x}_${previousTile.y}`]);
   const itemQueue = tree.select('itemQueue');
 
   if (itemQueue.get().length) {
     // If we have an item queue for the now previous tile, set their
     // hasCollected status to false so they repopulate when the tile is next rendered
-    _forEach(itemQueue.get(), item => {
-      const itemIndex = _findIndex(previousTileCursor.get('food'), foodItem => foodItem.id == item);
-      previousTileCursor.set(['food', itemIndex, 'collected'], false);
+    _forEach(itemQueue.get(), itemId => {
+      const itemCursor = getItemCursor('food', itemId, previousTile);
+      itemCursor.set('collected', false);
     });
 
     // Clear the queue
@@ -317,6 +321,13 @@ export function getExitPosition(character, targetTile) {
   return goToPosition;
 }
 
+/**
+ * Returns hitboxes for an items that have custom collision entities
+ *
+ * @param  {array} items - All items to check for custom hitboxes
+ *
+ * @return {array} - All collision entities, including custom hitboxes
+ */
 export function getCollisionsWithCustomHitboxes(items) {
   const customHitboxes = _flatten(_filter(items, item => item.collisionPoints).map(item => item.collisionPoints));
 
@@ -336,6 +347,7 @@ export function getCollisionsWithCustomHitboxes(items) {
  */
 export function getCollisionEntities(filterCollected, includeBunnies) {
   const tile = tree.get('tile');
+  const foodOnTile = tree.get('foodOnTile');
   const sceneryEntities = _filter(tile.scenery, entity => {
     // Remove burrow entities
     const isBurrow = entity.type == sceneryConstants.BURROW_TYPE;
@@ -344,7 +356,7 @@ export function getCollisionEntities(filterCollected, includeBunnies) {
 
   const sceneryEntitiesWithHitboxes = getCollisionsWithCustomHitboxes(sceneryEntities);
 
-  const foodEntities = !filterCollected ? tile.food : _filter(tile.food, food => !food.collected);
+  const foodEntities = !filterCollected ? foodOnTile : _filter(foodOnTile, food => !food.collected);
   const collisionEntities = [foodEntities, sceneryEntitiesWithHitboxes];
 
   if (includeBunnies) {
@@ -426,6 +438,15 @@ export function checkIfAtTargetPosition(direction, currentPosition, targetPositi
   return atTargetCoordinate;
 }
 
+/**
+ * Returns direct neighbours of a given position
+ *
+ * @param  {object} position - The position to get neighbours for
+ * @param  {int} height - The height of the starting position to derive the top and bottom neighbours
+ * @param  {int} width - The width of the starting position to derive the left and right neighbours
+ *
+ * @return {object} - The neighbours to the top, bottom, left, and right of the starting position
+ */
 export function getNeighboursOfPosition(position, height, width) {
   const posRect = getElementRect({ ...position, height, width });
   const forwardX = posRect.right;
@@ -443,6 +464,15 @@ export function getNeighboursOfPosition(position, height, width) {
   return neighbours;
 }
 
+/**
+ * Returns if a given position is at/equal to a target exit position
+ *
+ * @param  {object}  pos - The position to check if it's at the exit position
+ * @param  {object}  exitPosition - The target exit position
+ * @param  {object}  characterRect - The rect object of the character going to the exit position
+ *
+ * @return {bool} - Whether the position is at the exit position
+ */
 export function isAtExitPosition(pos, exitPosition, characterRect) {
   const boardDimensions = tree.get('boardDimensions');
 
@@ -459,26 +489,42 @@ export function isAtExitPosition(pos, exitPosition, characterRect) {
   return pos.x === exitPosition.x && pos.y === exitPosition.y;
 }
 
+/**
+ * Returns collision entities that are colliding with a given entity
+ *
+ * @param  {object} entity - The entity to check for collisions
+ * @param  {bool} includeBunnies - Whether to include bunnies as collision entities
+ *
+ * @return {array} - All collision entities that are currently colliding with the entity
+ */
 export function getCollisions(entity, includeBunnies) {
   const entityRect = getElementRect(entity);
   const collisions = getCollisionEntities(true, includeBunnies);
   return checkCollisions(entityRect, collisions);
 }
 
-export function getClosestEmptyPosition(character, includeBunnies) {
-  const characterRect = getElementRect(character);
-  const currentPos = { x: characterRect.x, y: characterRect.y };
+/**
+ * Returns the closest position that does not have any collisions
+ *
+ * @param  {object} item - The item that will go to this empty position
+ * @param  {bool} includeBunnies - Whether to include bunnies as collision entities
+ *
+ * @return {object} - The nearest position without any collisions
+ */
+export function getClosestEmptyPosition(item, includeBunnies) {
+  const itemRect = getElementRect(item);
+  const currentPos = { x: itemRect.x, y: itemRect.y };
   const queue = [currentPos];
   const positionsTried = [];
 
   while (queue.length) {
     const position = queue.shift();
 
-    if (!getCollisions(position, includeBunnies).length) {
+    if (!getCollisions({ ...position, height: item.height, width: item.width }, includeBunnies).length) {
       return position;
     }
 
-    const neighbours = getNeighboursOfPosition(position, character.height, character.width);
+    const neighbours = getNeighboursOfPosition(position, item.height, item.width);
     const posKey = `${position.x}_${position.y}`;
     positionsTried.push(posKey);
 
@@ -493,6 +539,14 @@ export function getClosestEmptyPosition(character, includeBunnies) {
   return currentPos;
 }
 
+/**
+ * Returns a path to the target exit position
+ *
+ * @param  {object} character - The character that will go to the exit position
+ * @param  {object} exitPos - The exit position the character will go to
+ *
+ * @return {array} - The path to the exit
+ */
 export function findPathToExit(character, exitPos) {
   const characterRect = getElementRect(character);
   const collisions = getCollisionEntities(true);
@@ -589,6 +643,16 @@ export function findPathToExit(character, exitPos) {
   return false;
 }
 
+/**
+ * Returns the "cost" of how far a given position is away from a given start and end point
+ *
+ * @param  {int} currentCost - The current cost for the current position
+ * @param  {object} startPos - The initial starting position
+ * @param  {object} endPos - The target destination position
+ * @param  {object} stepPos - The step to get the next cost for
+ *
+ * @return {int} - The cost of how far this step is from the start and end position
+ */
 export function getStepCost(currentCost, startPos, endPos, stepPos) {
   return currentCost + heuristic(startPos, stepPos) + heuristic(endPos, stepPos);
 }
@@ -705,6 +769,30 @@ export function isXAxis(axis) {
   return axis == 'x';
 }
 
+export function getItemOfType(type, itemId) {
+  const items = type === 'food' ? tree.get('foodOnTile') : tree.get(['tile', type]);
+  const itemIndex = _findIndex(items, item => item.id == itemId);
+  return items[itemIndex];
+}
+
+export function getItemCursor(type, itemId, tile) {
+  const activeTile = tile || tree.get('tile');
+  const item = getItemOfType(type, itemId, activeTile);
+  const items = type === 'food' ? tree.get('foodOnTile') : tree.get(['tile', type]);
+  let itemIndex = _findIndex(items, item => item.id == itemId);
+  let itemCursor = tree.select(['tiles', `${activeTile.x}_${activeTile.y}`, type, itemIndex]);
+
+  // If item belonged to a parent, need to update the item in that parent's produce list
+  if (item.parent) {
+    const parentItem = getItemById(item.parent, 'scenery');
+    const parentIndex = _findIndex(tree.get(['tile', 'scenery']), sceneryItem => sceneryItem.id == item.parent);
+    itemIndex = _findIndex(parentItem.produce, produceItem => produceItem.id == itemId);
+    itemCursor = tree.select(['tiles', `${activeTile.x}_${activeTile.y}`, 'scenery', parentIndex, 'produce', itemIndex]);
+  }
+
+  return itemCursor;
+}
+
 /**
  * Adds an item to the hero's inventory
  *
@@ -712,21 +800,26 @@ export function isXAxis(axis) {
  * @param  {int} itemId - The ID of the item to collect
  */
 export function collectItem(type, itemId) {
-  const items = tree.get(['tile', type]);
   const heroAbilities = tree.get(['hero', 'abilities']);
-  const itemIndex = _findIndex(items, item => item.id == itemId);
+  const item = getItemOfType(type, itemId);
 
   // Hero doesn't have the required skill to add this item yet
-  if (items[itemIndex].needsAbility && heroAbilities.indexOf(items[itemIndex].needsAbility) == -1) {
+  if (item.needsAbility && heroAbilities.indexOf(item.needsAbility) == -1) {
     showNeedsSkillPopover('to collect this item');
     return;
   }
 
-  const item = items[itemIndex];
   const activeTile = tree.get('tile');
   const produceListCursor = tree.select('produceList');
   const foodIndex = _findIndex(produceListCursor.get(), foodItem => foodItem.name == (item.display || item.type));
-  tree.select(['tiles', `${activeTile.x}_${activeTile.y}`, type, itemIndex, 'collected']).set(true);
+  const itemCursor = getItemCursor(type, itemId);
+
+  itemCursor.set('collected', true);
+
+  // Item has a parent where it's original location was. Put the item back where it started on it's parent
+  if (item.originalPosition) {
+    itemCursor.merge({ position: item.originalPosition, originalPosition: null, onParent: true });
+  }
 
   const collectedObj = produceListCursor.get(foodIndex);
   const itemDisplay = collectedObj.display;
@@ -758,7 +851,7 @@ export function collectItem(type, itemId) {
       queueCursor.push(itemId);
     } else {
       // If tile is not still active, repopulate the item
-      tree.select(['tiles', `${activeTile.x}_${activeTile.y}`, type, itemIndex, 'collected']).set(false);
+      itemCursor.set('collected', false);
     }
   }, repopulateTimeout);
 }
@@ -916,7 +1009,7 @@ export function checkElementCollision(element1, element2, heightOffset = 0, widt
  * Loops through entities of a certain type and checks if character is colliding
  * with any of them
  *
- * @param  {object} character - The character entity that is moving
+ * @param  {object} entity - The entity to check collisions for
  * @param  {array} items - The collision items to check
  * @param  {bool} returnOnCollision - Whether to return on the first found collision
  * @param  {bool} excludeEquals - Whether equals comparison check should be excluded
@@ -927,11 +1020,11 @@ export function checkElementCollision(element1, element2, heightOffset = 0, widt
  *                 If character is colliding with an item, this max value will
  *                 be whatever that collision point is.
  */
-export function checkCollisions(character, items, returnOnCollision, excludeEquals) {
+export function checkCollisions(entity, items, returnOnCollision, excludeEquals) {
   const collisions = [];
 
   for (let t = 0; t < items.length; t++) {
-    const isColliding = checkElementCollision(character, items[t], null, null, excludeEquals);
+    const isColliding = checkElementCollision(entity, items[t], null, null, excludeEquals);
 
     if (isColliding) {
       if (returnOnCollision) {
@@ -1380,8 +1473,8 @@ export function getCharacterWithNextPosition(character, x, y) {
  *                 will be whatever that collision point is.
  */
 export function checkFoodCollision(character, direction) {
-  const tile = tree.get('tile');
-  const items = tile.food.filter(item => !item.collected);
+  const foodOnTile = tree.get('foodOnTile');
+  const items = foodOnTile.filter(item => !item.collected);
   const collisions = checkCollisions(character, items);
 
   // If we're not moving, a space action is happening
@@ -1500,9 +1593,9 @@ export function checkSceneryCollision(character, direction) {
               return;
             }
 
-            const itemWithProduce = item.produce ? item : sceneryEntities.find(sceneryItem => sceneryItem.id === item.hitboxFor);
+            const itemWithProduce = item.produce ? item : sceneryEntities.find(sceneryItem => sceneryItem.id === (item.hitboxFor || item.id));
             const produceItems = itemWithProduce.produce;
-            const untouchedProduceItems = tile.food.filter(foodItem => produceItems.includes(foodItem.id) && !foodItem.collected && foodItem.onItem);
+            const untouchedProduceItems = produceItems.filter(item => !item.collected && item.onParent);
             if (untouchedProduceItems.length) {
               shakeProduce(untouchedProduceItems[0], itemWithProduce);
             }
@@ -1535,7 +1628,7 @@ export function getItemById(id, type) {
 export function shakeProduce(item, parent) {
   const tile = tree.get('tile');
   const hero = tree.select('hero');
-  const itemIndex = _findIndex(tile.food, foodItem => foodItem.id == item.id);
+  const itemIndex = _findIndex(parent.produce, foodItem => foodItem.id == item.id);
   const parentIndex = _findIndex(tile.scenery, sceneryItem => sceneryItem.id == parent.id);
   const parentRect = getElementRect(parent);
   const itemRect = getElementRect(item);
@@ -1544,7 +1637,6 @@ export function shakeProduce(item, parent) {
   const fallXOffset = _random(15, 40);
   const fallToX = fallLeft ? itemRect.x - fallXOffset : itemRect.x + fallXOffset;
   const fallToY = parentRect.bottom + _random(10, 40);
-  const tileItem = tree.select(['tiles', `${tile.x}_${tile.y}`, 'food', itemIndex]);
   const tileParent = tree.select(['tiles', `${tile.x}_${tile.y}`, 'scenery', parentIndex]);
   let fallToPos = { x: fallToX, y: fallToY };
   const fallToObj = { ...fallToPos, height: item.height, width: item.width };
@@ -1555,13 +1647,13 @@ export function shakeProduce(item, parent) {
     fallToPos = getClosestEmptyPosition(fallToObj, true);
   }
 
-  tileItem.merge({ fallTo: fallToPos, onItem: false });
+  tileParent.select(['produce', itemIndex]).merge({ fallTo: fallToPos, onParent: false });
   tileParent.set('shake', true);
   // Don't let hero move while produce is falling
   hero.set('disableMove', true);
 
   setTimeout(() => {
-    tileItem.merge({ fallTo: null, position: fallToPos });
+    tileParent.select(['produce', itemIndex]).merge({ fallTo: null, position: fallToPos, originalPosition: item.position });
     tileParent.set('shake', false);
     // Let hero move again when animation completes
     hero.set('disableMove', false);

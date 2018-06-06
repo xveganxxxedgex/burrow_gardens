@@ -1,4 +1,9 @@
-export { default as Tile1_1 } from 'Maps/Tile1_1';
-export { default as Tile1_2 } from 'Maps/Tile1_2';
-export { default as Tile2_1 } from 'Maps/Tile2_1';
-export { default as Tile2_2 } from 'Maps/Tile2_2';
+export { Tile1_1, Tile1_2, Tile1_3, Tile1_4, Tile1_5, Tile1_6, Tile1_7, Tile1_8 } from 'Maps/row_1';
+export { Tile2_1, Tile2_2, Tile2_3, Tile2_4, Tile2_5, Tile2_6, Tile2_7, Tile2_8 } from 'Maps/row_2';
+export { Tile3_1, Tile3_2, Tile3_3, Tile3_4, Tile3_5, Tile3_6, Tile3_7, Tile3_8 } from 'Maps/row_3';
+export { Tile4_1, Tile4_2, Tile4_3, Tile4_4, Tile4_5, Tile4_6, Tile4_7, Tile4_8 } from 'Maps/row_4';
+export { Tile5_1, Tile5_2, Tile5_3, Tile5_4, Tile5_5, Tile5_6, Tile5_7, Tile5_8 } from 'Maps/row_5';
+export { Tile6_1, Tile6_2, Tile6_3, Tile6_4, Tile6_5, Tile6_6, Tile6_7, Tile6_8 } from 'Maps/row_6';
+export { Tile7_1, Tile7_2, Tile7_3, Tile7_4, Tile7_5, Tile7_6, Tile7_7, Tile7_8 } from 'Maps/row_7';
+export { Tile8_1, Tile8_2, Tile8_3, Tile8_4, Tile8_5, Tile8_6, Tile8_7, Tile8_8 } from 'Maps/row_8';
+export { Tile9_1, Tile9_2, Tile9_3, Tile9_4, Tile9_5, Tile9_6, Tile9_7, Tile9_8 } from 'Maps/row_9';

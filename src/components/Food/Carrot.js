@@ -1,7 +1,7 @@
 import image from 'images/food/carrot.png';
 
 export default class Carrot {
-  constructor(position, id) {
+  constructor({ position, id }) {
     this.position = position;
     this.height = 26;
     this.width = 20;

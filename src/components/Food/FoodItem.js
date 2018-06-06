@@ -67,6 +67,10 @@ const StyledFood = styled.div`
   &.shake {
     animation: ${props => shake(props.top)} ${SHAKE_DURATION}ms linear;
   }
+
+  &.hasParent {
+    z-index: 4;
+  }
 `;
 
 class FoodItem extends Component {
@@ -85,9 +89,12 @@ class FoodItem extends Component {
       image,
       inMenu,
       fallTo,
-      onItem
+      parent,
+      onParent
     } = this.props;
     const styleProps = { height, width };
+    const onParentItem = onParent && getItemById(parent, 'scenery');
+    const shake = onParentItem && onParentItem.shake && !fallTo ? 'shake' : '';
 
     if (!inMenu) {
       styleProps.top = position.y;
@@ -104,12 +111,9 @@ class FoodItem extends Component {
       return <span />;
     }
 
-    const onParentItem = getItemById(onItem, 'scenery');
-    const shake = onParentItem && onParentItem.shake ? 'shake' : '';
-
     return (
       <StyledFood
-        className={`food ${type} food_index_${id} ${fallTo ? 'fallTo' : ''} ${shake}`}
+        className={`food ${type} food_index_${id} ${fallTo ? 'fallTo' : ''} ${shake} ${parent ? 'hasParent' : ''}`}
         {...styleProps}
       >
         <img src={image} />

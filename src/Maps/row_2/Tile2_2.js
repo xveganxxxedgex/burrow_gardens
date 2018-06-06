@@ -9,25 +9,25 @@ const exits = {
 const left = [];
 for (let i = 0; i < 1200; i = i + 40) {
   if (i < exits.left.start || i >= exits.left.end) {
-    left.push(new Scenery.Bush({ x: 0, y: i }));
+    left.push(new Scenery.Bush({ position: { x: 0, y: i } }));
   }
 }
 
 const right = [];
 for (let i = 0; i < 560; i = i + 40) {
-  right.push(new Scenery.Bush({ x: 1160, y: i }));
+  right.push(new Scenery.Bush({ position: { x: 1160, y: i } }));
 }
 
 const top = [];
 for (let i = 0; i < 1200; i = i + 40) {
   if (i < exits.top.start || i >= exits.top.end) {
-    top.push(new Scenery.Bush({ x: i, y: 0 }));
+    top.push(new Scenery.Bush({ position: { x: i, y: 0 } }));
   }
 }
 
 const bottom = [];
 for (let i = 0; i < 1200; i = i + 40) {
-  bottom.push(new Scenery.Bush({ x: i, y: 560 }));
+  bottom.push(new Scenery.Bush({ position: { x: i, y: 560 } }));
 }
 
 const Tile = {

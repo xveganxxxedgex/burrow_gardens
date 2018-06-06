@@ -1,7 +1,7 @@
 import image from 'images/food/cabbage.png';
 
 export default class Cabbage {
-  constructor(position, id) {
+  constructor({ position, id }) {
     this.position = position;
     this.height = 22;
     this.width = 25;
@@ -9,5 +9,6 @@ export default class Cabbage {
     this.collected = false;
     this.image = image;
     this.id = id;
+    this.needsAbility = 'dig';
   }
 }

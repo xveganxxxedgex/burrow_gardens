@@ -3,7 +3,7 @@ import image from 'images/scenery/burrow.png';
 import * as constants from './constants';
 
 export default class Burrow {
-  constructor(position, takeToTile, faceDirection) {
+  constructor({ position, takeToTile, faceDirection }) {
     this.position = position;
     this.height = constants.BURROW_HEIGHT;
     this.width = constants.BURROW_WIDTH;

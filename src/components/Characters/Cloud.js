@@ -29,6 +29,8 @@ export default class Cloud {
     this.height = constants.BUNNY_HEIGHT;
     this.width = constants.BUNNY_WIDTH;
     this.id = 3;
+    this.groupTile = { x: 1, y: 2 };
+    this.groupPosition = { x: 900, y: 500 };
     this.bunnyImages = {
       left: bunnyLeftImg,
       right: bunnyRightImg,

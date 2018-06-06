@@ -1,7 +1,7 @@
 import image from 'images/food/arugula.png';
 
 export default class Arugula {
-  constructor(position, id) {
+  constructor({ position, id }) {
     this.position = position;
     this.height = 21;
     this.width = 17;

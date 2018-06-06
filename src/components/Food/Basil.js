@@ -1,7 +1,7 @@
 import image from 'images/food/basil.png';
 
 export default class Basil {
-  constructor(position, id) {
+  constructor({ position, id }) {
     this.position = position;
     this.height = 21;
     this.width = 19;

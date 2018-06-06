@@ -1,7 +1,7 @@
 import image from 'images/food/pumpkin.png';
 
 export default class Pumpkin {
-  constructor(position, id) {
+  constructor({ position, id }) {
     this.position = position;
     this.height = 37;
     this.width = 40;

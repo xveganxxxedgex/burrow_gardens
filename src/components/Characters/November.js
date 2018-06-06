@@ -20,14 +20,18 @@ import * as constants from './constants';
 export default class November {
   constructor() {
     this.name = 'November';
-    this.giveSkill = 'ball';
+    // TODO: Change this back once another bunny gives the stomp skill
+    // this.giveSkill = 'ball';
+    this.giveSkill = 'stomp';
     this.hasCollected = false;
     this.goingToTile = false;
     this.position = { x: 60, y: 60 };
-    this.onTile = { x: 1, y: 5 };
+    this.onTile = { x: 2, y: 1 };
     this.height = constants.BUNNY_HEIGHT;
     this.width = constants.BUNNY_WIDTH;
     this.id = 2;
+    this.groupTile = { x: 1, y: 2 };
+    this.groupPosition = { x: 600, y: 200 };
     this.bunnyImages = {
       left: bunnyLeftImg,
       right: bunnyRightImg,

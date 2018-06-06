@@ -86,6 +86,26 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Enable Tab events while menu is open to switch between the menu tabs~~
 
+~~Create food items~~
+
+~~Create menu/options components~~
+
+~~Add background music~~
+
+~~Use correct images for inventory pictures for food~~
+
+~~When bunny is at target tile, add back collision detection for hero~~
+
+~~Fix issue when you trigger burrow action and move where it puts you at the same spot on the next tile~~
+
+~~Add key event for escape when in menu modal~~
+
+~~Fix bug when friending bunny, and while it's going to the target tile, you go to another tile that has a bunny and it's stuck as moving when it shouldn't be~~
+
+~~Fix produce not repopulating on their parent item~~
+
+Fix delay bug when going to another tile
+
 Maybe add a cute animation like a binky when a bunny is added to the group, to play before they head to the group tile
 
 Add areas where hero has to jump
@@ -102,8 +122,6 @@ Add unit tests
 
 Create characters
 
-Create food items
-
 Maybe have alt state for food items for buried items so the entity doesn't go away, but it shows like an empty patch where the produce was
 
 Create quests to bring food items to different characters that will subtract those items from your inventory
@@ -118,11 +136,7 @@ Create background art
 
 Create food art
 
-Create menu/options components
-
 Add event sound effects
-
-Add background music
 
 Pause game state when browser is idle (see TODOs in code)
 

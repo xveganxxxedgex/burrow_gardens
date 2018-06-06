@@ -70,6 +70,10 @@ var rules = [
     loader: RULES.file
   },
   {
+    test: /\.mp3$|\.wav$|\.ogg$/,
+    loader: RULES.file
+  },
+  {
     test: /\.(ttf|eot|svg|woff(2)?)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
     loader: RULES.file
   },

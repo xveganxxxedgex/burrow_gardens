@@ -44,6 +44,8 @@ import lopBunnyDownGif from 'images/bunnies/lop_bunny_down_gif.gif';
 const KEYBOARD_EVENTS = {
   // Tab key
   9: 'tab',
+  // Escape key
+  27: 'escape',
   // Direction keys
   38: 'up',
   40: 'down',
@@ -230,9 +232,12 @@ class Hero extends Component {
       return;
     }
 
-    // Player is toggling the inventory menu
-    if (keyEvent == 'inventory') {
-      toggleShowMenu();
+    // Player is toggling the inventory menu, or hitting escape to exit the menu
+    if (keyEvent == 'inventory' || keyEvent == 'escape') {
+      if (keyEvent == 'inventory' || showMenu) {
+        toggleShowMenu();
+      }
+
       return;
     }
 

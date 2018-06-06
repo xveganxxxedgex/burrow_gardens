@@ -1,6 +1,4 @@
 .menu-modal {
-  overflow: auto;
-
   .menu-modal-content {
     height: 100%;
 
@@ -9,6 +7,11 @@
 
       .tab-content {
         padding-top: 10px;
+        height: calc(~'100% - 41px');
+
+        .tab-pane {
+          height: 100%;
+        }
 
         .main-menu-content {
           padding: 10px 20px;
@@ -31,6 +34,15 @@
           &.disabled {
             .inventory-item-cell-content {
               background-color: #ececec;
+            }
+          }
+
+          &.skill-chunk {
+            height: auto;
+            min-height: 100px;
+
+            .inventory-item-cell-content {
+              padding: 10px;
             }
           }
 
@@ -64,16 +76,16 @@
               text-align: center;
               font-size: 12px;
             }
+          }
+        }
 
-            .unlock-icon {
-              justify-content: center;
+        .unlock-icon {
+          justify-content: center;
 
-              .glyphicon {
-                align-self: center;
-                font-size: 36px;
-                color: #9f9f9f;
-              }
-            }
+          .glyphicon {
+            align-self: center;
+            font-size: 36px;
+            color: #9f9f9f;
           }
         }
 

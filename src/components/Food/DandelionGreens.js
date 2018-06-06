@@ -1,7 +1,7 @@
 import image from 'images/food/dandelion_greens.png';
 
 export default class DandelionGreens {
-  constructor(position, id) {
+  constructor({ position, id }) {
     this.position = position;
     this.height = 14;
     this.width = 25;

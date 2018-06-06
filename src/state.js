@@ -1,6 +1,8 @@
 import Baobab, { monkey } from 'baobab';
 import _filter from 'lodash/filter';
+import _flatten from 'lodash/flatten';
 import _forEach from 'lodash/forEach';
+import _union from 'lodash/union';
 
 import * as Tiles from 'Maps';
 import * as Bunnies from 'components/Characters';
@@ -54,7 +56,7 @@ const foodItems = vegetables.concat(fruits);
 
 const state = new Baobab({
   hero: {
-    position: { x: 60, y: 60 },
+    position: { x: 700, y: 380 },
     height: 40,
     width: 40,
     lastDirection: 'right',
@@ -112,7 +114,7 @@ const state = new Baobab({
   ],
   produceList: foodItems.map(foodItem => {
     return {
-      name: foodItem.replace(' ', ''),
+      name: foodItem.replace(/ /g, ''),
       display: foodItem,
       count: 0,
       hasCollected: false
@@ -219,6 +221,15 @@ const state = new Baobab({
       });
     }
   }),
+  foodOnTile: monkey({
+    cursors: {
+      tile: ['tile']
+    },
+    get: function({ tile }) {
+      const produceOnItems = _flatten(tile.scenery.map(item => item.produce || []));
+      return _union(tile.food, produceOnItems);
+    }
+  }),
   wonGame: monkey({
     cursors: {
       produceList: ['produceList'],
@@ -239,9 +250,11 @@ const state = new Baobab({
   backgrounds: {
     B0: 'Dirt',
     B1: 'Grass',
-    B2: 'Mud',
+    B2: 'Grass2',
+    B3: 'Mud',
   },
-  gameVisible: true
+  gameVisible: true,
+  audioMuted: false,
 });
 
 export default state;

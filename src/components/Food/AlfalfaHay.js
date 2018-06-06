@@ -1,7 +1,7 @@
 import image from 'images/food/alfalfa_hay1.png';
 
 export default class AlfalfaHay {
-  constructor(position, id) {
+  constructor({ position, id }) {
     this.position = position;
     this.height = 35;
     this.width = 59;

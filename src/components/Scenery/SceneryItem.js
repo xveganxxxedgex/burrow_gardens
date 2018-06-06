@@ -62,7 +62,7 @@ const StyledScenery = styled.div`
   height: ${props => props.height}px;
   width: ${props => props.width}px;
   position: absolute;
-  z-index: 1;
+  z-index: 3;
 
   &.burrow {
     &.right {
@@ -126,7 +126,7 @@ class SceneryItem extends Component {
       const section = width / 3;
       const randStart = idx * section;
       const leafX = x + _random(randStart + 10, Math.min(((randStart * (idx + 1)) - 30), width - 10));
-      const leafY = y + _random(5, 150);
+      const leafY = y + _random(5, height * .4);
       const itemCenter = x + ((width - 10) / 2);
       const fallLeft = leafX < itemCenter;
       return (

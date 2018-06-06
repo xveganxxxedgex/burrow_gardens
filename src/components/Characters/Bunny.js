@@ -27,7 +27,8 @@ import {
   getDirectionForAxis,
   takeBunnyToGroupTile,
   getElementRect,
-  removeBunnyCollisionWithHero
+  removeBunnyCollisionWithHero,
+  updateBunnyGoingToTile
 } from 'actions';
 
 import 'less/Characters.less';
@@ -124,6 +125,7 @@ class Bunny extends Component {
         if (pathToExit) {
           // Unset them as colliding with the hero
           removeBunnyCollisionWithHero(this.props.id);
+          updateBunnyGoingToTile(this.props.id);
           const newPosition = pathToExit[0];
           pathToExit.splice(0, 1);
 

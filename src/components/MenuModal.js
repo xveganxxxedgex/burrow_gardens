@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { branch } from 'baobab-react/higher-order';
 import { Modal, Label, Glyphicon, Tabs, Tab } from 'react-bootstrap';
+import _capitalize from 'lodash/capitalize';
+import _find from 'lodash/find';
 import _orderBy from 'lodash/orderBy';
 
 import FoodItem from 'components/Food/FoodItem';
@@ -11,10 +13,6 @@ import { changeMenuTab } from 'actions';
 import 'less/MenuModal.less';
 
 class MenuModal extends Component {
-  constructor(props, context) {
-    super(props, context);
-  }
-
   shouldComponentUpdate(nextProps) {
     return nextProps.show != this.props.show;
   }
@@ -43,7 +41,9 @@ export default MenuModal;
   produceList: ['produceList'],
   bunnies: ['bunnies'],
   wonGame: ['wonGame'],
-  activeTab: ['activeMenuTab']
+  activeTab: ['activeMenuTab'],
+  allSkills: ['skills'],
+  heroSkills: ['hero', 'abilities']
 })
 class MenuTabs extends Component {
   getWonGameContent() {
@@ -84,7 +84,7 @@ class MenuTabs extends Component {
   }
 
   render() {
-    const { produceList, bunnies, wonGame, activeTab } = this.props;
+    const { produceList, bunnies, wonGame, activeTab, allSkills, heroSkills } = this.props;
 
     return (
       <div className="flex menu-modal-content">
@@ -98,6 +98,9 @@ class MenuTabs extends Component {
           <Tab eventKey={3} title="Friends">
             <BunnyList bunnies={bunnies} />
           </Tab>
+          <Tab eventKey={4} title="Skills">
+            <SkillList allSkills={allSkills} heroSkills={heroSkills} />
+          </Tab>
         </Tabs>
       </div>
     );
@@ -105,24 +108,17 @@ class MenuTabs extends Component {
 }
 
 class FoodList extends Component {
-  constructor(props, context) {
-    super(props, context);
-  }
-
   render() {
     const { produceList } = this.props;
     const foodItems = _orderBy(produceList, ['hasCollected', 'name'], ['desc', 'asc']).map((food, index) => {
-      // TODO: Remove this once all food items have files
-      const availableFood = ['AlfalfaHay', 'Apple', 'Arugula', 'Banana', 'Blueberry', 'BokChoy', 'Broccoli', 'ButterLettuce', 'Cabbage', 'Carrot', 'Cilantro', 'DandelionGreens', 'Endive', 'Melon', 'Mint'];
-      const useFoodType = availableFood.indexOf(food.name) > -1 ? food.name : 'Carrot';
-      const foodObj = new Food[useFoodType]({}, index);
+      const foodObj = new Food[food.name]({ position: {}, id: index });
       return (
         <div key={`food_${index}`} className={`inventory-item-cell grid-cell ${food.hasCollected ? '' : 'disabled'}`}>
           <div className="inventory-item-cell-content flex flex-grow">
             {food.hasCollected &&
               <div className="flex flex-grow flex-column">
                 <div className="inventory-item-cell-image flex flex-grow">
-                  <FoodItem {...foodObj} inMenu type={useFoodType} />
+                  <FoodItem {...foodObj} inMenu type={food.name} />
                   <Label bsStyle={food.count ? 'primary' : 'default'} className="inventory-item-stock">
                     {food.count}
                   </Label>
@@ -154,13 +150,9 @@ class FoodList extends Component {
 }
 
 class BunnyList extends Component {
-  constructor(props, context) {
-    super(props, context);
-  }
-
   render() {
     const { bunnies } = this.props;
-    const bunnyElements = bunnies.map((bunny, index) => {
+    const bunnyElements = _orderBy(bunnies, ['hasCollected', 'name'], ['desc', 'asc']).map((bunny, index) => {
       // TODO: use actual bunny images
       return (
         <div key={`bunny_${index}`} className={`inventory-item-cell grid-cell ${bunny.hasCollected ? '' : 'disabled'}`}>
@@ -190,6 +182,41 @@ class BunnyList extends Component {
         <div className="h3 flex">Friends</div>
         <div className="inventory-list flex-grid grid-fifth flex-wrap">
           {bunnyElements}
+        </div>
+      </div>
+    );
+  }
+}
+
+class SkillList extends Component {
+  render() {
+    const { heroSkills, allSkills } = this.props;
+    const hasSkill = (skill) => !!_find(heroSkills, ability => ability === skill.name);
+    const skillElements = _orderBy(allSkills, [hasSkill, 'name'], ['desc', 'asc']).map((skill, index) => {
+      const heroHasSkill = hasSkill(skill);
+      return (
+        <div key={`skill_${index}`} className={`inventory-item-cell skill-chunk grid-cell ${heroHasSkill ? '' : 'disabled'}`}>
+          <div className="inventory-item-cell-content flex flex-grow">
+            {heroHasSkill &&
+              <div>
+                <div className="h4">{_capitalize(skill.name)}</div>
+                <p>{skill.description}</p>
+              </div>
+            }
+            {!heroHasSkill &&
+              <div className="unlock-icon flex flex-grow">
+                <Glyphicon glyph="question-sign" />
+              </div>
+            }
+          </div>
+        </div>
+      )
+    });
+    return (
+      <div className="flex flex-column collected-section skills-inventory">
+        <div className="h3 flex">Skills</div>
+        <div className="inventory-list flex-grid grid-full flex-wrap">
+          {skillElements}
         </div>
       </div>
     );

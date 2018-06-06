@@ -28,6 +28,8 @@ export default class Spencer {
     this.height = constants.BUNNY_HEIGHT;
     this.width = constants.BUNNY_WIDTH;
     this.id = 4;
+    this.groupTile = { x: 1, y: 2 };
+    this.groupPosition = { x: 500, y: 300 };
     this.bunnyImages = {
       left: bunnyLeftImg,
       right: bunnyRightImg,
