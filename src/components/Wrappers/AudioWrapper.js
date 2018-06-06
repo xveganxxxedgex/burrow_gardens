@@ -6,8 +6,9 @@ import ReactHowler from 'react-howler';
 
 import { toggleAudioMuted } from 'actions';
 
-import BackgroundTheme1Ogg from 'audio/background_theme_1_2.ogg';
-import BackgroundTheme2Ogg from 'audio/background_theme_2.ogg';
+import CarrotFields from 'audio/Carrot_Fields.ogg';
+// import HiddenForest from 'audio/Hidden_Forest.ogg';
+// import SleepyHome from 'audio/Sleepy_Home.ogg';
 
 const AudioControls = styled.div`
   position: absolute;
@@ -39,7 +40,7 @@ class AudioWrapper extends Component {
         <ReactHowler
           ref={(audio) => { this.backgroundAudio = audio; }}
           mute={this.props.audioMuted}
-          src={BackgroundTheme2Ogg}
+          src={CarrotFields}
           playing={true}
           loop
         />
