@@ -10,5 +10,6 @@ export default class BokChoy {
     this.image = image;
     this.id = id;
     this.needsAbility = 'dig';
+    this.playSound = 'rustle';
   }
 }

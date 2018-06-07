@@ -11,5 +11,6 @@ export default class BuriedCarrot {
     this.collected = false;
     this.image = image;
     this.id = id;
+    this.playSound = 'rustle';
   }
 }

@@ -7,6 +7,15 @@ import _union from 'lodash/union';
 import * as Tiles from 'Maps';
 import * as Bunnies from 'components/Characters';
 
+import ItemDrop from 'audio/item_drop.mp3';
+import Stomp from 'audio/stomp.mp3';
+import TreeShake from 'audio/tree_shake.mp3';
+import Fall from 'audio/fall.mp3';
+import Rustle from 'audio/rustle.mp3';
+import PickUp from 'audio/pick_up.mp3';
+import Dig from 'audio/dig.mp3';
+import Squeak from 'audio/squeak.mp3';
+
 const tiles = {};
 
 for (let r = 1; r <= 2; r++) {
@@ -97,7 +106,7 @@ const state = new Baobab({
     },
     {
       name: 'stomp',
-      description: 'You can use the Stomp skill to become friends with more submissive bunnies, as well as shake produce off of certain trees.'
+      description: 'You can use the Stomp skill to become friends with more submissive bunnies, as well as shake produce off of certain trees or shrubs.'
     },
     {
       name: 'climb',
@@ -255,6 +264,16 @@ const state = new Baobab({
   },
   gameVisible: true,
   audioMuted: false,
+  soundEffects: {
+    treeShake: TreeShake,
+    stomp: Stomp,
+    itemDrop: ItemDrop,
+    fall: Fall,
+    rustle: Rustle,
+    pickUp: PickUp,
+    dig: Dig,
+    squeak: Squeak
+  }
 });
 
 export default state;

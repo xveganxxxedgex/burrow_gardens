@@ -104,7 +104,13 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Fix produce not repopulating on their parent item~~
 
+~~Add event sound effects~~
+
+~~Create food art~~
+
 Fix delay bug when going to another tile
+
+Improve pathfinding/tile exit logic (where exits are big gaps, let character go to whichever valid spot is closest)
 
 Maybe add a cute animation like a binky when a bunny is added to the group, to play before they head to the group tile
 
@@ -133,10 +139,6 @@ Create full map templates, using different screens
 Create character art
 
 Create background art
-
-Create food art
-
-Add event sound effects
 
 Pause game state when browser is idle (see TODOs in code)
 

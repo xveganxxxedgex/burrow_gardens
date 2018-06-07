@@ -10,5 +10,6 @@ export default class Endive {
     this.image = image;
     this.id = id;
     this.needsAbility = 'dig';
+    this.playSound = 'rustle';
   }
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import tree from 'state';
+import { Howl } from 'howler';
 import _capitalize from 'lodash/capitalize';
 import _filter from 'lodash/filter';
 import _find from 'lodash/find';
@@ -809,6 +810,10 @@ export function collectItem(type, itemId) {
     return;
   }
 
+  if (item.playSound) {
+    playSoundEffect(item.playSound, 0.5);
+  }
+
   const activeTile = tree.get('tile');
   const produceListCursor = tree.select('produceList');
   const foodIndex = _findIndex(produceListCursor.get(), foodItem => foodItem.name == (item.display || item.type));
@@ -880,6 +885,7 @@ export function collectBunny(bunnyId) {
     return;
   }
 
+  playSoundEffect('squeak');
   const bunny = bunnies[bunnyIndex];
   const skills = tree.get('skills');
   const newSkill = bunny.giveSkill && _find(skills, skill => skill.name == bunny.giveSkill);
@@ -1143,6 +1149,8 @@ export function handleBurrowAction(item) {
     showNeedsSkillPopover('to perform this action');
     return;
   }
+
+  playSoundEffect('dig', 0.1, 1.9);
 
   // If bunny is going into a burrow, take them to the appropriate tile
   setActiveTile(item.takeToTile.x, item.takeToTile.y);
@@ -1647,6 +1655,8 @@ export function shakeProduce(item, parent) {
     fallToPos = getClosestEmptyPosition(fallToObj, true);
   }
 
+  playSoundEffect('treeShake', 0.6);
+  playSoundEffect('stomp', 0.1);
   tileParent.select(['produce', itemIndex]).merge({ fallTo: fallToPos, onParent: false });
   tileParent.set('shake', true);
   // Don't let hero move while produce is falling
@@ -1658,6 +1668,16 @@ export function shakeProduce(item, parent) {
     // Let hero move again when animation completes
     hero.set('disableMove', false);
   }, FALL_DURATION);
+}
+
+export function playSoundEffect(soundName, volume = 1, rate = 1) {
+  if (tree.get('audioMuted')) {
+    return;
+  }
+
+  const soundFile = tree.get(['soundEffects', soundName]);
+  const sound = new Howl({ src: [soundFile], volume, rate });
+  sound.play();
 }
 
 /**
