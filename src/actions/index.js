@@ -158,6 +158,10 @@ export function setActiveTile(x = 1, y = 1) {
   const previousTile = cursor.get();
   const itemQueue = tree.select('itemQueue');
 
+  // Set new tile immediately so player doesn't have to wait for the logic below to finish
+  cursor.set({ x, y });
+  tree.commit();
+
   if (itemQueue.get().length) {
     // If we have an item queue for the now previous tile, set their
     // hasCollected status to false so they repopulate when the tile is next rendered
@@ -169,7 +173,6 @@ export function setActiveTile(x = 1, y = 1) {
     // Clear the queue
     itemQueue.set([]);
   }
-
 
   const bunniesOnTile = _filter(bunnies, bunny => {
     return bunny.onTile.x == x && bunny.onTile.y == y;
@@ -185,9 +188,6 @@ export function setActiveTile(x = 1, y = 1) {
       }
     });
   }
-
-  cursor.set({ x, y });
-  tree.commit();
 }
 
 /**
@@ -541,6 +541,33 @@ export function getClosestEmptyPosition(item, includeBunnies) {
 }
 
 /**
+ * Returns the position offset for a given axis when an entity is colliding with a collision entity
+ *
+ * @param {object} collisionRect - The dimensions rect for the collision entity
+ *                                 The offset will be calculated based off this rect to move the entity to the
+ *                                 nearest/most logical border of this collision entity
+ * @param {object} entity - The entity that is colliding with the collision
+ * @param {string} axis - The axis to get the offset for
+ *
+ * @return {int} - The offset to use for the axis
+ */
+function getCollisionPositionOffset(collisionRect, entity, axis) {
+  const entityRect = getElementRect(entity);
+  const axisDimension = getDimensionFromAxis(axis);
+  const forwardDimension = getForwardDimension(axis);
+  const collisionCharacterOffset = collisionRect[axis] - entityRect[axisDimension];
+  const isBeforeCollision = entityRect[axis] <= collisionRect[axis] && entityRect[forwardDimension] >= collisionRect[axis];
+  let collisionOffset = isBeforeCollision ? collisionCharacterOffset : collisionRect[forwardDimension];
+
+  // Position is inside a collision entity larger than the position dimensions, so use it's current position
+  if (entityRect[axis] >= collisionRect[axis] && entityRect[forwardDimension] <= collisionRect[forwardDimension]) {
+    collisionOffset = entityRect[axis];
+  }
+
+  return collisionOffset;
+}
+
+/**
  * Returns a path to the target exit position
  *
  * @param  {object} character - The character that will go to the exit position
@@ -567,7 +594,7 @@ export function findPathToExit(character, exitPos) {
   let visitOrder = queue.length;
 
   while (queue.length) {
-    queue.sort((a, b) => a.sortKey == b.sortKey ? a.visitOrder - b.visitOrder: a.sortKey - b.sortKey);
+    queue.sort((a, b) => a.sortKey == b.sortKey ? a.visitOrder - b.visitOrder : a.sortKey - b.sortKey);
     const currentLocation = queue.shift();
 
     if (isAtExitPosition(currentLocation.position, exitPosition, characterRect)) {
@@ -596,12 +623,11 @@ export function findPathToExit(character, exitPos) {
             // This position is overlapping a collision entity, so set the position to the border of the collision
             const collisionRect = getElementRect(isOverlappingEntity);
             const collidingOnYAxis = ['top', 'bottom'].includes(neighbourSide);
-            const collisionCharacterXOffset = collisionRect.x - neighbourPos.width;
-            const collisionCharacterYOffset = collisionRect.y - neighbourPos.height;
-            const collisionXOffset = collisionRect.right < neighbourPos.x ? collisionRect.right : collisionCharacterXOffset;
-            const collisionYOffset = collisionRect.bottom < neighbourPos.y ? collisionRect.bottom : collisionCharacterYOffset;
-            const useX = collidingOnYAxis ? collisionXOffset : (neighbourSide == 'right' ? collisionCharacterXOffset : collisionRect.right);
-            const useY = !collidingOnYAxis ? collisionYOffset : (neighbourSide == 'bottom' ? collisionCharacterYOffset : collisionRect.bottom);
+            const collisionXOffset = getCollisionPositionOffset(collisionRect, neighbourPos, 'x');
+            const collisionYOffset = getCollisionPositionOffset(collisionRect, neighbourPos, 'y');
+
+            const useX = collidingOnYAxis ? collisionXOffset : (neighbourSide == 'right' ? (collisionRect.x - neighbourPos.width) : collisionRect.right);
+            const useY = !collidingOnYAxis ? collisionYOffset : (neighbourSide == 'bottom' ? (collisionRect.y - neighbourPos.height) : collisionRect.bottom);
             const neighbourBorderPosition = { x: useX, y: useY };
 
             const neighbourBorderPos = `${neighbourBorderPosition.x}_${neighbourBorderPosition.y}`;

@@ -2,7 +2,7 @@ import * as Food from 'components/Food';
 import * as Scenery from 'components/Scenery';
 
 const exits = {
-  top: { start: 220, end: 640 },
+  top: { start: 240, end: 640 },
   right: { start: 480, end: 600 }
 };
 

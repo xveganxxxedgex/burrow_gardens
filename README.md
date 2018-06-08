@@ -108,9 +108,9 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Create food art~~
 
-Fix delay bug when going to another tile
+~~Improve delay when going to another tile~~
 
-Improve pathfinding/tile exit logic (where exits are big gaps, let character go to whichever valid spot is closest)
+~~Improve pathfinding/tile exit logic~~
 
 Maybe add a cute animation like a binky when a bunny is added to the group, to play before they head to the group tile
 
