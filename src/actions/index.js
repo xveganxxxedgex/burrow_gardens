@@ -152,7 +152,8 @@ export function setBoardDimensions(board) {
  * @param {Number} x - The new tile X coordinate
  * @param {Number} y - The new tile Y coordinate
  */
-export function setActiveTile(x = 1, y = 1) {
+// TODO: The start tile should be x = 4, y = 3
+export function setActiveTile(x = 2, y = 4) {
   const cursor = tree.select('activeTile');
   const bunnies = tree.get('bunnies');
   const previousTile = cursor.get();
@@ -906,7 +907,7 @@ export function collectBunny(bunnyId) {
   }
 
   // Hero doesn't have the required skill to add this bunny yet
-  if (bunnies[bunnyIndex].needsAbility && heroAbilities.indexOf(bunnies[bunnyIndex].needsAbility) == -1) {
+  if (bunnies[bunnyIndex].needsAbility && !heroAbilities.includes(bunnies[bunnyIndex].needsAbility)) {
     showNeedsSkillPopover('for this bunny to become your friend');
     return;
   }
@@ -1735,4 +1736,37 @@ export function getCollidingSide(character, collision) {
 export function toggleGameVisibility() {
   const cursor = tree.select('gameVisible');
   cursor.set(document.hidden);
+}
+
+export function buildTileBorders(exits, SceneryItem) {
+  const left = [];
+  const right = [];
+  const top = [];
+  const bottom = [];
+
+  for (let i = 0; i < 600; i = i + 40) {
+    if (!exits.left || i < exits.left.start || i >= exits.left.end) {
+      left.push(new SceneryItem({ position: { x: 0, y: i } }));
+    }
+  }
+
+  for (let i = 0; i < 560; i = i + 40) {
+    if (!exits.right || i < exits.right.start || i >= exits.right.end) {
+      right.push(new SceneryItem({ position: { x: 1160, y: i } }));
+    }
+  }
+
+  for (let i = 0; i < 1160; i = i + 40) {
+    if (!exits.top || i < exits.top.start || i >= exits.top.end) {
+      top.push(new SceneryItem({ position: { x: i, y: 0 } }));
+    }
+  }
+
+  for (let i = 40; i < 1200; i = i + 40) {
+    if (!exits.bottom || i < exits.bottom.start || i >= exits.bottom.end) {
+      bottom.push(new SceneryItem({ position: { x: i, y: 560 } }));
+    }
+  }
+
+  return { left, right, top, bottom };
 }

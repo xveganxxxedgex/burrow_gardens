@@ -1,34 +1,13 @@
 import * as Food from 'components/Food';
 import * as Scenery from 'components/Scenery';
+import { buildTileBorders } from 'actions';
 
 const exits = {
-  top: { start: 240, end: 640 },
-  right: { start: 480, end: 600 }
+  top: { start: 700, end: 800 },
+  bottom: { start: 1040, end: 1102 },
 };
 
-const left = [];
-for (let i = 0; i < 760; i = i + 40) {
-  left.push(new Scenery.Bush({ position: { x: 0, y: i } }));
-}
-
-const right = [];
-for (let i = 0; i < 600; i = i + 40) {
-  if (i < exits.right.start || i >= exits.right.end) {
-    right.push(new Scenery.Bush({ position: { x: 1160, y: i } }));
-  }
-}
-
-const top = [];
-for (let i = 0; i < 1200; i = i + 40) {
-  if (i < exits.top.start || i >= exits.top.end) {
-    top.push(new Scenery.Bush({ position: { x: i, y: 0 } }));
-  }
-}
-
-const bottom = [];
-for (let i = 0; i < 1200; i = i + 40) {
-  bottom.push(new Scenery.Bush({ position: { x: i, y: 560 } }));
-}
+const { left, right, bottom, top } = buildTileBorders(exits, Scenery.Bush);
 
 const Tile = {
   background: [
@@ -39,9 +18,9 @@ const Tile = {
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
-    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B2', 'B2', 'B2', 'B2', 'B2', 'B2', 'B2', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
-    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B2', 'B2', 'B2', 'B2', 'B2', 'B2', 'B2', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
-    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B2', 'B2', 'B2', 'B2', 'B2', 'B2', 'B2', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
+    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
+    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
+    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
@@ -53,6 +32,8 @@ const Tile = {
     ...right,
     ...top,
     ...bottom,
+    // Bottom burrow
+    new Scenery.Burrow({ position: { x: 1040, y: 560 }, takeToTile: { x: 3, y: 1 }, faceDirection: 'left'}),
   ],
   food: [],
   x: 2,

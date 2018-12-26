@@ -7,6 +7,9 @@ import _union from 'lodash/union';
 import * as Tiles from 'Maps';
 import * as Bunnies from 'components/Characters';
 
+// Sound effects from:
+// https://www.zapsplat.com/
+// https://freesound.org/
 import ItemDrop from 'audio/item_drop.mp3';
 import Stomp from 'audio/stomp.mp3';
 import TreeShake from 'audio/tree_shake.mp3';
@@ -18,8 +21,8 @@ import Squeak from 'audio/squeak.mp3';
 
 const tiles = {};
 
-for (let r = 1; r <= 2; r++) {
-  for (let c = 1; c <= 2; c++) {
+for (let r = 1; r <= 9; r++) {
+  for (let c = 1; c <= 8; c++) {
     const Tile = Tiles[`Tile${r}_${c}`];
     tiles[`${Tile.x}_${Tile.y}`] = Tile;
   }
@@ -93,8 +96,8 @@ const state = new Baobab({
       description: 'You can use the Dig skill anywhere you see burrow holes, or buried produce. This will grant you access to new places and allow you to obtain new produce items.'
     },
     {
-      name: 'ball',
-      description: 'You can use the Ball skill to cover gaps, which can unlock new areas to explore.'
+      name: 'nudge',
+      description: 'You can use the Nudge skill to become friends with more submissive bunnies.'
     },
     {
       name: 'binky',
@@ -106,11 +109,7 @@ const state = new Baobab({
     },
     {
       name: 'stomp',
-      description: 'You can use the Stomp skill to become friends with more submissive bunnies, as well as shake produce off of certain trees or shrubs.'
-    },
-    {
-      name: 'climb',
-      description: 'You can use the Climb skill to access higher locations or objects.'
+      description: 'You can use the Stomp skill to shake produce off of certain trees or shrubs.'
     },
     {
       name: 'zoom',
@@ -118,7 +117,7 @@ const state = new Baobab({
     },
     {
       name: 'jump',
-      description: 'You can use the Jump skill to get onto higher areas to explore.'
+      description: 'You can use the Jump skill to get across gaps to unlock new areas to explore.'
     },
   ],
   produceList: foodItems.map(foodItem => {
@@ -135,19 +134,11 @@ const state = new Baobab({
     new Bunnies.Cloud(),
     new Bunnies.Spencer(),
     {
-      name: 'Giant',
-      giveSkill: 'climb',
-      hasCollected: false,
-      position: { x: 60, y: 60 },
-      onTile: { x: 1, y: 5 },
-      id: 5
-    },
-    {
       name: 'Unknown 1',
       giveSkill: 'zoom',
       hasCollected: false,
       position: { x: 60, y: 60 },
-      onTile: { x: 1, y: 5 },
+      onTile: { x: 4, y: 8 },
       id: 6
     },
     {
@@ -156,7 +147,7 @@ const state = new Baobab({
       needsAbility: 'binky',
       hasCollected: false,
       position: { x: 60, y: 60 },
-      onTile: { x: 1, y: 5 },
+      onTile: { x: 9, y: 4 },
       id: 7
     },
     {
@@ -164,43 +155,43 @@ const state = new Baobab({
       giveSkill: 'stomp',
       hasCollected: false,
       position: { x: 60, y: 60 },
-      onTile: { x: 1, y: 5 },
+      onTile: { x: 5, y: 6 },
       id: 8
     },
     {
-      name: 'No Skill',
+      name: 'No Skill 1',
       hasCollected: false,
       position: { x: 60, y: 60 },
-      onTile: { x: 1, y: 5 },
+      onTile: { x: 1, y: 4 },
       id: 9
     },
     {
-      name: 'No Skill',
+      name: 'No Skill 2',
+      needsAbility: 'nudge',
       hasCollected: false,
-      needsAbility: 'stomp',
       position: { x: 60, y: 60 },
-      onTile: { x: 1, y: 5 },
+      onTile: { x: 8, y: 3 },
       id: 10
     },
     {
-      name: 'No Skill',
+      name: 'No Skill 3',
       hasCollected: false,
       position: { x: 60, y: 60 },
-      onTile: { x: 1, y: 5 },
+      onTile: { x: 1, y: 1 },
       id: 11
     },
     {
-      name: 'No Skill',
+      name: 'No Skill 4',
       hasCollected: false,
       position: { x: 60, y: 60 },
-      onTile: { x: 1, y: 5 },
+      onTile: { x: 1, y: 8 },
       id: 12
     },
     {
-      name: 'No Skill',
+      name: 'No Skill 5',
       hasCollected: false,
       position: { x: 60, y: 60 },
-      onTile: { x: 1, y: 5 },
+      onTile: { x: 4, y: 1 },
       id: 13
     },
   ],

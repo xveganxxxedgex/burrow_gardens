@@ -78,7 +78,7 @@ const StyledScenery = styled.div`
   }
 
   &.shake {
-    animation: ${props => shake(props.top, props.height)} ${SHAKE_DURATION}ms linear;
+    animation: ${props => shake(props.top, props.height)} ${SHAKE_DURATION}ms linear forwards;
   }
 `;
 
@@ -88,7 +88,7 @@ const FallingLeaf = styled.div`
   height: ${props => props.height}px;
   width: ${props => props.width}px;
   position: absolute;
-  animation: ${props => leafFall(props)} ${LEAF_FALL_DURATION}ms linear;
+  animation: ${props => leafFall(props)} ${LEAF_FALL_DURATION}ms linear forwards;
   z-index: 3;
   transform: ${props => props.fallLeft ? 'none' : 'scaleX(-1)'};
 

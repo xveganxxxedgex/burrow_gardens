@@ -230,6 +230,9 @@ class Bunny extends Component {
     const useDirection = this.checkIfIsHero() ? direction : this.state.lastDirection;
     let imageKey = 'left';
 
+    // TODO: Remove this once all bunnies have their images
+    if (!bunnyImages || !Object.keys(bunnyImages).length) return;
+
     if (isFlopped || isLoaf) {
       imageKey = (isFlopped ? 'flop' : 'loaf') + _capitalize(useDirection);
     } else {

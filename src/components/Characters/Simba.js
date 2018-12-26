@@ -24,7 +24,7 @@ export default class Simba {
     this.hasCollected = false;
     this.goingToTile = false;
     this.position = { x: 300, y: 230 };
-    this.onTile = { x: 1, y: 1 };
+    this.onTile = { x: 6, y: 4 };
     this.height = constants.BUNNY_HEIGHT;
     this.width = constants.BUNNY_WIDTH;
     this.id = 1;

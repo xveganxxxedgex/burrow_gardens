@@ -61,11 +61,11 @@ const StyledFood = styled.div`
   width: ${props => props.width}px;
 
   &.fallTo {
-    animation: ${props => fallTo(props)} ${FALL_DURATION - 20}ms linear;
+    animation: ${props => fallTo(props)} ${FALL_DURATION - 20}ms linear forwards;
   }
 
   &.shake {
-    animation: ${props => shake(props.top)} ${SHAKE_DURATION}ms linear;
+    animation: ${props => shake(props.top)} ${SHAKE_DURATION}ms linear forwards;
   }
 
   &.hasParent {

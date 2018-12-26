@@ -21,12 +21,12 @@ export default class November {
   constructor() {
     this.name = 'November';
     // TODO: Change this back once another bunny gives the stomp skill
-    // this.giveSkill = 'ball';
+    // this.giveSkill = 'nudge';
     this.giveSkill = 'stomp';
     this.hasCollected = false;
     this.goingToTile = false;
     this.position = { x: 60, y: 60 };
-    this.onTile = { x: 2, y: 1 };
+    this.onTile = { x: 9, y: 8 };
     this.height = constants.BUNNY_HEIGHT;
     this.width = constants.BUNNY_WIDTH;
     this.id = 2;

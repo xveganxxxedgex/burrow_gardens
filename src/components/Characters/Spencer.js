@@ -24,7 +24,7 @@ export default class Spencer {
     this.hasCollected = false;
     this.goingToTile = false;
     this.position = { x: 60, y: 60 };
-    this.onTile = { x: 1, y: 5 };
+    this.onTile = { x: 5, y: 5 };
     this.height = constants.BUNNY_HEIGHT;
     this.width = constants.BUNNY_WIDTH;
     this.id = 4;

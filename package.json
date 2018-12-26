@@ -85,7 +85,7 @@
   "config": {
     "buildDir": "./compile",
     "devHost": "0.0.0.0",
-    "devPort": 8081
+    "devPort": 8082
   },
   "author": "Maureen Fortin <xveganxxxedgex@gmail.com>",
   "license": "MIT"

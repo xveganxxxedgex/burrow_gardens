@@ -25,7 +25,7 @@ export default class Cloud {
     this.hasCollected = false;
     this.goingToTile = false;
     this.position = { x: 60, y: 60 };
-    this.onTile = { x: 1, y: 5 };
+    this.onTile = { x: 7, y: 2 };
     this.height = constants.BUNNY_HEIGHT;
     this.width = constants.BUNNY_WIDTH;
     this.id = 3;
