@@ -5,7 +5,7 @@ import { buildTileBorders } from 'actions';
 const exits = {
   right: { start: 240, end: 440 },
   top: { start: 200, end: 262 },
-  bottom: { start: 40, end: 280 }
+  bottom: { start: 40, end: 280 },
 };
 
 const { left, right, bottom, top } = buildTileBorders(exits, Scenery.Bush);
@@ -26,7 +26,7 @@ const Tile = {
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
-    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1']
+    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
   ],
   scenery: [
     ...left,
@@ -34,12 +34,12 @@ const Tile = {
     ...top,
     ...bottom,
     // Top burrow
-    new Scenery.Burrow({ position: { x: 200, y: 0 }, takeToTile: { x: 4, y: 1 }, faceDirection: 'up'}),
+    new Scenery.Burrow({ position: { x: 200, y: 0 }, takeToTile: { x: 4, y: 1 }, faceDirection: 'up' }),
   ],
   food: [],
   x: 5,
   y: 1,
-  exits
+  exits,
 };
 
 export default Tile;

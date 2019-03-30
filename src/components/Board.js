@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { branch } from 'baobab-react/higher-order';
 import { Popover } from 'react-bootstrap';
 
@@ -22,7 +23,7 @@ import 'less/Board.less';
   tile: ['tile'],
   popover: ['popover'],
   showMenu: ['showMenu'],
-  wonGame: ['wonGame']
+  wonGame: ['wonGame'],
 })
 class Board extends Component {
   constructor(props, context) {
@@ -43,7 +44,7 @@ class Board extends Component {
 
   componentWillReceiveProps(nextProps) {
     // If player just won the game, open the modal to notify them
-    if (nextProps.wonGame && this.props.wonGame != nextProps.wonGame && !nextProps.showMenu) {
+    if (nextProps.wonGame && this.props.wonGame !== nextProps.wonGame && !nextProps.showMenu) {
       toggleShowMenu();
     }
   }
@@ -66,8 +67,8 @@ class Board extends Component {
     }
 
     return (
-      <div className="board modal-container" ref={(board) => { this.board = board }}>
-        {popover &&
+      <div className="board modal-container" ref={(board) => { this.board = board; }}>
+        {popover && (
           <Popover
             id="board-popover"
             title={popover.title}
@@ -77,7 +78,7 @@ class Board extends Component {
           >
             {popover.text}
           </Popover>
-        }
+        )}
         {showMenu &&
           <MenuModal container={this} show={showMenu} />
         }
@@ -93,3 +94,17 @@ class Board extends Component {
 }
 
 export default Board;
+
+Board.propTypes = {
+  popover: PropTypes.object,
+  showMenu: PropTypes.bool,
+  tile: PropTypes.object,
+  wonGame: PropTypes.bool,
+};
+
+Board.defaultProps = {
+  popover: null,
+  showMenu: false,
+  tile: {},
+  wonGame: false,
+};

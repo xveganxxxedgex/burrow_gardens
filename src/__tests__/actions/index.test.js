@@ -1,8 +1,8 @@
 import Baobab from 'baobab';
 
-import * as actions from '../../actions';
-import { __RewireAPI__ as ActionsRewire } from '../../actions';
 import * as sceneryConstants from 'components/Scenery/constants';
+import * as actions from 'actions'; // eslint-disable-line import/no-duplicates
+import { __RewireAPI__ as ActionsRewire } from 'actions'; // eslint-disable-line import/no-duplicates, import/named
 
 describe('Actions;', () => {
   const boardDimensions = {
@@ -11,7 +11,7 @@ describe('Actions;', () => {
     top: 0,
     bottom: 600,
     left: 0,
-    right: 1200
+    right: 1200,
   };
 
 
@@ -218,7 +218,7 @@ describe('Actions;', () => {
         x: 100,
         y: 200,
         height: 40,
-        width: 60
+        width: 60,
       };
       const expectedResult = {
         x: 100,
@@ -227,8 +227,8 @@ describe('Actions;', () => {
         width: 60,
         position: {
           x: 100,
-          y: 200
-        }
+          y: 200,
+        },
       };
       const characterWithNextPosition = actions.getCharacterWithNextPosition(character, 100, 200);
       expect(characterWithNextPosition).toEqual(expectedResult);
@@ -239,7 +239,7 @@ describe('Actions;', () => {
         x: 100,
         y: 200,
         height: 40,
-        width: 60
+        width: 60,
       };
       const expectedResult = {
         x: 100,
@@ -248,8 +248,8 @@ describe('Actions;', () => {
         width: 60,
         position: {
           x: 400,
-          y: 700
-        }
+          y: 700,
+        },
       };
       const characterWithNextPosition = actions.getCharacterWithNextPosition(character, 400, 700);
       expect(characterWithNextPosition).toEqual(expectedResult);
@@ -258,15 +258,15 @@ describe('Actions;', () => {
     it('returns correct object when character object does not have x and y', () => {
       const character = {
         height: 40,
-        width: 60
+        width: 60,
       };
       const expectedResult = {
         height: 40,
         width: 60,
         position: {
           x: 100,
-          y: 200
-        }
+          y: 200,
+        },
       };
       const characterWithNextPosition = actions.getCharacterWithNextPosition(character, 100, 200);
       expect(characterWithNextPosition).toEqual(expectedResult);
@@ -302,7 +302,7 @@ describe('Actions;', () => {
         x: 100,
         y: 200,
         height: 40,
-        width: 60
+        width: 60,
       };
       const expectedRect = {
         x: 100,
@@ -310,7 +310,7 @@ describe('Actions;', () => {
         height: 40,
         width: 60,
         right: 160,
-        bottom: 240
+        bottom: 240,
       };
       const rect = actions.getElementRect(entity);
       expect(rect).toEqual(expectedRect);
@@ -323,7 +323,7 @@ describe('Actions;', () => {
           y: 200,
         },
         height: 40,
-        width: 60
+        width: 60,
       };
       const expectedRect = {
         x: 100,
@@ -331,7 +331,7 @@ describe('Actions;', () => {
         height: 40,
         width: 60,
         right: 160,
-        bottom: 240
+        bottom: 240,
       };
       const rect = actions.getElementRect(entity);
       expect(rect).toEqual(expectedRect);
@@ -343,10 +343,10 @@ describe('Actions;', () => {
           position: {
             x: 100,
             y: 200,
-          }
+          },
         },
         height: 40,
-        width: 60
+        width: 60,
       };
       const expectedRect = {
         x: 100,
@@ -354,7 +354,7 @@ describe('Actions;', () => {
         height: 40,
         width: 60,
         right: 160,
-        bottom: 240
+        bottom: 240,
       };
       const rect = actions.getElementRect(entity);
       expect(rect).toEqual(expectedRect);
@@ -363,7 +363,7 @@ describe('Actions;', () => {
     it('returns correct rect for entity without x and y values', () => {
       const entity = {
         height: 40,
-        width: 60
+        width: 60,
       };
       const expectedRect = {
         x: 0,
@@ -371,7 +371,7 @@ describe('Actions;', () => {
         height: 40,
         width: 60,
         right: 60,
-        bottom: 40
+        bottom: 40,
       };
       const rect = actions.getElementRect(entity);
       expect(rect).toEqual(expectedRect);
@@ -383,8 +383,8 @@ describe('Actions;', () => {
         y: 200,
         props: {
           height: 40,
-          width: 60
-        }
+          width: 60,
+        },
       };
       const expectedRect = {
         x: 100,
@@ -392,7 +392,7 @@ describe('Actions;', () => {
         height: 40,
         width: 60,
         right: 160,
-        bottom: 240
+        bottom: 240,
       };
       const rect = actions.getElementRect(entity);
       expect(rect).toEqual(expectedRect);
@@ -401,7 +401,7 @@ describe('Actions;', () => {
     it('returns correct rect for entity without height and width', () => {
       const entity = {
         x: 100,
-        y: 200
+        y: 200,
       };
       const expectedRect = {
         x: 100,
@@ -409,7 +409,7 @@ describe('Actions;', () => {
         height: 0,
         width: 0,
         right: 100,
-        bottom: 200
+        bottom: 200,
       };
       const rect = actions.getElementRect(entity);
       expect(rect).toEqual(expectedRect);
@@ -423,7 +423,7 @@ describe('Actions;', () => {
         height: 0,
         width: 0,
         right: 0,
-        bottom: 0
+        bottom: 0,
       };
       const rect = actions.getElementRect(entity);
       expect(rect).toEqual(expectedRect);
@@ -434,11 +434,11 @@ describe('Actions;', () => {
         props: {
           position: {
             x: 100,
-            y: 200
+            y: 200,
           },
           height: 40,
-          width: 60
-        }
+          width: 60,
+        },
       };
       const expectedRect = {
         x: 100,
@@ -446,7 +446,7 @@ describe('Actions;', () => {
         height: 40,
         width: 60,
         right: 160,
-        bottom: 240
+        bottom: 240,
       };
       const rect = actions.getElementRect(entity);
       expect(rect).toEqual(expectedRect);
@@ -1017,7 +1017,7 @@ describe('Actions;', () => {
     beforeAll(() => {
       const tree = new Baobab({
         tile: { x: 1, y: 1, scenery: [], food: [] },
-        boardDimensions
+        boardDimensions,
       });
 
       ActionsRewire.__Rewire__('tree', tree);
@@ -1043,7 +1043,7 @@ describe('Actions;', () => {
     beforeAll(() => {
       const tree = new Baobab({
         tile: { x: 1, y: 1, scenery: [], food: [] },
-        boardDimensions
+        boardDimensions,
       });
 
       ActionsRewire.__Rewire__('tree', tree);
@@ -1069,7 +1069,7 @@ describe('Actions;', () => {
     beforeAll(() => {
       const tree = new Baobab({
         tile: { x: 1, y: 1, scenery: [], food: [] },
-        boardDimensions
+        boardDimensions,
       });
 
       ActionsRewire.__Rewire__('tree', tree);
@@ -1095,7 +1095,7 @@ describe('Actions;', () => {
     beforeAll(() => {
       const tree = new Baobab({
         tile: { x: 1, y: 1, scenery: [], food: [] },
-        boardDimensions
+        boardDimensions,
       });
 
       ActionsRewire.__Rewire__('tree', tree);
@@ -1139,7 +1139,7 @@ describe('Actions;', () => {
     const setTileExits = (exits) => {
       const tree = new Baobab({
         tile: { x: 3, y: 3, scenery: [], food: [], exits },
-        boardDimensions
+        boardDimensions,
       });
 
       ActionsRewire.__Rewire__('tree', tree);
@@ -1575,7 +1575,7 @@ describe('Actions;', () => {
     beforeAll(() => {
       const tree = new Baobab({
         tile: { x: 1, y: 1, scenery: [], food: [] },
-        boardDimensions
+        boardDimensions,
       });
 
       ActionsRewire.__Rewire__('tree', tree);
@@ -1586,82 +1586,146 @@ describe('Actions;', () => {
     });
 
     it('returns true when character is at left exit position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: -characterRect.width, y: 200 }, { x: -characterRect.width, y: 100 }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: -characterRect.width, y: 200 },
+        { x: -characterRect.width, y: 100 },
+        characterRect,
+      );
       expect(isAtExit).toBeTruthy();
     });
 
     it('returns true when character is before left exit position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: -(characterRect.width + 1), y: 200 }, { x: -characterRect.width, y: 100 }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: -(characterRect.width + 1), y: 200 },
+        { x: -characterRect.width, y: 100 },
+        characterRect,
+      );
       expect(isAtExit).toBeTruthy();
     });
 
     it('returns false when character is after left exit position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: -(characterRect.width - 1), y: 200 }, { x: -characterRect.width, y: 100 }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: -(characterRect.width - 1), y: 200 },
+        { x: -characterRect.width, y: 100 },
+        characterRect,
+      );
       expect(isAtExit).toBeFalsy();
     });
 
     it('returns true when character is at right exit position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: boardDimensions.width, y: 200 }, { x: boardDimensions.width, y: 100 }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: boardDimensions.width, y: 200 },
+        { x: boardDimensions.width, y: 100 },
+        characterRect,
+      );
       expect(isAtExit).toBeTruthy();
     });
 
     it('returns true when character is past right exit position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: boardDimensions.width + 1, y: 200 }, { x: boardDimensions.width, y: 100 }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: boardDimensions.width + 1, y: 200 },
+        { x: boardDimensions.width, y: 100 },
+        characterRect,
+      );
       expect(isAtExit).toBeTruthy();
     });
 
     it('returns false when character is past right exit position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: boardDimensions.width - 1, y: 200 }, { x: boardDimensions.width, y: 100 }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: boardDimensions.width - 1, y: 200 },
+        { x: boardDimensions.width, y: 100 },
+        characterRect,
+      );
       expect(isAtExit).toBeFalsy();
     });
 
     it('returns true when character is at top exit position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: 200, y: -characterRect.height }, { x: 200, y: -characterRect.height }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: 200, y: -characterRect.height },
+        { x: 200, y: -characterRect.height },
+        characterRect,
+      );
       expect(isAtExit).toBeTruthy();
     });
 
     it('returns true when character is before top exit position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: 200, y: -(characterRect.height + 1) }, { x: 200, y: -characterRect.height }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: 200, y: -(characterRect.height + 1) },
+        { x: 200, y: -characterRect.height },
+        characterRect,
+      );
       expect(isAtExit).toBeTruthy();
     });
 
     it('returns false when character is after top exit position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: 200, y: -(characterRect.height - 1) }, { x: 200, y: -characterRect.height }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: 200, y: -(characterRect.height - 1) },
+        { x: 200, y: -characterRect.height },
+        characterRect,
+      );
       expect(isAtExit).toBeFalsy();
     });
 
     it('returns true when character is at bottom exit position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: 200, y: boardDimensions.height }, { x: 200, y: boardDimensions.height }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: 200, y: boardDimensions.height },
+        { x: 200, y: boardDimensions.height },
+        characterRect,
+      );
       expect(isAtExit).toBeTruthy();
     });
 
     it('returns false when character is before bottom exit position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: 200, y: boardDimensions.height - 1 }, { x: 200, y: boardDimensions.height }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: 200, y: boardDimensions.height - 1 },
+        { x: 200, y: boardDimensions.height },
+        characterRect,
+      );
       expect(isAtExit).toBeFalsy();
     });
 
     it('returns true when character is after bottom exit position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: 200, y: boardDimensions.height + 1 }, { x: 200, y: boardDimensions.height }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: 200, y: boardDimensions.height + 1 },
+        { x: 200, y: boardDimensions.height },
+        characterRect,
+      );
       expect(isAtExit).toBeTruthy();
     });
 
     it('returns true when character is at exit position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: 200, y: 400 }, { x: 200, y: 400 }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: 200, y: 400 },
+        { x: 200, y: 400 },
+        characterRect,
+      );
       expect(isAtExit).toBeTruthy();
     });
 
     it('returns false when character is not at exit x position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: 201, y: 400 }, { x: 200, y: 400 }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: 201, y: 400 },
+        { x: 200, y: 400 },
+        characterRect,
+      );
       expect(isAtExit).toBeFalsy();
     });
 
     it('returns false when character is not at exit y position', () => {
-      const isAtExit = actions.isAtExitPosition({ x: 200, y: 401 }, { x: 200, y: 400 }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: 200, y: 401 },
+        { x: 200, y: 400 },
+        characterRect,
+      );
       expect(isAtExit).toBeFalsy();
     });
 
     it('returns false when character is not at exit x or y positions', () => {
-      const isAtExit = actions.isAtExitPosition({ x: 201, y: 401 }, { x: 200, y: 400 }, characterRect);
+      const isAtExit = actions.isAtExitPosition(
+        { x: 201, y: 401 },
+        { x: 200, y: 400 },
+        characterRect,
+      );
       expect(isAtExit).toBeFalsy();
     });
   });
@@ -1673,7 +1737,7 @@ describe('Actions;', () => {
     beforeAll(() => {
       const tree = new Baobab({
         tile: { x: 1, y: 1, scenery: [], food: [] },
-        boardDimensions
+        boardDimensions,
       });
 
       ActionsRewire.__Rewire__('tree', tree);
@@ -1684,92 +1748,164 @@ describe('Actions;', () => {
     });
 
     it('returns true when gap is valid near top and left', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.left + 1, y: boardDimensions.top + 1, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.left + 1, y: boardDimensions.top + 1, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeTruthy();
     });
 
     it('returns true when gap is valid near bottom and left', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.left + 1, y: boardDimensions.height - 1, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.left + 1, y: boardDimensions.height - 1, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeTruthy();
     });
 
     it('returns true when gap is valid near top and right', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.width - 1, y: boardDimensions.top + 1, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.width - 1, y: boardDimensions.top + 1, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeTruthy();
     });
 
     it('returns true when gap is valid near bottom and right', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.width - 1, y: boardDimensions.height - 1, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.width - 1, y: boardDimensions.height - 1, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeTruthy();
     });
 
     it('returns true when gap is at zero on the left', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.left, y: boardDimensions.height - 1, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.left, y: boardDimensions.height - 1, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeTruthy();
     });
 
     it('returns true when gap is at zero on the top', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.width - 1, y: boardDimensions.top, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.width - 1, y: boardDimensions.top, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeTruthy();
     });
 
     it('returns true when gap is at zero on the top and left', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.left, y: boardDimensions.top, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.left, y: boardDimensions.top, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeTruthy();
     });
 
     it('returns true when gap is at exit position', () => {
-      const isValid = actions.checkIfValidGap({ x: 100, y: 100, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: 100, y: 100, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeTruthy();
     });
 
     it('returns false when gap is before top and left', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.left - 1, y: boardDimensions.top - 1, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.left - 1, y: boardDimensions.top - 1, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeFalsy();
     });
 
     it('returns false when gap is near bottom and but before left', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.left - 1, y: boardDimensions.height - 1, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.left - 1, y: boardDimensions.height - 1, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeFalsy();
     });
 
     it('returns false when gap is near bottom and but after right', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.width + 1, y: boardDimensions.height - 1, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.width + 1, y: boardDimensions.height - 1, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeFalsy();
     });
 
     it('returns false when gap is near left and but after bottom', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.left + 1, y: boardDimensions.height + 1, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.left + 1, y: boardDimensions.height + 1, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeFalsy();
     });
 
     it('returns false when gap is before top', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.width - 1, y: boardDimensions.top - 1, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.width - 1, y: boardDimensions.top - 1, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeFalsy();
     });
 
     it('returns false when gap is near top but after right', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.width + 1, y: boardDimensions.top + 1, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.width + 1, y: boardDimensions.top + 1, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeFalsy();
     });
 
     it('returns true when gap is at zero on the left, but is after bottom', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.left, y: boardDimensions.height + 1, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.left, y: boardDimensions.height + 1, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeFalsy();
     });
 
     it('returns true when gap is at zero on the left, but is before top', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.left, y: boardDimensions.top - 1, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.left, y: boardDimensions.top - 1, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeFalsy();
     });
 
     it('returns true when gap is at zero on the top, but is after right', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.width + 1, y: boardDimensions.top, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.width + 1, y: boardDimensions.top, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeFalsy();
     });
 
     it('returns true when gap is at zero on the top, but is before left', () => {
-      const isValid = actions.checkIfValidGap({ x: boardDimensions.left - 1, y: boardDimensions.top, ...characterRect }, { x: 100, y: 100 }, characterRect);
+      const isValid = actions.checkIfValidGap(
+        { x: boardDimensions.left - 1, y: boardDimensions.top, ...characterRect },
+        { x: 100, y: 100 },
+        characterRect,
+      );
       expect(isValid).toBeFalsy();
     });
   });
@@ -1784,15 +1920,15 @@ describe('Actions;', () => {
           scenery: [
             { type: sceneryConstants.BURROW_TYPE },
             { type: 'Bush' },
-            { type: 'Tree' }
+            { type: 'Tree' },
           ],
           food: [
             { type: 'Apple', collected: true },
             { type: 'Broccoli' },
-            { type: 'Carrot' }
-          ]
+            { type: 'Carrot' },
+          ],
         },
-        boardDimensions
+        boardDimensions,
       });
 
       ActionsRewire.__Rewire__('tree', tree);
@@ -1828,23 +1964,31 @@ describe('Actions;', () => {
   describe('getNeighboursOfPosition;', () => {
     it('returns correct neighbours 1', () => {
       const dimensions = { height: 40, width: 40 };
-      const neighbours = actions.getNeighboursOfPosition({ x: 100, y: 200 }, dimensions.height, dimensions.width);
+      const neighbours = actions.getNeighboursOfPosition(
+        { x: 100, y: 200 },
+        dimensions.height,
+        dimensions.width,
+      );
       expect(neighbours).toEqual({
         left: { x: 60, y: 200, ...dimensions },
         right: { x: 140, y: 200, ...dimensions },
         top: { x: 100, y: 160, ...dimensions },
-        bottom: { x: 100, y: 240, ...dimensions }
+        bottom: { x: 100, y: 240, ...dimensions },
       });
     });
 
     it('returns correct neighbours 2', () => {
       const dimensions = { height: 100, width: 130 };
-      const neighbours = actions.getNeighboursOfPosition({ x: 300, y: 400 }, dimensions.height, dimensions.width);
+      const neighbours = actions.getNeighboursOfPosition(
+        { x: 300, y: 400 },
+        dimensions.height,
+        dimensions.width,
+      );
       expect(neighbours).toEqual({
         left: { x: 170, y: 400, ...dimensions },
         right: { x: 430, y: 400, ...dimensions },
         top: { x: 300, y: 300, ...dimensions },
-        bottom: { x: 300, y: 500, ...dimensions }
+        bottom: { x: 300, y: 500, ...dimensions },
       });
     });
   });
@@ -1856,7 +2000,7 @@ describe('Actions;', () => {
     beforeAll(() => {
       const tree = new Baobab({
         tile: { x: 1, y: 1, scenery: [], food: [] },
-        boardDimensions
+        boardDimensions,
       });
 
       ActionsRewire.__Rewire__('tree', tree);
@@ -2310,7 +2454,10 @@ describe('Actions;', () => {
         });
 
         it('returns correct exit when both exits are the same distance', () => {
-          const exits = { top: { start: boardDimensions.width - 100, end: boardDimensions.width - 50 }, right: { start: 60, end: 110 } };
+          const exits = {
+            top: { start: boardDimensions.width - 100, end: boardDimensions.width - 50 },
+            right: { start: 60, end: 110 },
+          };
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
@@ -2344,7 +2491,11 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: ((boardDimensions.height / 2) - (dimensions.height / 2)), ...dimensions });
+          const exitPosition = actions.getExitPosition({
+            x: 100,
+            y: ((boardDimensions.height / 2) - (dimensions.height / 2)),
+            ...dimensions,
+          });
           expect(exitPosition).toEqual({ x: 100, y: -dimensions.height });
         });
       });
@@ -2374,7 +2525,11 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: ((boardDimensions.width / 2) - (dimensions.width / 2)), y: 100, ...dimensions });
+          const exitPosition = actions.getExitPosition({
+            x: ((boardDimensions.width / 2) - (dimensions.width / 2)),
+            y: 100,
+            ...dimensions,
+          });
           expect(exitPosition).toEqual({ x: -dimensions.width, y: 100 });
         });
       });
@@ -2400,11 +2555,18 @@ describe('Actions;', () => {
         });
 
         it('returns correct exit when both exits are the same distance', () => {
-          const exits = { left: { start: boardDimensions.height - 100, end: boardDimensions.height - 50 }, bottom: { start: 60, end: 110 } };
+          const exits = {
+            left: { start: boardDimensions.height - 100, end: boardDimensions.height - 50 },
+            bottom: { start: 60, end: 110 },
+          };
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: boardDimensions.height - 200, ...dimensions });
+          const exitPosition = actions.getExitPosition({
+            x: 100,
+            y: boardDimensions.height - 200,
+            ...dimensions,
+          });
           expect(exitPosition).toEqual({ x: 100, y: boardDimensions.height });
         });
       });
@@ -2432,13 +2594,20 @@ describe('Actions;', () => {
         it('returns correct exit when both exits are the same distance', () => {
           const exits = {
             right: { start: boardDimensions.height - 100, end: boardDimensions.height - 50 },
-            bottom: { start: boardDimensions.width - 100, end: boardDimensions.width - 50 }
+            bottom: { start: boardDimensions.width - 100, end: boardDimensions.width - 50 },
           };
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: boardDimensions.width - 200, y: boardDimensions.height - 200, ...dimensions });
-          expect(exitPosition).toEqual({ x: boardDimensions.width, y: boardDimensions.height - 100 });
+          const exitPosition = actions.getExitPosition({
+            x: boardDimensions.width - 200,
+            y: boardDimensions.height - 200,
+            ...dimensions,
+          });
+          expect(exitPosition).toEqual({
+            x: boardDimensions.width,
+            y: boardDimensions.height - 100,
+          });
         });
       });
     });
@@ -2451,7 +2620,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 4 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 4 },
+          );
           expect(exitPosition).toEqual({ x: boardDimensions.width, y: 50 });
         });
 
@@ -2460,7 +2632,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 4 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 4 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: boardDimensions.height });
         });
 
@@ -2469,7 +2644,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 4 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 4 },
+          );
           expect(exitPosition).toEqual({ x: -dimensions.width, y: 50 });
         });
 
@@ -2478,16 +2656,26 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 4 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 4 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: -dimensions.height });
         });
 
         it('returns correct exit position when tile has top, bottom and left exits', () => {
-          const exits = { top: { start: 50, end: 100 }, bottom: { start: 50, end: 100 }, left: { start: 50, end: 100 } };
+          const exits = {
+            top: { start: 50, end: 100 },
+            bottom: { start: 50, end: 100 },
+            left: { start: 50, end: 100 },
+          };
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 4 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 4 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: -dimensions.height });
         });
 
@@ -2496,7 +2684,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 4 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 4 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: -dimensions.height });
         });
 
@@ -2505,7 +2696,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 4 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 4 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: -dimensions.height });
         });
 
@@ -2514,7 +2708,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 4 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 4 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: boardDimensions.height });
         });
       });
@@ -2526,7 +2723,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 2 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 2 },
+          );
           expect(exitPosition).toEqual({ x: -dimensions.width, y: 50 });
         });
 
@@ -2535,7 +2735,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 2 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 2 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: boardDimensions.height });
         });
 
@@ -2544,7 +2747,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 2 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 2 },
+          );
           expect(exitPosition).toEqual({ x: boardDimensions.width, y: 50 });
         });
 
@@ -2553,16 +2759,26 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 2 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 2 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: -dimensions.height });
         });
 
         it('returns correct exit position when tile has top, bottom and right exits', () => {
-          const exits = { top: { start: 50, end: 100 }, bottom: { start: 50, end: 100 }, right: { start: 50, end: 100 } };
+          const exits = {
+            top: { start: 50, end: 100 },
+            bottom: { start: 50, end: 100 },
+            right: { start: 50, end: 100 },
+          };
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 2 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 2 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: -dimensions.height });
         });
 
@@ -2571,7 +2787,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 2 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 2 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: -dimensions.height });
         });
 
@@ -2580,7 +2799,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 2 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 2 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: -dimensions.height });
         });
 
@@ -2589,7 +2811,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 3, y: 2 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 3, y: 2 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: boardDimensions.height });
         });
       });
@@ -2601,7 +2826,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 2, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 2, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: -dimensions.height });
         });
 
@@ -2610,7 +2838,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 2, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 2, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: boardDimensions.height });
         });
 
@@ -2619,7 +2850,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 2, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 2, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: -dimensions.width, y: 50 });
         });
 
@@ -2628,16 +2862,26 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 2, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 2, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: boardDimensions.width, y: 50 });
         });
 
         it('returns correct exit position when tile has right, bottom and left exits', () => {
-          const exits = { right: { start: 50, end: 100 }, bottom: { start: 50, end: 100 }, left: { start: 50, end: 100 } };
+          const exits = {
+            right: { start: 50, end: 100 },
+            bottom: { start: 50, end: 100 },
+            left: { start: 50, end: 100 },
+          };
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 2, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 2, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: boardDimensions.width, y: 50 });
         });
 
@@ -2646,7 +2890,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 2, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 2, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: boardDimensions.width, y: 50 });
         });
 
@@ -2655,7 +2902,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 2, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 2, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: boardDimensions.width, y: 50 });
         });
 
@@ -2664,7 +2914,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 2, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 2, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: boardDimensions.height });
         });
       });
@@ -2676,7 +2929,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 4, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 4, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: boardDimensions.height });
         });
 
@@ -2685,7 +2941,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 4, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 4, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: -dimensions.height });
         });
 
@@ -2694,7 +2953,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 4, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 4, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: -dimensions.width, y: 50 });
         });
 
@@ -2703,16 +2965,26 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 4, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 4, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: boardDimensions.width, y: 50 });
         });
 
         it('returns correct exit position when tile has right, top and left exits', () => {
-          const exits = { right: { start: 50, end: 100 }, top: { start: 50, end: 100 }, left: { start: 50, end: 100 } };
+          const exits = {
+            right: { start: 50, end: 100 },
+            top: { start: 50, end: 100 },
+            left: { start: 50, end: 100 },
+          };
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 4, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 4, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: boardDimensions.width, y: 50 });
         });
 
@@ -2721,7 +2993,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 4, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 4, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: boardDimensions.width, y: 50 });
         });
 
@@ -2730,7 +3005,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 4, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 4, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: boardDimensions.width, y: 50 });
         });
 
@@ -2739,7 +3017,10 @@ describe('Actions;', () => {
           const tree = new Baobab({ tile: { ...tile, exits }, boardDimensions });
           ActionsRewire.__Rewire__('tree', tree);
 
-          const exitPosition = actions.getExitPosition({ x: 100, y: 100, ...dimensions }, { x: 4, y: 3 });
+          const exitPosition = actions.getExitPosition(
+            { x: 100, y: 100, ...dimensions },
+            { x: 4, y: 3 },
+          );
           expect(exitPosition).toEqual({ x: 50, y: -dimensions.height });
         });
       });

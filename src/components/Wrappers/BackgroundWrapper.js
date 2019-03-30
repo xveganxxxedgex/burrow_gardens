@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { branch } from 'baobab-react/higher-order';
 import _isEqual from 'lodash/isEqual';
 
@@ -17,19 +18,29 @@ export default class BackgroundWrapper extends Component {
 
     return (
       <div className="background-wrapper">
-        {tile.background.map((row, rowIndex) => {
+        {tile.background.map((row, index) => {
+          const rowIndex = index;
           return (
             <div className="background-row" key={`row-${rowIndex}`}>
-              {row.map((tile, tileIndex) => {
-                const BackgroundItem = getBackgroundCell(tile);
+              {row.map((cell, cellIndex) => {
+                const cellKey = cellIndex;
+                const BackgroundItem = getBackgroundCell(cell);
                 return (
-                  <BackgroundItem tile={tile} key={`background-${tileIndex}`} index={tileIndex} />
+                  <BackgroundItem tile={cell} key={`background-${cellKey}`} index={cellKey} />
                 );
               })}
             </div>
           );
         })}
       </div>
-    )
+    );
   }
 }
+
+BackgroundWrapper.propTypes = {
+  tile: PropTypes.object,
+};
+
+BackgroundWrapper.defaultProps = {
+  tile: {},
+};

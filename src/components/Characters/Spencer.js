@@ -46,7 +46,7 @@ export default class Spencer {
       flopLeft: bunnyFlopLeftImg,
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
-      flopDown: bunnyFlopDownImg
-    }
+      flopDown: bunnyFlopDownImg,
+    };
   }
 }

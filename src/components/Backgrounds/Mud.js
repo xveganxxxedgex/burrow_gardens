@@ -1,20 +1,16 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 import BackgroundCell from 'components/Backgrounds/BackgroundCell';
-import grassImage from 'images/scenery/grass.png';
+// TODO: Use mud image
+// import mudImage from 'images/scenery/mud.png';
+import mudImage from 'images/scenery/grass.png';
 
-class Mud extends Component {
-  constructor(props, context) {
-    super(props, context);
-  }
-
-  render() {
-    return (
-      <BackgroundCell {...this.props}>
-        <img src={grassImage} />
-      </BackgroundCell>
-    )
-  }
-}
+const Mud = (props) => {
+  return (
+    <BackgroundCell {...props}>
+      <img src={mudImage} alt="Mud Background" />
+    </BackgroundCell>
+  );
+};
 
 export default Mud;

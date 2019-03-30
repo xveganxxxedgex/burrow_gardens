@@ -47,7 +47,7 @@ export default class Simba {
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
       flopDown: bunnyFlopDownImg,
-      closeup: bunnyCloseUpImg
-    }
+      closeup: bunnyCloseUpImg,
+    };
   }
 }

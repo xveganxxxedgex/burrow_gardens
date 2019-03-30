@@ -3,13 +3,13 @@ import * as Scenery from 'components/Scenery';
 import { buildTileBorders } from 'actions';
 
 const exits = {
-  top: { start: 200, end: 262 }
+  top: { start: 200, end: 262 },
 };
 
 const { left, right, bottom, top } = buildTileBorders(exits, Scenery.Bush);
 const divider = [];
 
-for (let i = 160; i < 1040; i = i + 40) {
+for (let i = 160; i < 1040; i += 40) {
   divider.push(new Scenery.Bush({ position: { x: i, y: 280 } }));
 }
 
@@ -29,7 +29,7 @@ const Tile = {
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
-    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1']
+    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
   ],
   scenery: [
     ...left,
@@ -38,12 +38,12 @@ const Tile = {
     ...bottom,
     ...divider,
     // Top burrow
-    new Scenery.Burrow({ position: { x: 200, y: 0 }, takeToTile: { x: 1, y: 4 }, faceDirection: 'left'}),
+    new Scenery.Burrow({ position: { x: 200, y: 0 }, takeToTile: { x: 1, y: 4 }, faceDirection: 'left' }),
   ],
   food: [],
   x: 2,
   y: 4,
-  exits
+  exits,
 };
 
 export default Tile;

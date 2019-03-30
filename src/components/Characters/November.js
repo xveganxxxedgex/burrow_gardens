@@ -48,7 +48,7 @@ export default class November {
       flopLeft: bunnyFlopLeftImg,
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
-      flopDown: bunnyFlopDownImg
-    }
+      flopDown: bunnyFlopDownImg,
+    };
   }
 }

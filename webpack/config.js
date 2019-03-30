@@ -6,8 +6,8 @@ var pkg = require('../package.json');
 var rules = require('./rules');
 var plugins = require('./plugins');
 
-var DEBUG = process.env.NODE_ENV === 'development',
-    TEST = process.env.NODE_ENV === 'test';
+var DEBUG = process.env.NODE_ENV === 'development';
+var TEST = process.env.NODE_ENV === 'test';
 
 var entry = {
   'app': ['../src/index.js']
@@ -29,7 +29,7 @@ var config = {
     path: path.resolve(pkg.config.buildDir),
     publicPath: './',
     filename: path.join('assets', 'js', '[name].js'),
-    pathinfo: false
+    pathinfo: false,
   },
   module: {
     rules: rules,
@@ -39,12 +39,12 @@ var config = {
   resolve: {
     extensions: ['.js', '.json', '.jsx'],
     alias: {
-      'moment$': 'moment/moment',
+      moment$: 'moment/moment',
     },
     modules: [
       'node_modules',
-      'src'
-    ]
+      'src',
+    ],
   },
   devServer: {
     contentBase: path.resolve(pkg.config.buildDir),
@@ -53,8 +53,8 @@ var config = {
     noInfo: false,
     inline: true,
     stats: { colors: true },
-    historyApiFallback: true
-  }
+    historyApiFallback: true,
+  },
 };
 
 module.exports = config;

@@ -25,7 +25,7 @@ const Tile = {
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
-    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1']
+    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
   ],
   scenery: [
     ...left,
@@ -33,14 +33,14 @@ const Tile = {
     ...top,
     ...bottom,
     // Top burrow
-    new Scenery.Burrow({ position: { x: 520, y: 0 }, takeToTile: { x: 5, y: 5 }, faceDirection: 'left'}),
+    new Scenery.Burrow({ position: { x: 520, y: 0 }, takeToTile: { x: 5, y: 5 }, faceDirection: 'left' }),
     // Right burrow
-    new Scenery.Burrow({ position: { x: 1138, y: 480 }, takeToTile: { x: 6, y: 6 }, faceDirection: 'left'}),
+    new Scenery.Burrow({ position: { x: 1138, y: 480 }, takeToTile: { x: 6, y: 6 }, faceDirection: 'left' }),
   ],
   food: [],
   x: 6,
   y: 5,
-  exits
+  exits,
 };
 
 export default Tile;

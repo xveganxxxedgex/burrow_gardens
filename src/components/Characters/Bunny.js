@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { branch } from 'baobab-react/higher-order';
 import _capitalize from 'lodash/capitalize';
 import _find from 'lodash/find';
@@ -28,7 +29,7 @@ import {
   takeBunnyToGroupTile,
   getElementRect,
   removeBunnyCollisionWithHero,
-  updateBunnyGoingToTile
+  updateBunnyGoingToTile,
 } from 'actions';
 
 import 'less/Characters.less';
@@ -38,7 +39,7 @@ import 'less/Characters.less';
   boardDimensions: ['boardDimensions'],
   gameVisible: ['gameVisible'],
   heroCollisions: ['heroCollisions'],
-  heroLastDirection: ['hero', 'lastDirection']
+  heroLastDirection: ['hero', 'lastDirection'],
 })
 class Bunny extends Component {
   constructor(props, context) {
@@ -55,17 +56,16 @@ class Bunny extends Component {
 
     const {
       position,
-      boardDimensions: { height: boardHeight, width: boardWidth }
+      boardDimensions: { height: boardHeight, width: boardWidth },
     } = props;
 
     this.state = {
       moveTransition: true,
-      startingPosition: props.position,
       moving: [],
       lastDirection: _sample(this.directions),
       goToPosition: null,
       maxBounds: this.getMaxBoundsFromStartPosition(position, boardHeight, boardWidth),
-      goToGroupTile: false
+      goToGroupTile: false,
     };
   }
 
@@ -84,33 +84,38 @@ class Bunny extends Component {
       heroLastDirection,
       hasCollected,
       groupTile,
-      onTile
+      onTile,
     } = nextProps;
     // Tile is changing - temporarily disable movement transition
-    // This will prevent the hero from appearing to slide across the tile to the new starting position
-    if (tile.x != this.props.tile.x || tile.y != this.props.tile.y) {
+    // This will prevent the hero from appearing to slide across the tile
+    // to the new starting position
+    if (tile.x !== this.props.tile.x || tile.y !== this.props.tile.y) {
       clearTimeout(this.transitionTimeout);
       this.transitionTimeout = null;
       this.toggleTransition(false);
     }
 
-    if (gameVisible != this.props.gameVisible && gameVisible) {
+    if (gameVisible !== this.props.gameVisible && gameVisible) {
       // TODO: Handle when tab is no longer active/visible
     }
 
+    const dimensionsChanged = !_isEqual(this.props.boardDimensions, nextProps.boardDimensions);
+
     // Update max bounds once the board dimensions have loaded
-    if (!_isEmpty(nextProps.boardDimensions) && !_isEqual(this.props.boardDimensions, nextProps.boardDimensions)) {
-      this.setState({ maxBounds: this.getMaxBoundsFromStartPosition(nextProps.position, boardHeight, boardWidth) });
+    if (!_isEmpty(nextProps.boardDimensions) && dimensionsChanged) {
+      this.setState({
+        maxBounds: this.getMaxBoundsFromStartPosition(nextProps.position, boardHeight, boardWidth),
+      });
     }
 
     // If the character moves tiles, do cleanup
-    if (onTile != this.props.onTile) {
+    if (onTile !== this.props.onTile) {
       this.stopMovingCharacter(false, true);
     }
 
     // Bunny just joined the group, navigate them to the group area
-    if (hasCollected && hasCollected != this.props.hasCollected) {
-      if (groupTile.x != tile.x || groupTile.y != tile.y) {
+    if (hasCollected && hasCollected !== this.props.hasCollected) {
+      if (groupTile.x !== tile.x || groupTile.y !== tile.y) {
         const newState = { goToGroupTile: true };
         // See if the preferred exit in the direction of the target tile has a valid path
         let goToPosition = getExitPosition(this, groupTile);
@@ -131,7 +136,12 @@ class Bunny extends Component {
 
           newState.goToPosition = newPosition;
           newState.path = pathToExit;
-          newState.maxBounds = this.getMaxBoundsFromStartPosition(goToPosition, boardHeight, boardWidth, true);
+          newState.maxBounds = this.getMaxBoundsFromStartPosition(
+            goToPosition,
+            boardHeight,
+            boardWidth,
+            true,
+          );
         }
 
         this.setState(newState, () => {
@@ -140,13 +150,13 @@ class Bunny extends Component {
       }
     }
 
-    if (!this.state.goToPosition && heroCollisions != this.props.heroCollisions) {
+    if (!this.state.goToPosition && heroCollisions !== this.props.heroCollisions) {
       // Check if colliding with Hero and if so, face their direction
       if (this.checkIfCollidingWithHero(nextProps)) {
         this.stopMovingCharacter(true, true);
         const oppositeHeroDirection = getOppositeDirection(heroLastDirection);
 
-        if (this.state.lastDirection != oppositeHeroDirection) {
+        if (this.state.lastDirection !== oppositeHeroDirection) {
           this.setLastDirection(oppositeHeroDirection);
         }
       }
@@ -156,10 +166,10 @@ class Bunny extends Component {
   componentWillUpdate(nextProps, nextState) {
     const { moving, goToPosition } = nextState;
 
-    if (moving != this.state.moving) {
+    if (moving !== this.state.moving) {
       const lastDirection = moving.length ? moving[moving.length - 1] : this.state.lastDirection;
 
-      if (lastDirection != this.state.lastDirection) {
+      if (lastDirection !== this.state.lastDirection) {
         this.setLastDirection(lastDirection);
       }
 
@@ -195,34 +205,8 @@ class Bunny extends Component {
       up: setToBounds ? -this.props.height : Math.max(position.y - 100, 0),
       down: setToBounds && maxHeight ? maxHeight : bottomBounds,
       left: setToBounds ? -this.props.width : Math.max(position.x - 200, 0),
-      right: setToBounds && maxWidth ? maxWidth : rightBounds
+      right: setToBounds && maxWidth ? maxWidth : rightBounds,
     };
-  }
-
-  setLastDirection(lastDirection) {
-    this.setState({ lastDirection });
-  }
-
-  clearTimeouts() {
-    clearTimeout(this.stopMovingCharacterTimeout);
-    clearTimeout(this.transitionTimeout);
-    clearTimeout(this.movingTimeout);
-    clearTimeout(this.moveCharacterTimeout);
-  }
-
-  checkIfCollidingWithHero(props) {
-    props = props || this.props;
-    const { heroCollisions, id } = props;
-
-    return !this.isHero && heroCollisions.indexOf(id) > -1;
-  }
-
-  toggleTransition(moveTransition) {
-    this.setState({ moveTransition });
-  }
-
-  getPosNumber(pos) {
-    return Number(pos.replace('px', ''));
   }
 
   getBunnyImage() {
@@ -231,7 +215,9 @@ class Bunny extends Component {
     let imageKey = 'left';
 
     // TODO: Remove this once all bunnies have their images
-    if (!bunnyImages || !Object.keys(bunnyImages).length) return;
+    if (!bunnyImages || !Object.keys(bunnyImages).length) {
+      return false;
+    }
 
     if (isFlopped || isLoaf) {
       imageKey = (isFlopped ? 'flop' : 'loaf') + _capitalize(useDirection);
@@ -239,7 +225,7 @@ class Bunny extends Component {
       imageKey = useDirection;
 
       if (this.props.isMoving || this.state.moving.length) {
-        imageKey = imageKey + 'Gif';
+        imageKey += 'Gif';
       }
     }
 
@@ -256,7 +242,7 @@ class Bunny extends Component {
     return {
       ...this,
       height,
-      width
+      width,
     };
   }
 
@@ -271,6 +257,28 @@ class Bunny extends Component {
 
     const characterRect = getElementRect(this);
     return getTargetDirection(characterRect, goToPosition);
+  }
+
+  setLastDirection(lastDirection) {
+    this.setState({ lastDirection });
+  }
+
+  clearTimeouts() {
+    clearTimeout(this.stopMovingCharacterTimeout);
+    clearTimeout(this.transitionTimeout);
+    clearTimeout(this.movingTimeout);
+    clearTimeout(this.moveCharacterTimeout);
+  }
+
+  checkIfCollidingWithHero(props) {
+    const useProps = props || this.props;
+    const { heroCollisions, id } = useProps;
+
+    return !this.isHero && heroCollisions.indexOf(id) > -1;
+  }
+
+  toggleTransition(moveTransition) {
+    this.setState({ moveTransition });
   }
 
   moveAI() {
@@ -290,7 +298,7 @@ class Bunny extends Component {
       }
 
       this.setState({
-        moving: [direction]
+        moving: [direction],
       }, () => {
         this.moveCharacter();
 
@@ -318,7 +326,7 @@ class Bunny extends Component {
     const checkAxis = getAxisFromDirection(boundsDirection);
     const isInBounds = this.isInBounds(newAxisValue, boundsDirection);
     const collidingWithHero = this.checkIfCollidingWithHero();
-    const atSamePosition = newAxisValue == oldPos[checkAxis];
+    const atSamePosition = newAxisValue === oldPos[checkAxis];
     const canMove = !atSamePosition && isInBounds;
 
     if (goToPosition) {
@@ -326,13 +334,17 @@ class Bunny extends Component {
       const atTargetAxisPosition = checkIfAtTargetPosition(boundsDirection, oldPos, goToPosition);
 
       if (atTargetAxisPosition) {
-        const otherAxis = checkAxis == 'x' ? 'y' : 'x';
+        const otherAxis = checkAxis === 'x' ? 'y' : 'x';
         const otherAxisDirection = getDirectionForAxis(otherAxis, oldPos, goToPosition);
-        const atTargetOtherAxisPosition = checkIfAtTargetPosition(otherAxisDirection, oldPos, goToPosition);
+        const atTargetOtherAxisPosition = checkIfAtTargetPosition(
+          otherAxisDirection,
+          oldPos,
+          goToPosition,
+        );
 
         // Check to see if there's collisions in the next potential direction
         if (atTargetOtherAxisPosition) {
-          const path = this.state.path;
+          const { path } = this.state;
           const newPosition = path[0];
           path.splice(0, 1);
 
@@ -355,10 +367,14 @@ class Bunny extends Component {
     const { goToPosition } = this.state;
 
     if (isBackwardsDirection(boundsDirection)) {
-      return goToPosition ? newPos >= this.state.maxBounds[boundsDirection] : newPos > this.state.maxBounds[boundsDirection];
+      return goToPosition
+        ? newPos >= this.state.maxBounds[boundsDirection]
+        : newPos > this.state.maxBounds[boundsDirection];
     }
 
-    return goToPosition ? newPos <= this.state.maxBounds[boundsDirection] : newPos < this.state.maxBounds[boundsDirection];
+    return goToPosition
+      ? newPos <= this.state.maxBounds[boundsDirection]
+      : newPos < this.state.maxBounds[boundsDirection];
   }
 
   moveCharacter() {
@@ -373,34 +389,48 @@ class Bunny extends Component {
         move: moveEntityBack,
         // When moving back, use the max possible value so they don't go out of
         // bounds or intersect with a colliding entity
-        value: _max
+        value: _max,
       },
       forward: {
         move: moveEntityForward,
         // When moving forward, use the min possible value so they don't go out of
         // bounds or intersect with a colliding entity
-        value: _min
-      }
+        value: _min,
+      },
     };
 
-    for (let m = 0; m < moving.length; m++) {
+    for (let m = 0; m < moving.length; m += 1) {
       const direction = moving[m];
       const axis = getAxisFromDirection(direction);
       const isMovingBack = isBackwardsDirection(direction);
       const useMoveLogic = isMovingBack ? 'back' : 'forward';
-      const movePlayer = moveMethods[useMoveLogic].move(this, axis, newPosition.x, newPosition.y, direction, moving.length > 1, goToPosition);
-      const newValue = moveMethods[useMoveLogic].value([movePlayer.value, this.state.maxBounds[direction]]);
+      const movePlayer = moveMethods[useMoveLogic].move(
+        this,
+        axis,
+        newPosition.x,
+        newPosition.y,
+        direction,
+        moving.length > 1,
+        goToPosition,
+      );
+      const newValue = moveMethods[useMoveLogic].value([
+        movePlayer.value,
+        this.state.maxBounds[direction],
+      ]);
 
       if (movePlayer.collisions.length) {
         collisions = _uniq(collisions.concat(movePlayer.collisions));
       }
 
-      continueMoving = continueMoving || this.shouldContinueMoving(newValue, direction, newPosition);
+      continueMoving = (
+        continueMoving ||
+        this.shouldContinueMoving(newValue, direction, newPosition)
+      );
       newPosition[axis] = newValue;
     }
 
     if (!this.checkIfIsHero()) {
-      const burrowCollision = _find(collisions, collision => collision.type == BURROW_TYPE);
+      const burrowCollision = _find(collisions, collision => collision.type === BURROW_TYPE);
 
       if (burrowCollision) {
         this.setState({ goToPosition: null, path: null, goToGroupTile: false });
@@ -429,11 +459,20 @@ class Bunny extends Component {
   }
 
   checkIfIsHero() {
-    return this.props.id == 'Hero';
+    return this.props.id === 'Hero';
   }
 
   render() {
-    const { name, position, height, width, children, direction, isFlopped, id } = this.props;
+    const {
+      name,
+      position,
+      height,
+      width,
+      children,
+      direction,
+      isFlopped,
+      id,
+    } = this.props;
     const { moveTransition, lastDirection } = this.state;
     const bunnyImage = this.getBunnyImage();
     const useDirection = this.checkIfIsHero() ? direction : lastDirection;
@@ -442,13 +481,13 @@ class Bunny extends Component {
       <div
         className={`bunny ${name} ${moveTransition ? '' : 'no-transition'} ${useDirection} ${isFlopped ? 'isFlopped' : ''} bunny_index_${id}`}
         style={{
-          top: position.y + 'px',
-          left: position.x + 'px',
-          height: height + 'px',
-          width: width + 'px'
+          top: `${position.y}px`,
+          left: `${position.x}px`,
+          height: `${height}px`,
+          width: `${width}px`,
         }}
       >
-        <img src={bunnyImage} />
+        <img src={bunnyImage} alt={`${name} Bunny`} />
         {children}
       </div>
     );
@@ -456,3 +495,50 @@ class Bunny extends Component {
 }
 
 export default Bunny;
+
+Bunny.propTypes = {
+  boardDimensions: PropTypes.object,
+  bunnyImages: PropTypes.object,
+  children: PropTypes.any,
+  direction: PropTypes.string,
+  gameVisible: PropTypes.bool,
+  groupTile: PropTypes.object,
+  hasCollected: PropTypes.bool,
+  height: PropTypes.number,
+  heroCollisions: PropTypes.array,
+  heroLastDirection: PropTypes.string,
+  isFlopped: PropTypes.bool,
+  isLoaf: PropTypes.bool,
+  isMoving: PropTypes.bool,
+  id: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
+  name: PropTypes.string,
+  onTile: PropTypes.object,
+  position: PropTypes.object,
+  tile: PropTypes.object,
+  width: PropTypes.number,
+};
+
+Bunny.defaultProps = {
+  boardDimensions: {},
+  bunnyImages: {},
+  children: null,
+  direction: '',
+  gameVisible: true,
+  groupTile: {},
+  hasCollected: false,
+  height: 0,
+  heroCollisions: [],
+  heroLastDirection: '',
+  id: 0,
+  isFlopped: false,
+  isLoaf: false,
+  isMoving: false,
+  name: '',
+  onTile: {},
+  position: {},
+  tile: {},
+  width: 0,
+};

@@ -112,6 +112,10 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Improve pathfinding/tile exit logic~~
 
+Add all produce and bunnies in correct tiles
+
+Resolve lint issues
+
 Maybe add a cute animation like a binky when a bunny is added to the group, to play before they head to the group tile
 
 Add areas where hero has to jump

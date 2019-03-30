@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { branch } from 'baobab-react/higher-order';
 
 import * as constants from 'components/Characters/constants';
@@ -14,7 +15,7 @@ import {
   getOppositeDirection,
   updateHeroSize,
   getEntityCollisions,
-  changeMenuTab
+  changeMenuTab,
 } from 'actions';
 
 import bunnyLeftImg from 'images/bunnies/bunny_left.png';
@@ -34,12 +35,12 @@ import bunnyFlopRightImg from 'images/bunnies/bunny_right_flop.png';
 import bunnyFlopUpImg from 'images/bunnies/bunny_up_flop.png';
 import bunnyFlopDownImg from 'images/bunnies/bunny_down_flop.png';
 
-import lopBunnyLeftImg from 'images/bunnies/lop_bunny.png';
-import lopBunnyUpImg from 'images/bunnies/lop_bunny_up.png';
-import lopBunnyDownImg from 'images/bunnies/lop_bunny_down.png';
-import lopBunnyLeftGif from 'images/bunnies/lop_bunny_gif.gif';
-import lopBunnyUpGif from 'images/bunnies/lop_bunny_up_gif.gif';
-import lopBunnyDownGif from 'images/bunnies/lop_bunny_down_gif.gif';
+// import lopBunnyLeftImg from 'images/bunnies/lop_bunny.png';
+// import lopBunnyUpImg from 'images/bunnies/lop_bunny_up.png';
+// import lopBunnyDownImg from 'images/bunnies/lop_bunny_down.png';
+// import lopBunnyLeftGif from 'images/bunnies/lop_bunny_gif.gif';
+// import lopBunnyUpGif from 'images/bunnies/lop_bunny_up_gif.gif';
+// import lopBunnyDownGif from 'images/bunnies/lop_bunny_down_gif.gif';
 
 const KEYBOARD_EVENTS = {
   // Tab key
@@ -59,22 +60,57 @@ const KEYBOARD_EVENTS = {
   // Space Bar
   32: 'space',
   // i key
-  73: 'inventory'
+  73: 'inventory',
 };
 
 @branch({
   hero: ['hero'],
   boardDimensions: ['boardDimensions'],
-  showMenu: ['showMenu']
+  showMenu: ['showMenu'],
 })
 class Hero extends Component {
+  /**
+   * Determines the hero dimensions based on their idle status
+   *
+   * @param  {Boolean} isFlopped  - If hero is in flopped status
+   * @param  {Boolean} isVertical - If the hero is facing a vertical direction
+   *                                Flopped dimensions are only affected when
+   *                                hero is facing a horizontal direction
+   *
+   * @return {object} - The new dimensions to use
+   */
+  static getBunnyDimensions(isFlopped, isVertical) {
+    if (isFlopped && !isVertical) {
+      return {
+        height: constants.BUNNY_FLOP_HEIGHT,
+        width: constants.BUNNY_FLOP_WIDTH,
+      };
+    }
+
+    return {
+      height: constants.BUNNY_HEIGHT,
+      width: constants.BUNNY_WIDTH,
+    };
+  }
+
+  /**
+   * Returns the keyboard action event
+   *
+   * @param  {object} e - The key down/up event
+   *
+   * @return {string} - The string representation of the key event
+   */
+  static getKeyEvent(e) {
+    const keycode = e.keyCode;
+    return KEYBOARD_EVENTS[keycode];
+  }
+
   constructor(props, context) {
     super(props, context);
 
     this.isHero = true;
 
     this.movePlayer = this.movePlayer.bind(this);
-    this.getKeyEvent = this.getKeyEvent.bind(this);
     this.setKeyDown = this.setKeyDown.bind(this);
     this.setKeyUp = this.setKeyUp.bind(this);
     this.setHeroIdleStatus = this.setHeroIdleStatus.bind(this);
@@ -96,11 +132,11 @@ class Hero extends Component {
       flopLeft: bunnyFlopLeftImg,
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
-      flopDown: bunnyFlopDownImg
-    }
+      flopDown: bunnyFlopDownImg,
+    };
 
     this.state = {
-      moving: []
+      moving: [],
     };
   }
 
@@ -116,11 +152,11 @@ class Hero extends Component {
     const { hero } = nextProps;
     const { moving, isFlopped } = nextState;
 
-    if (moving != this.state.moving) {
+    if (moving !== this.state.moving) {
       const lastDirection = moving.length ? moving[moving.length - 1] : hero.lastDirection;
 
       // Set the last direction the hero was moving in
-      if (lastDirection != hero.lastDirection) {
+      if (lastDirection !== hero.lastDirection) {
         setHeroLastDirection(lastDirection);
       }
 
@@ -129,7 +165,7 @@ class Hero extends Component {
         clearTimeout(this.movingTimeout);
         this.movingTimeout = null;
       }
-    } else if (this.state.isFlopped != isFlopped) {
+    } else if (this.state.isFlopped !== isFlopped) {
       // Update dimensions when flop status is changed
       this.assignDimensions(nextProps, nextState);
     }
@@ -142,64 +178,17 @@ class Hero extends Component {
   }
 
   /**
-   * Assigns the hero dimensions based on their idle status
+   * Returns the character object with height and width at the top level
    *
-   * @param  {object} props - The most up to date props
-   * @param  {object} state - The most up to date state
+   * @return {object} - The new character object
    */
-  assignDimensions(props, state) {
-    props = props || this.props || {};
-    state = state || this.state || {};
-    const isVertical = ['up', 'down'].indexOf(props.hero.lastDirection) > -1;
-    const { height, width } = this.getBunnyDimensions(state.isFlopped, isVertical);
-
-    if (this.props.hero.height != height || this.props.hero.width != width) {
-      updateHeroSize(height, width);
-    }
-  }
-
-  /**
-   * Determines the hero dimensions based on their idle status
-   *
-   * @param  {Boolean} isFlopped  - If hero is in flopped status
-   * @param  {Boolean} isVertical - If the hero is facing a vertical direction
-   *                                Flopped dimensions are only affected when
-   *                                hero is facing a horizontal direction
-   *
-   * @return {object} - The new dimensions to use
-   */
-  getBunnyDimensions(isFlopped, isVertical) {
-    if (isFlopped && !isVertical) {
-      return {
-        height: constants.BUNNY_FLOP_HEIGHT,
-        width: constants.BUNNY_FLOP_WIDTH
-      };
-    }
-
+  getCharacterWithDimensions() {
+    const { hero: { height, width } } = this.props;
     return {
-      height: constants.BUNNY_HEIGHT,
-      width: constants.BUNNY_WIDTH,
+      ...this,
+      height,
+      width,
     };
-  }
-
-  /**
-   * Clear moving and idle timeouts
-   */
-  clearTimeouts() {
-    clearTimeout(this.movingTimeout);
-    clearTimeout(this.idleTimeout);
-  }
-
-  /**
-   * Returns the keyboard action event
-   *
-   * @param  {object} e - The key down/up event
-   *
-   * @return {string} - The string representation of the key event
-   */
-  getKeyEvent(e) {
-    const keycode = e.keyCode;
-    return KEYBOARD_EVENTS[keycode];
   }
 
   /**
@@ -210,13 +199,13 @@ class Hero extends Component {
   setKeyDown(e) {
     e.preventDefault();
     const { moving } = this.state;
-    const keyEvent = this.getKeyEvent(e);
+    const keyEvent = Hero.getKeyEvent(e);
     const {
       hero: {
         position: { x, y },
-        disableMove
+        disableMove,
       },
-      showMenu
+      showMenu,
     } = this.props;
 
     clearTimeout(this.idleTimeout);
@@ -233,15 +222,15 @@ class Hero extends Component {
     }
 
     // Player is toggling the inventory menu, or hitting escape to exit the menu
-    if (keyEvent == 'inventory' || keyEvent == 'escape') {
-      if (keyEvent == 'inventory' || showMenu) {
+    if (keyEvent === 'inventory' || keyEvent === 'escape') {
+      if (keyEvent === 'inventory' || showMenu) {
         toggleShowMenu();
       }
 
       return;
     }
 
-    if (keyEvent == 'tab') {
+    if (keyEvent === 'tab') {
       // Allow tab event when the menu is open
       if (showMenu) {
         changeMenuTab();
@@ -270,7 +259,7 @@ class Hero extends Component {
     }
 
     // Handle space for collision actions
-    if (keyEvent == 'space') {
+    if (keyEvent === 'space') {
       if (!moving.length) {
         const useCharacter = this.getCharacterWithDimensions();
         getEntityCollisions(useCharacter, x, y, null, null, true);
@@ -285,9 +274,9 @@ class Hero extends Component {
 
     // If player is moving in a new direction that isn't an opposite of another
     // diretion they're already moving, update the state
-    if (directionIndex == -1 && oppositeDirectionIndex == -1) {
+    if (directionIndex === -1 && oppositeDirectionIndex === -1) {
       this.setState({
-        moving: [...moving, keyEvent]
+        moving: [...moving, keyEvent],
       }, () => {
         // Move the player entity after the state updates
         if (!this.movingTimeout) {
@@ -303,7 +292,7 @@ class Hero extends Component {
    * @param {object} e - The key up event
    */
   setKeyUp(e) {
-    const keyEvent = this.getKeyEvent(e);
+    const keyEvent = Hero.getKeyEvent(e);
 
     // If player hit a key we don't have an event for, return
     if (!keyEvent) {
@@ -311,12 +300,14 @@ class Hero extends Component {
     }
 
     const directionIndex = this.state.moving.indexOf(keyEvent);
-    const newMoving = this.state.moving.filter((value, index) => { return index != directionIndex });
+    const newMoving = this.state.moving.filter((value, index) => {
+      return index !== directionIndex;
+    });
 
     if (directionIndex > -1) {
       // If we're no longer moving in a direction, update the state
       this.setState({
-        moving: newMoving
+        moving: newMoving,
       }, () => {
         if (newMoving.length) {
           // If player is still moving in another direction, keep the entity moving
@@ -339,13 +330,13 @@ class Hero extends Component {
    */
   setHeroIdleStatus(type, value) {
     const newState = {
-      [type]: value || !this.state[type]
+      [type]: value || !this.state[type],
     };
 
     // Flop bunny after loaf status
-    if (type == 'isLoaf') {
+    if (type === 'isLoaf') {
       this.idleTimeout = setTimeout(this.setHeroIdleStatus.bind(this, 'isFlopped'), 5000);
-    } else if (type == 'isFlopped') {
+    } else if (type === 'isFlopped') {
       newState.isLoaf = false;
     }
 
@@ -353,17 +344,28 @@ class Hero extends Component {
   }
 
   /**
-   * Returns the character object with height and width at the top level
+   * Assigns the hero dimensions based on their idle status
    *
-   * @return {object} - The new character object
+   * @param  {object} props - The most up to date props
+   * @param  {object} state - The most up to date state
    */
-  getCharacterWithDimensions() {
-    const { hero: { height, width } } = this.props;
-    return {
-      ...this,
-      height,
-      width
-    };
+  assignDimensions(props, state) {
+    const useProps = props || this.props || {};
+    const useState = state || this.state || {};
+    const isVertical = ['up', 'down'].indexOf(useProps.hero.lastDirection) > -1;
+    const { height, width } = Hero.getBunnyDimensions(useState.isFlopped, isVertical);
+
+    if (this.props.hero.height !== height || this.props.hero.width !== width) {
+      updateHeroSize(height, width);
+    }
+  }
+
+  /**
+   * Clear moving and idle timeouts
+   */
+  clearTimeouts() {
+    clearTimeout(this.movingTimeout);
+    clearTimeout(this.idleTimeout);
   }
 
   /**
@@ -373,8 +375,8 @@ class Hero extends Component {
     const { moving } = this.state;
     const {
       hero: {
-        position: { x, y }
-      }
+        position: { x, y },
+      },
     } = this.props;
 
     let newX = x;
@@ -382,8 +384,8 @@ class Hero extends Component {
 
     const useCharacter = this.getCharacterWithDimensions();
 
-    for (let m = 0; m < moving.length; m++) {
-      switch(moving[m]) {
+    for (let m = 0; m < moving.length; m += 1) {
+      switch (moving[m]) {
         case 'up':
           // Move player up on the Y axis
           newY = moveEntityBack(useCharacter, 'y', newX, newY, moving[m], moving.length > 1).value;
@@ -397,6 +399,7 @@ class Hero extends Component {
           newX = moveEntityBack(useCharacter, 'x', newX, newY, moving[m], moving.length > 1).value;
           break;
         case 'right':
+        default:
           // Move player right on the X axis
           newX = moveEntityForward(useCharacter, 'x', newX, newY, moving[m], moving.length > 1).value;
           break;
@@ -415,21 +418,21 @@ class Hero extends Component {
         position,
         lastDirection,
         height,
-        width
-      }
+        width,
+      },
     } = this.props;
 
     return (
       <Bunny
         name="hero"
-        ref={(hero) => { this.hero = hero }}
+        ref={(hero) => { this.hero = hero; }}
         height={height}
         width={width}
         position={position}
         direction={lastDirection}
         isFlopped={this.state.isFlopped}
         isLoaf={this.state.isLoaf}
-        isMoving={this.state.moving.length}
+        isMoving={!!this.state.moving.length}
         bunnyImages={this.bunnyImages}
         id="Hero"
       />
@@ -438,3 +441,13 @@ class Hero extends Component {
 }
 
 export default Hero;
+
+Hero.propTypes = {
+  hero: PropTypes.object,
+  showMenu: PropTypes.bool,
+};
+
+Hero.defaultProps = {
+  hero: {},
+  showMenu: false,
+};

@@ -47,7 +47,7 @@ export default class Cloud {
       flopLeft: bunnyFlopLeftImg,
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
-      flopDown: bunnyFlopDownImg
-    }
+      flopDown: bunnyFlopDownImg,
+    };
   }
 }

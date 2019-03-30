@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { branch } from 'baobab-react/higher-order';
 import styled from 'styled-components';
 import { Glyphicon } from 'react-bootstrap';
@@ -31,27 +32,44 @@ const AudioControls = styled.div`
 `;
 
 @branch({
-  audioMuted: ['audioMuted']
+  backgroundAudio: ['audioSettings', 'background'],
+  effectsAudio: ['audioSettings', 'effects'],
+  gameStarted: ['gameStarted'],
 })
 class AudioWrapper extends Component {
   render() {
+    const { backgroundAudio, effectsAudio } = this.props;
+    const allAudioMuted = backgroundAudio.muted && effectsAudio.muted;
     return (
       <div className="audio-wrapper">
         <ReactHowler
           ref={(audio) => { this.backgroundAudio = audio; }}
-          mute={this.props.audioMuted}
+          mute={allAudioMuted || backgroundAudio.muted}
+          volume={parseFloat(backgroundAudio.volume)}
           src={CarrotFields}
-          playing={true}
+          playing={this.props.gameStarted}
           loop
         />
         <AudioControls>
-          <button onClick={toggleAudioMuted} title={`${this.props.audioMuted ? 'Unmute' : 'Mute'} Audio`}>
-            <Glyphicon glyph={this.props.audioMuted ? 'volume-up' : 'volume-off'} />
+          <button type="button" onClick={toggleAudioMuted} title={`${allAudioMuted ? 'Unmute' : 'Mute'} Audio`}>
+            <Glyphicon glyph={allAudioMuted ? 'volume-up' : 'volume-off'} />
           </button>
         </AudioControls>
       </div>
-    )
+    );
   }
 }
 
 export default AudioWrapper;
+
+AudioWrapper.propTypes = {
+  backgroundAudio: PropTypes.object,
+  effectsAudio: PropTypes.object,
+  gameStarted: PropTypes.bool,
+};
+
+AudioWrapper.defaultProps = {
+  backgroundAudio: {},
+  effectsAudio: {},
+  gameStarted: false,
+};

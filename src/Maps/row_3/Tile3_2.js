@@ -13,15 +13,15 @@ const mazeTop = [];
 const mazeBottom = [];
 const mazeLeft = [];
 
-for (let i = 320; i < 1040; i = i + 40) {
+for (let i = 320; i < 1040; i += 40) {
   mazeTop.push(new Scenery.Bush({ position: { x: i, y: 0 } }));
 }
 
-for (let i = 160; i < 500; i = i + 40) {
+for (let i = 160; i < 500; i += 40) {
   mazeBottom.push(new Scenery.Bush({ position: { x: i, y: 160 } }));
 }
 
-for (let i = 0; i < 160; i = i + 40) {
+for (let i = 0; i < 160; i += 40) {
   mazeLeft.push(new Scenery.Bush({ position: { x: 160, y: i } }));
 }
 
@@ -41,7 +41,7 @@ const Tile = {
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
-    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1']
+    ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
   ],
   scenery: [
     ...left,
@@ -55,7 +55,7 @@ const Tile = {
   food: [],
   x: 3,
   y: 2,
-  exits
+  exits,
 };
 
 export default Tile;
