@@ -36,7 +36,7 @@ class SceneryWrapper extends Component {
               item.collisionPoints.map((collisionItem, colIndex) => (
                 <SceneryItem
                   {...collisionItem}
-                  key={`scenery-collision-${collisionItem.id || colIndex}`}
+                  key={`scenery-collision-${collisionItem.id}_${colIndex}`} // eslint-disable-line react/no-array-index-key
                   index={collisionItem.id || colIndex}
                 />
               )),

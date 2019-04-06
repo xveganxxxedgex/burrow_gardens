@@ -112,9 +112,27 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Improve pathfinding/tile exit logic~~
 
-Add all produce and bunnies in correct tiles
+~~Resolve lint issues~~
 
-Resolve lint issues
+~~Add all produce and bunnies in correct tiles~~
+
+~~Fix bug where bunny doesn't recollide if they exit the screen before hero does~~
+
+~~Create character art~~
+
+Finalize produce placement on tiles
+
+Add art for various plant leaves, vines, trees, dirt mounds, etc
+
+Add art/items for other scenery items like flowers, bridges, leaves, stumps, shrubs, etc
+
+Add various backgrounds like different grass, water, mud, rocks, etc
+
+Create character close up art
+
+Maybe have some bunnies only join if you bring them a certain number of produce items
+
+Create quests to bring food items to different characters that will subtract those items from your inventory, otherwise they'll leave the group area and you have to find them again
 
 Maybe add a cute animation like a binky when a bunny is added to the group, to play before they head to the group tile
 
@@ -134,15 +152,7 @@ Create characters
 
 Maybe have alt state for food items for buried items so the entity doesn't go away, but it shows like an empty patch where the produce was
 
-Create quests to bring food items to different characters that will subtract those items from your inventory
-
 Create game state storage
-
-Create full map templates, using different screens
-
-Create character art
-
-Create background art
 
 Pause game state when browser is idle (see TODOs in code)
 

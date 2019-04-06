@@ -9,6 +9,14 @@ const exits = {
 
 const { left, right, bottom, top } = buildTileBorders(exits, Scenery.Bush);
 
+const foodItems = [];
+const dirtRows = [];
+
+for (let x = 200; x < 900; x += 70) {
+  dirtRows.push(new Scenery.DirtPile({ position: { x, y: 200 } }));
+  foodItems.push({ type: 'RomaineLettuce', position: { x: x + 35, y: 180 } });
+}
+
 const Tile = {
   background: [
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
@@ -32,8 +40,15 @@ const Tile = {
     ...right,
     ...top,
     ...bottom,
+    ...dirtRows,
   ],
-  food: [],
+  food: foodItems.map((item, index) => (
+    new Food[item.type]({
+      ...item,
+      position: item.position,
+      id: item.id || index + 1,
+    })
+  )),
   x: 6,
   y: 7,
   exits,

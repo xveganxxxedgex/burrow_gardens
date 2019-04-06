@@ -1,37 +1,34 @@
-import bunnyLeftImg from 'images/bunnies/bunny_left.png';
-import bunnyRightImg from 'images/bunnies/bunny_right.png';
-import bunnyUpImg from 'images/bunnies/bunny_up.png';
-import bunnyDownImg from 'images/bunnies/bunny_down.png';
-import bunnyLeftGif from 'images/bunnies/bunny_left_gif.gif';
-import bunnyRightGif from 'images/bunnies/bunny_right_gif.gif';
-import bunnyUpGif from 'images/bunnies/bunny_up_gif.gif';
-import bunnyDownGif from 'images/bunnies/bunny_down_gif.gif';
-import bunnyLoafLeftImg from 'images/bunnies/bunny_left_loaf.png';
-import bunnyLoafRightImg from 'images/bunnies/bunny_right_loaf.png';
-import bunnyLoafUpImg from 'images/bunnies/bunny_up_loaf.png';
-import bunnyLoafDownImg from 'images/bunnies/bunny_down_loaf.png';
-import bunnyFlopLeftImg from 'images/bunnies/bunny_left_flop.png';
-import bunnyFlopRightImg from 'images/bunnies/bunny_right_flop.png';
-import bunnyFlopUpImg from 'images/bunnies/bunny_up_flop.png';
-import bunnyFlopDownImg from 'images/bunnies/bunny_down_flop.png';
+import bunnyLeftImg from 'images/bunnies/November/left_1.png';
+import bunnyRightImg from 'images/bunnies/November/right.png';
+import bunnyUpImg from 'images/bunnies/November/up_1.png';
+import bunnyDownImg from 'images/bunnies/November/down_1.png';
+import bunnyLeftGif from 'images/bunnies/November/left_gif.gif';
+import bunnyRightGif from 'images/bunnies/November/right_gif.gif';
+import bunnyUpGif from 'images/bunnies/November/up_gif.gif';
+import bunnyDownGif from 'images/bunnies/November/down_gif.gif';
+import bunnyLoafLeftImg from 'images/bunnies/November/loaf_left.png';
+import bunnyLoafRightImg from 'images/bunnies/November/loaf_right.png';
+import bunnyLoafUpImg from 'images/bunnies/November/loaf_up.png';
+import bunnyLoafDownImg from 'images/bunnies/November/loaf_down.png';
+import bunnyFlopLeftImg from 'images/bunnies/November/flop_left.png';
+import bunnyFlopRightImg from 'images/bunnies/November/flop_right.png';
+import bunnyFlopUpImg from 'images/bunnies/November/flop_up.png';
+import bunnyFlopDownImg from 'images/bunnies/November/flop_down.png';
 import * as constants from './constants';
 
-// TODO: use actual images
 export default class November {
   constructor() {
     this.name = 'November';
-    // TODO: Change this back once another bunny gives the stomp skill
-    // this.giveSkill = 'nudge';
-    this.giveSkill = 'stomp';
+    this.giveSkill = 'nudge';
     this.hasCollected = false;
     this.goingToTile = false;
-    this.position = { x: 60, y: 60 };
+    this.position = { x: 900, y: 100 };
     this.onTile = { x: 9, y: 8 };
     this.height = constants.BUNNY_HEIGHT;
     this.width = constants.BUNNY_WIDTH;
     this.id = 2;
-    this.groupTile = { x: 1, y: 2 };
-    this.groupPosition = { x: 600, y: 200 };
+    this.groupTile = { x: 4, y: 6 };
+    this.groupPosition = { x: 500, y: 300 };
     this.bunnyImages = {
       left: bunnyLeftImg,
       right: bunnyRightImg,

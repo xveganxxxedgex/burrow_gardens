@@ -8,6 +8,7 @@ const exits = {
 };
 
 const { left, right, bottom, top } = buildTileBorders(exits, Scenery.Bush);
+const shrub1Position = { x: 380, y: 420 };
 
 const mazeTopOuter = [];
 const mazeTopInner = [];
@@ -69,8 +70,23 @@ const Tile = {
     ...mazeLeftInner,
     ...mazeLeftOuter,
     ...mazeBottom,
+    new Scenery.Shrub({
+      position: shrub1Position,
+      id: 'shrub_1',
+      produce: [
+        new Food.Strawberry({
+          position: { x: shrub1Position.x + 15, y: shrub1Position.y + 45 },
+          id: 'shrub_1_strawberry_1',
+          parentId: 'shrub_1',
+        }),
+        new Food.Strawberry({
+          position: { x: shrub1Position.x + 50, y: shrub1Position.y + 25 },
+          id: 'shrub_1_strawberry_2',
+          parentId: 'shrub_1',
+        }),
+      ],
+    }),
   ],
-  food: [],
   x: 2,
   y: 2,
   exits,

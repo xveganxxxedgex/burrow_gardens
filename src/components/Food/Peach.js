@@ -1,7 +1,7 @@
 import image from 'images/food/peach.png';
 
 export default class Peach {
-  constructor({ position, id, parentId }) {
+  constructor({ position, id, parentId, flipX }) {
     this.position = position;
     this.height = 24;
     this.width = 21;
@@ -12,5 +12,6 @@ export default class Peach {
     this.onParent = !!parentId;
     this.parent = parentId;
     this.needsAbility = 'stomp';
+    this.flipX = flipX;
   }
 }

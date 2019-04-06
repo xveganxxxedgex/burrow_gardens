@@ -11,6 +11,10 @@ const exits = {
 
 const { left, right, bottom, top } = buildTileBorders(exits, Scenery.Bush);
 
+const foodItems = [
+  { type: 'Pumpkin', position: { x: 540, y: 390 } },
+];
+
 const Tile = {
   background: [
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
@@ -35,7 +39,13 @@ const Tile = {
     ...top,
     ...bottom,
   ],
-  food: [],
+  food: foodItems.map((item, index) => (
+    new Food[item.type]({
+      ...item,
+      position: item.position,
+      id: item.id || index + 1,
+    })
+  )),
   x: 3,
   y: 6,
   exits,

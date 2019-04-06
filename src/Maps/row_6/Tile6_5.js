@@ -9,6 +9,10 @@ const exits = {
 
 const { left, right, bottom, top } = buildTileBorders(exits, Scenery.Bush);
 
+const foodItems = [
+  { type: 'Cilantro', position: { x: 540, y: 390 } },
+];
+
 const Tile = {
   background: [
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
@@ -37,7 +41,13 @@ const Tile = {
     // Right burrow
     new Scenery.Burrow({ position: { x: 1138, y: 480 }, takeToTile: { x: 6, y: 6 }, faceDirection: 'left' }),
   ],
-  food: [],
+  food: foodItems.map((item, index) => (
+    new Food[item.type]({
+      ...item,
+      position: item.position,
+      id: item.id || index + 1,
+    })
+  )),
   x: 6,
   y: 5,
   exits,

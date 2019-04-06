@@ -9,6 +9,7 @@ const exits = {
 };
 
 const { left, right, bottom, top } = buildTileBorders(exits, Scenery.Bush);
+const treePosition = { x: 800, y: 50 };
 
 const Tile = {
   background: [
@@ -35,6 +36,23 @@ const Tile = {
     ...bottom,
     // Right burrow
     new Scenery.Burrow({ position: { x: 1138, y: 40 }, takeToTile: { x: 1, y: 8 }, faceDirection: 'left' }),
+    new Scenery.Tree({
+      position: treePosition,
+      id: 'tree_1',
+      produce: [
+        new Food.Papaya({
+          position: { x: treePosition.x + 50, y: treePosition.y + 145 },
+          id: 'tree_1_papaya_1',
+          parentId: 'tree_1',
+        }),
+        new Food.Papaya({
+          position: { x: treePosition.x + 170, y: treePosition.y + 122 },
+          id: 'tree_1_papaya_2',
+          parentId: 'tree_1',
+          flipX: true,
+        }),
+      ],
+    }),
   ],
   food: [],
   x: 1,

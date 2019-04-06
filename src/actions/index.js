@@ -457,8 +457,7 @@ export function getClosestEmptyPosition(item, includeBunnies) {
  * @param {Number} x - The new tile X coordinate
  * @param {Number} y - The new tile Y coordinate
  */
-// TODO: The start tile should be x = 4, y = 3
-export function setActiveTile(x = 5, y = 8) {
+export function setActiveTile(x = 4, y = 3) {
   const cursor = tree.select('activeTile');
   const bunnies = tree.get('bunnies');
   const previousTile = cursor.get();
@@ -1568,7 +1567,7 @@ export function checkBunnyCollision(character, direction, bypassBunnyCollisionUp
 
   const collisionIds = collisions.map(item => item.id);
 
-  if (!bypassBunnyCollisionUpdate && !_isEqual(heroCollisions.get(), collisionIds)) {
+  if (isHero && !bypassBunnyCollisionUpdate && !_isEqual(heroCollisions.get(), collisionIds)) {
     heroCollisions.set(collisionIds);
   }
 
@@ -1656,19 +1655,22 @@ export function getCollisionMaxValue(currentPosition, direction, character, coll
   return maxValue;
 }
 
-export function updateBunnyGoingToTile(bunnyId) {
+export function updateBunnyGoingToTile(bunnyId, onGroupTile) {
   const bunniesCursor = tree.select('bunnies');
   const bunnies = bunniesCursor.get();
   const bunnyIndex = _findIndex(bunnies, bunny => bunny.id === bunnyId);
 
-  bunniesCursor.set([bunnyIndex, 'goingToTile'], !bunniesCursor.get([bunnyIndex, 'goingToTile']));
+  // If they're already on the tile, set value to false
+  const goingToTile = onGroupTile ? !onGroupTile : !bunniesCursor.get([bunnyIndex, 'goingToTile']);
+
+  bunniesCursor.set([bunnyIndex, 'goingToTile'], goingToTile);
 }
 
-export function takeBunnyToGroupTile(character) {
+export function takeBunnyToGroupTile(character, onGroupTile) {
   const { id, groupTile, groupPosition } = character.props;
   updateBunnyTile(id, groupTile);
   updateCharacterPosition(id, groupPosition);
-  updateBunnyGoingToTile(id);
+  updateBunnyGoingToTile(id, onGroupTile);
 }
 
 /**
@@ -1745,6 +1747,8 @@ export function moveEntityForward(
   const diagonalPercentage = getSquareDiagonalPercentage(movePixels);
   const value = Math.ceil(currentValue + (movePixels * (moveDiagonally ? diagonalPercentage : 1)));
   const maxTile = isOnXAxis ? 'MAX_Y_TILES' : 'MAX_X_TILES';
+  const useX = isOnXAxis ? value : currentX;
+  const useY = isOnXAxis ? currentY : value;
 
   // Character is going beyond the board bounds
   if (value > maxLimit) {
@@ -1757,21 +1761,29 @@ export function moveEntityForward(
         collisions: [],
       };
     } if (!isHero) {
-      // Take AI to next tile and set their position on the new tile
-      takeBunnyToGroupTile(character);
+      const goingToGroupTile = character.state.goToGroupTile;
+      const collisions = goingToGroupTile ? [] : getEntityCollisions(
+        character,
+        useX,
+        useY,
+        direction,
+        goToTargetPosition,
+      );
+      if (character.state.goToGroupTile) {
+        // Take AI to next tile and set their position on the new tile
+        takeBunnyToGroupTile(character);
+      }
 
       // Return the current value so the bunny doesn't continue moving
       // This will also prevent it overriding the new group location being set
       // in the takeBunnyToGroupTile method
       return {
         value: currentValue,
-        collisions: [],
+        collisions,
       };
     }
   }
 
-  const useX = isOnXAxis ? value : currentX;
-  const useY = isOnXAxis ? currentY : value;
   const collisions = getEntityCollisions(character, useX, useY, direction, goToTargetPosition);
   const maxCollisionValue = getCollisionMaxValue(
     { x: useX, y: useY },

@@ -9,6 +9,14 @@ const exits = {
 
 const { left, right, bottom, top } = buildTileBorders(exits, Scenery.Bush);
 
+const foodItems = [];
+
+for (let row = 270; row <= 350; row += 40) {
+  for (let col = 180; col <= 540; col += 60) {
+    foodItems.push({ type: 'AlfalfaHay', position: { x: col, y: row } });
+  }
+}
+
 const Tile = {
   background: [
     ['B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1', 'B1'],
@@ -34,7 +42,13 @@ const Tile = {
     ...bottom,
     // TODO: Add top exit element
   ],
-  food: [],
+  food: foodItems.map((item, index) => (
+    new Food[item.type]({
+      ...item,
+      position: item.position,
+      id: item.id || index + 1,
+    })
+  )),
   x: 9,
   y: 7,
   exits,

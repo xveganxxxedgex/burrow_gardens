@@ -18,29 +18,22 @@ import {
   changeMenuTab,
 } from 'actions';
 
-import bunnyLeftImg from 'images/bunnies/bunny_left.png';
-import bunnyRightImg from 'images/bunnies/bunny_right.png';
-import bunnyUpImg from 'images/bunnies/bunny_up.png';
-import bunnyDownImg from 'images/bunnies/bunny_down.png';
-import bunnyLeftGif from 'images/bunnies/bunny_left_gif.gif';
-import bunnyRightGif from 'images/bunnies/bunny_right_gif.gif';
-import bunnyUpGif from 'images/bunnies/bunny_up_gif.gif';
-import bunnyDownGif from 'images/bunnies/bunny_down_gif.gif';
-import bunnyLoafLeftImg from 'images/bunnies/bunny_left_loaf.png';
-import bunnyLoafRightImg from 'images/bunnies/bunny_right_loaf.png';
-import bunnyLoafUpImg from 'images/bunnies/bunny_up_loaf.png';
-import bunnyLoafDownImg from 'images/bunnies/bunny_down_loaf.png';
-import bunnyFlopLeftImg from 'images/bunnies/bunny_left_flop.png';
-import bunnyFlopRightImg from 'images/bunnies/bunny_right_flop.png';
-import bunnyFlopUpImg from 'images/bunnies/bunny_up_flop.png';
-import bunnyFlopDownImg from 'images/bunnies/bunny_down_flop.png';
-
-// import lopBunnyLeftImg from 'images/bunnies/lop_bunny.png';
-// import lopBunnyUpImg from 'images/bunnies/lop_bunny_up.png';
-// import lopBunnyDownImg from 'images/bunnies/lop_bunny_down.png';
-// import lopBunnyLeftGif from 'images/bunnies/lop_bunny_gif.gif';
-// import lopBunnyUpGif from 'images/bunnies/lop_bunny_up_gif.gif';
-// import lopBunnyDownGif from 'images/bunnies/lop_bunny_down_gif.gif';
+import bunnyLeftImg from 'images/bunnies/Hero/left.png';
+import bunnyRightImg from 'images/bunnies/Hero/right.png';
+import bunnyUpImg from 'images/bunnies/Hero/up.png';
+import bunnyDownImg from 'images/bunnies/Hero/down.png';
+import bunnyLeftGif from 'images/bunnies/Hero/left_gif.gif';
+import bunnyRightGif from 'images/bunnies/Hero/right_gif.gif';
+import bunnyUpGif from 'images/bunnies/Hero/up_gif.gif';
+import bunnyDownGif from 'images/bunnies/Hero/down_gif.gif';
+import bunnyLoafLeftImg from 'images/bunnies/Hero/left_loaf.png';
+import bunnyLoafRightImg from 'images/bunnies/Hero/right_loaf.png';
+import bunnyLoafUpImg from 'images/bunnies/Hero/up_loaf.png';
+import bunnyLoafDownImg from 'images/bunnies/Hero/down_loaf.png';
+import bunnyFlopLeftImg from 'images/bunnies/Hero/left_flop.png';
+import bunnyFlopRightImg from 'images/bunnies/Hero/right_flop.png';
+import bunnyFlopUpImg from 'images/bunnies/Hero/up_flop.png';
+import bunnyFlopDownImg from 'images/bunnies/Hero/down_flop.png';
 
 const KEYBOARD_EVENTS = {
   // Tab key

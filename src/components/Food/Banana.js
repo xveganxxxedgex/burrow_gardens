@@ -1,7 +1,7 @@
 import image from 'images/food/banana.png';
 
 export default class Banana {
-  constructor({ position, id, parentId }) {
+  constructor({ position, id, parentId, needsAbility, flipX }) {
     this.position = position;
     this.height = 25;
     this.width = 19;
@@ -11,6 +11,7 @@ export default class Banana {
     this.id = id;
     this.onParent = !!parentId;
     this.parent = parentId;
-    this.needsAbility = 'stomp';
+    this.needsAbility = needsAbility;
+    this.flipX = flipX;
   }
 }

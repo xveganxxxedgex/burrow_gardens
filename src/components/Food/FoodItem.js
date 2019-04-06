@@ -79,6 +79,10 @@ const StyledFood = styled.div`
   &.hasParent {
     z-index: 4;
   }
+
+  img {
+    ${props => props.flipX ? 'transform: scaleX(-1);' : ''}
+  }
 `;
 
 const FoodItem = (props) => {
@@ -86,6 +90,7 @@ const FoodItem = (props) => {
     type,
     position,
     collected,
+    flipX,
     id,
     height,
     width,
@@ -95,7 +100,7 @@ const FoodItem = (props) => {
     parent,
     onParent,
   } = props;
-  const styleProps = { height, width };
+  const styleProps = { height, width, flipX };
   const onParentItem = onParent && getItemById(parent, 'scenery');
   const shake = onParentItem && onParentItem.shake && !fallTo ? 'shake' : '';
 
@@ -130,13 +135,17 @@ FoodItem.propTypes = {
   type: PropTypes.string,
   position: PropTypes.object,
   collected: PropTypes.bool,
-  id: PropTypes.number,
+  flipX: PropTypes.bool,
+  id: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
   height: PropTypes.number,
   width: PropTypes.number,
   image: PropTypes.string,
   inMenu: PropTypes.bool,
   fallTo: PropTypes.object,
-  parent: PropTypes.object,
+  parent: PropTypes.string,
   onParent: PropTypes.bool,
 };
 
@@ -144,6 +153,7 @@ FoodItem.defaultProps = {
   type: '',
   position: {},
   collected: false,
+  flipX: false,
   id: 0,
   height: 0,
   width: 0,

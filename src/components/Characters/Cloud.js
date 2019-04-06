@@ -1,19 +1,19 @@
-import bunnyLeftImg from 'images/bunnies/bunny_left.png';
-import bunnyRightImg from 'images/bunnies/bunny_right.png';
-import bunnyUpImg from 'images/bunnies/bunny_up.png';
-import bunnyDownImg from 'images/bunnies/bunny_down.png';
-import bunnyLeftGif from 'images/bunnies/bunny_left_gif.gif';
-import bunnyRightGif from 'images/bunnies/bunny_right_gif.gif';
-import bunnyUpGif from 'images/bunnies/bunny_up_gif.gif';
-import bunnyDownGif from 'images/bunnies/bunny_down_gif.gif';
-import bunnyLoafLeftImg from 'images/bunnies/bunny_left_loaf.png';
-import bunnyLoafRightImg from 'images/bunnies/bunny_right_loaf.png';
-import bunnyLoafUpImg from 'images/bunnies/bunny_up_loaf.png';
-import bunnyLoafDownImg from 'images/bunnies/bunny_down_loaf.png';
-import bunnyFlopLeftImg from 'images/bunnies/bunny_left_flop.png';
-import bunnyFlopRightImg from 'images/bunnies/bunny_right_flop.png';
-import bunnyFlopUpImg from 'images/bunnies/bunny_up_flop.png';
-import bunnyFlopDownImg from 'images/bunnies/bunny_down_flop.png';
+import bunnyLeftImg from 'images/bunnies/Cloud/left_1.png';
+import bunnyRightImg from 'images/bunnies/Cloud/right.png';
+import bunnyUpImg from 'images/bunnies/Cloud/up_1.png';
+import bunnyDownImg from 'images/bunnies/Cloud/down_1.png';
+import bunnyLeftGif from 'images/bunnies/Cloud/left_gif.gif';
+import bunnyRightGif from 'images/bunnies/Cloud/right_gif.gif';
+import bunnyUpGif from 'images/bunnies/Cloud/up_gif.gif';
+import bunnyDownGif from 'images/bunnies/Cloud/down_gif.gif';
+import bunnyLoafLeftImg from 'images/bunnies/Cloud/loaf_left.png';
+import bunnyLoafRightImg from 'images/bunnies/Cloud/loaf_right.png';
+import bunnyLoafUpImg from 'images/bunnies/Cloud/loaf_up.png';
+import bunnyLoafDownImg from 'images/bunnies/Cloud/loaf_down.png';
+import bunnyFlopLeftImg from 'images/bunnies/Cloud/flop_left.png';
+import bunnyFlopRightImg from 'images/bunnies/Cloud/flop_right.png';
+import bunnyFlopUpImg from 'images/bunnies/Cloud/flop_up.png';
+import bunnyFlopDownImg from 'images/bunnies/Cloud/flop_down.png';
 import * as constants from './constants';
 
 // TODO: use actual images
@@ -24,13 +24,13 @@ export default class Cloud {
     this.needsAbility = 'groom';
     this.hasCollected = false;
     this.goingToTile = false;
-    this.position = { x: 60, y: 60 };
+    this.position = { x: 300, y: 350 };
     this.onTile = { x: 7, y: 2 };
     this.height = constants.BUNNY_HEIGHT;
     this.width = constants.BUNNY_WIDTH;
     this.id = 3;
-    this.groupTile = { x: 1, y: 2 };
-    this.groupPosition = { x: 900, y: 500 };
+    this.groupTile = { x: 4, y: 6 };
+    this.groupPosition = { x: 900, y: 50 };
     this.bunnyImages = {
       left: bunnyLeftImg,
       right: bunnyRightImg,

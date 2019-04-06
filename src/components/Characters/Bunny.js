@@ -159,6 +159,13 @@ class Bunny extends Component {
         if (this.state.lastDirection !== oppositeHeroDirection) {
           this.setLastDirection(oppositeHeroDirection);
         }
+      } else {
+        const wasColliding = this.checkIfCollidingWithHero(this.props);
+        const isColliding = this.checkIfCollidingWithHero(nextProps);
+        if (!this.checkIfIsHero() && wasColliding && !isColliding) {
+          // Character is no longer colliding with hero, so start moving again
+          this.moveAI();
+        }
       }
     }
   }
@@ -453,7 +460,7 @@ class Bunny extends Component {
     setTimeout(() => {
       // Take character to group tile after the position has updated
       // This is to ensure character doesn't disappear too early
-      takeBunnyToGroupTile(this);
+      takeBunnyToGroupTile(this, true);
       this.stopMovingCharacter(false, true);
     }, MOVEMENT_DURATION);
   }

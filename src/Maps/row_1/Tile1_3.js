@@ -8,6 +8,8 @@ const exits = {
 
 const { left, right, bottom, top } = buildTileBorders(exits, Scenery.Bush);
 
+const shrub1Position = { x: 850, y: 250 };
+const shrub2Position = { x: 850, y: 400 };
 const dividerRight = [];
 const dividerMiddle = [];
 
@@ -44,6 +46,38 @@ const Tile = {
     ...bottom,
     ...dividerRight,
     ...dividerMiddle,
+    new Scenery.Shrub({
+      position: shrub1Position,
+      id: 'shrub_1',
+      produce: [
+        new Food.Blueberry({
+          position: { x: shrub1Position.x + 15, y: shrub1Position.y + 45 },
+          id: 'shrub_1_blueberry_1',
+          parentId: 'shrub_1',
+        }),
+        new Food.Blueberry({
+          position: { x: shrub1Position.x + 50, y: shrub1Position.y + 20 },
+          id: 'shrub_1_blueberry_2',
+          parentId: 'shrub_1',
+        }),
+      ],
+    }),
+    new Scenery.Shrub({
+      position: shrub2Position,
+      id: 'shrub_2',
+      produce: [
+        new Food.Blueberry({
+          position: { x: shrub2Position.x + 15, y: shrub2Position.y + 45 },
+          id: 'shrub_2_blueberry_1',
+          parentId: 'shrub_2',
+        }),
+        new Food.Blueberry({
+          position: { x: shrub2Position.x + 50, y: shrub2Position.y + 20 },
+          id: 'shrub_2_blueberry_2',
+          parentId: 'shrub_2',
+        }),
+      ],
+    }),
   ],
   food: [],
   x: 1,

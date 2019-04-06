@@ -170,7 +170,10 @@ SceneryItem.propTypes = {
   height: PropTypes.number,
   width: PropTypes.number,
   image: PropTypes.string,
-  index: PropTypes.number,
+  index: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
   shake: PropTypes.bool,
 };
 

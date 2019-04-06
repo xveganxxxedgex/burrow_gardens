@@ -1,4 +1,12 @@
+export { default as Adrian } from 'components/Characters/Adrian';
+export { default as Alice } from 'components/Characters/Alice';
 export { default as Cloud } from 'components/Characters/Cloud';
+export { default as Cookie } from 'components/Characters/Cookie';
+export { default as Davey } from 'components/Characters/Davey';
+export { default as Elise } from 'components/Characters/Elise';
+export { default as Lacey } from 'components/Characters/Lacey';
 export { default as November } from 'components/Characters/November';
+export { default as Sebastian } from 'components/Characters/Sebastian';
 export { default as Simba } from 'components/Characters/Simba';
 export { default as Spencer } from 'components/Characters/Spencer';
+export { default as Yuki } from 'components/Characters/Yuki';

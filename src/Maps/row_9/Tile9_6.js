@@ -1,4 +1,3 @@
-import * as Food from 'components/Food';
 import * as Scenery from 'components/Scenery';
 import { buildTileBorders } from 'actions';
 

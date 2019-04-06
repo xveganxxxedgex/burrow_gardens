@@ -9,5 +9,6 @@ export default class Broccoli {
     this.collected = false;
     this.image = image;
     this.id = id;
+    this.needsAbility = 'dig';
   }
 }

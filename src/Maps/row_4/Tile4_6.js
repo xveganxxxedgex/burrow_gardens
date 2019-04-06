@@ -9,6 +9,13 @@ const exits = {
 };
 
 const { left, right, bottom, top } = buildTileBorders(exits, Scenery.Bush);
+const foodItems = [];
+
+for (let y = 300; y <= 500; y += 200) {
+  for (let x = 0; x <= 200; x += 50) {
+    foodItems.push({ type: 'TimothyHay', position: { x, y } });
+  }
+}
 
 const Tile = {
   background: [
@@ -34,7 +41,13 @@ const Tile = {
     ...top,
     ...bottom,
   ],
-  food: [],
+  food: foodItems.map((item, index) => (
+    new Food[item.type]({
+      ...item,
+      position: item.position,
+      id: item.id || index + 1,
+    })
+  )),
   x: 4,
   y: 6,
   exits,

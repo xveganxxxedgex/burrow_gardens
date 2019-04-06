@@ -1,7 +1,7 @@
 import image from 'images/food/papaya.png';
 
 export default class Papaya {
-  constructor({ position, id, parentId }) {
+  constructor({ position, id, parentId, flipX }) {
     this.position = position;
     this.height = 15;
     this.width = 20;
@@ -12,5 +12,6 @@ export default class Papaya {
     this.onParent = !!parentId;
     this.parent = parentId;
     this.needsAbility = 'stomp';
+    this.flipX = flipX;
   }
 }
