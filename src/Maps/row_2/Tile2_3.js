@@ -4,6 +4,7 @@ import { buildTileBorders } from 'actions';
 
 const exits = {
   bottom: { start: 40, end: 680 },
+  top: { start: 1040, end: 1120 },
 };
 
 const { left, right, bottom, top } = buildTileBorders(exits, Scenery.Bush);
