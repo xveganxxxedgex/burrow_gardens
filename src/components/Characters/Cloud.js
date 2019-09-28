@@ -14,9 +14,9 @@ import bunnyFlopLeftImg from 'images/bunnies/Cloud/flop_left.png';
 import bunnyFlopRightImg from 'images/bunnies/Cloud/flop_right.png';
 import bunnyFlopUpImg from 'images/bunnies/Cloud/flop_up.png';
 import bunnyFlopDownImg from 'images/bunnies/Cloud/flop_down.png';
+import bunnyCloseUpImg from 'images/bunnies/Cloud/close_up.png';
 import * as constants from './constants';
 
-// TODO: use actual images
 export default class Cloud {
   constructor() {
     this.name = 'Cloud';
@@ -48,6 +48,7 @@ export default class Cloud {
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
       flopDown: bunnyFlopDownImg,
+      closeup: bunnyCloseUpImg,
     };
   }
 }

@@ -14,7 +14,7 @@ import bunnyFlopLeftImg from 'images/bunnies/Simba/flop_left.png';
 import bunnyFlopRightImg from 'images/bunnies/Simba/flop_right.png';
 import bunnyFlopUpImg from 'images/bunnies/Simba/flop_up.png';
 import bunnyFlopDownImg from 'images/bunnies/Simba/flop_down.png';
-import bunnyCloseUpImg from 'images/bunnies/bunny_close_1.png'; // TODO: Use correct image for Simba
+import bunnyCloseUpImg from 'images/bunnies/Simba/close_up.png';
 import * as constants from './constants';
 
 export default class Simba {

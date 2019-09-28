@@ -14,6 +14,7 @@ import bunnyFlopLeftImg from 'images/bunnies/Cookie/flop_left.png';
 import bunnyFlopRightImg from 'images/bunnies/Cookie/flop_right.png';
 import bunnyFlopUpImg from 'images/bunnies/Cookie/flop_up.png';
 import bunnyFlopDownImg from 'images/bunnies/Cookie/flop_down.png';
+import bunnyCloseUpImg from 'images/bunnies/Cookie/close_up.png';
 import * as constants from './constants';
 
 export default class Cookie {
@@ -45,6 +46,7 @@ export default class Cookie {
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
       flopDown: bunnyFlopDownImg,
+      closeup: bunnyCloseUpImg,
     };
   }
 }

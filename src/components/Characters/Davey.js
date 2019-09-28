@@ -14,6 +14,7 @@ import bunnyFlopLeftImg from 'images/bunnies/Davey/flop_left.png';
 import bunnyFlopRightImg from 'images/bunnies/Davey/flop_right.png';
 import bunnyFlopUpImg from 'images/bunnies/Davey/flop_up.png';
 import bunnyFlopDownImg from 'images/bunnies/Davey/flop_down.png';
+import bunnyCloseUpImg from 'images/bunnies/Davey/close_up.png';
 import * as constants from './constants';
 
 export default class Davey {
@@ -46,6 +47,7 @@ export default class Davey {
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
       flopDown: bunnyFlopDownImg,
+      closeup: bunnyCloseUpImg,
     };
   }
 }

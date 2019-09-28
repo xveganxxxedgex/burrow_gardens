@@ -14,6 +14,7 @@ import bunnyFlopLeftImg from 'images/bunnies/Adrian/flop_left.png';
 import bunnyFlopRightImg from 'images/bunnies/Adrian/flop_right.png';
 import bunnyFlopUpImg from 'images/bunnies/Adrian/flop_up.png';
 import bunnyFlopDownImg from 'images/bunnies/Adrian/flop_down.png';
+import bunnyCloseUpImg from 'images/bunnies/Adrian/close_up.png';
 import * as constants from './constants';
 
 export default class Adrian {
@@ -45,6 +46,7 @@ export default class Adrian {
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
       flopDown: bunnyFlopDownImg,
+      closeup: bunnyCloseUpImg,
     };
   }
 }

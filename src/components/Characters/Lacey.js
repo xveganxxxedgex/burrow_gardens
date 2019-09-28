@@ -14,6 +14,7 @@ import bunnyFlopLeftImg from 'images/bunnies/Lacey/flop_left.png';
 import bunnyFlopRightImg from 'images/bunnies/Lacey/flop_right.png';
 import bunnyFlopUpImg from 'images/bunnies/Lacey/flop_up.png';
 import bunnyFlopDownImg from 'images/bunnies/Lacey/flop_down.png';
+import bunnyCloseUpImg from 'images/bunnies/Lacey/close_up.png';
 import * as constants from './constants';
 
 export default class Lacey {
@@ -45,6 +46,7 @@ export default class Lacey {
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
       flopDown: bunnyFlopDownImg,
+      closeup: bunnyCloseUpImg,
     };
   }
 }

@@ -14,9 +14,9 @@ import bunnyFlopLeftImg from 'images/bunnies/Alice/flop_left.png';
 import bunnyFlopRightImg from 'images/bunnies/Alice/flop_right.png';
 import bunnyFlopUpImg from 'images/bunnies/Alice/flop_up.png';
 import bunnyFlopDownImg from 'images/bunnies/Alice/flop_down.png';
+import bunnyCloseUpImg from 'images/bunnies/Alice/close_up.png';
 import * as constants from './constants';
 
-// TODO: use actual images
 export default class Alice {
   constructor() {
     this.name = 'Alice';
@@ -47,6 +47,7 @@ export default class Alice {
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
       flopDown: bunnyFlopDownImg,
+      closeup: bunnyCloseUpImg,
     };
   }
 }

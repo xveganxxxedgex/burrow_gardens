@@ -14,9 +14,9 @@ import bunnyFlopLeftImg from 'images/bunnies/Elise/flop_left.png';
 import bunnyFlopRightImg from 'images/bunnies/Elise/flop_right.png';
 import bunnyFlopUpImg from 'images/bunnies/Elise/flop_up.png';
 import bunnyFlopDownImg from 'images/bunnies/Elise/flop_down.png';
+import bunnyCloseUpImg from 'images/bunnies/Elise/close_up.png';
 import * as constants from './constants';
 
-// TODO: use actual images
 export default class Elise {
   constructor() {
     this.name = 'Elise';
@@ -47,6 +47,7 @@ export default class Elise {
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
       flopDown: bunnyFlopDownImg,
+      closeup: bunnyCloseUpImg,
     };
   }
 }
