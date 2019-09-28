@@ -120,6 +120,8 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Create character art~~
 
+~~Create characters~~
+
 Finalize produce placement on tiles
 
 Add art for various plant leaves, vines, trees, dirt mounds, etc
@@ -147,8 +149,6 @@ Create tile(s) for inside the house
 Create art and objects with collision for inside the house
 
 Add unit tests
-
-Create characters
 
 Maybe have alt state for food items for buried items so the entity doesn't go away, but it shows like an empty patch where the produce was
 

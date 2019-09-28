@@ -1,6 +1,7 @@
 import React from 'react';
 import tree from 'state';
 import { Howl } from 'howler';
+import moment from 'moment';
 import _capitalize from 'lodash/capitalize';
 import _filter from 'lodash/filter';
 import _find from 'lodash/find';
@@ -11,6 +12,7 @@ import _isEqual from 'lodash/isEqual';
 import _max from 'lodash/max';
 import _min from 'lodash/min';
 import _minBy from 'lodash/minBy';
+import _pick from 'lodash/pick';
 import _random from 'lodash/random';
 import _union from 'lodash/union';
 import { findDOMNode } from 'react-dom';
@@ -457,30 +459,22 @@ export function getClosestEmptyPosition(item, includeBunnies) {
  * @param {Number} x - The new tile X coordinate
  * @param {Number} y - The new tile Y coordinate
  */
-export function setActiveTile(x = 4, y = 3) {
+export function setActiveTile(x, y) {
   const cursor = tree.select('activeTile');
   const bunnies = tree.get('bunnies');
   const previousTile = cursor.get();
-  const itemQueue = tree.select('itemQueue');
+  let newTile = { x, y };
 
-  // Set new tile immediately so player doesn't have to wait for the logic below to finish
-  cursor.set({ x, y });
-  tree.commit();
-
-  if (itemQueue.get().length) {
-    // If we have an item queue for the now previous tile, set their
-    // hasCollected status to false so they repopulate when the tile is next rendered
-    _forEach(itemQueue.get(), (itemId) => {
-      const itemCursor = getItemCursor('food', itemId, previousTile);
-      itemCursor.set('collected', false);
-    });
-
-    // Clear the queue
-    itemQueue.set([]);
+  if (!x && !y) {
+    newTile = cursor.get();
   }
 
+  // Set new tile immediately so player doesn't have to wait for the logic below to finish
+  cursor.set(newTile);
+  tree.commit();
+
   const bunniesOnTile = _filter(bunnies, (bunny) => {
-    return bunny.onTile.x === x && bunny.onTile.y === y;
+    return bunny.onTile.x === newTile.x && bunny.onTile.y === newTile.y;
   });
 
   if (bunniesOnTile.length) {
@@ -1082,7 +1076,7 @@ export function collectItem(type, itemId) {
   );
   const itemCursor = getItemCursor(type, itemId);
 
-  itemCursor.set('collected', true);
+  itemCursor.merge({ collected: true, lastCollected: moment().unix() });
 
   // Item has a parent where it's original location was. Put the item back
   // where it started on it's parent
@@ -1105,24 +1099,11 @@ export function collectItem(type, itemId) {
     text: `You picked up: ${itemDisplay}`,
     popoverClass: 'info',
   });
+}
 
-  // Repopulate items every three minutes
-  const repopulateTimeout = 3 * 60 * 1000;
-
-  // Repopulate item after the repopulate timeout
-  setTimeout(() => {
-    const currentTile = tree.get('tile');
-    const stillOnSameTile = _isEqual([currentTile.x, currentTile.y], [activeTile.x, activeTile.y]);
-
-    if (stillOnSameTile) {
-      // If tile is still active, add to queue to repopulate when the tile changes
-      const queueCursor = tree.select('itemQueue');
-      queueCursor.push(itemId);
-    } else {
-      // If tile is not still active, repopulate the item
-      itemCursor.set('collected', false);
-    }
-  }, repopulateTimeout);
+export function repopulateItem(id, type) {
+  const itemCursor = getItemCursor(type, id);
+  itemCursor.set('collected', false);
 }
 
 /**
@@ -1901,6 +1882,34 @@ export function removeBunnyCollisionWithHero(bunnyId) {
   if (bunnyIndex > -1) {
     heroCollisions.splice([bunnyIndex, 1]);
   }
+}
+
+export function saveGame() {
+  const bunnies = tree.get('bunnies');
+  const bunniesInTransit = bunnies.filter(bunny => bunny.goingToTile);
+
+  // Take all actively moving bunnies to their destination tile
+  if (bunniesInTransit.length) {
+    bunniesInTransit.forEach(bunny => {
+      takeBunnyToGroupTile({ props: bunny });
+    })
+  }
+
+  const gameState = tree.get();
+  const keepKeys = [
+    'hero',
+    'heroCollisions',
+    'produceList',
+    'showMenu',
+    'gameStarted',
+    'activeTile',
+    'audioSettings',
+    'bunnies',
+    'tiles'
+  ];
+  const keepState = { ..._pick(gameState, keepKeys) };
+
+  localStorage.setItem('savedGame', btoa(JSON.stringify(keepState)));
 }
 
 /**

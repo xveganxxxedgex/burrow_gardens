@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled, { keyframes } from 'styled-components';
+import moment from 'moment';
 
 import { SHAKE_DURATION, FALL_DURATION } from 'components/constants';
-import { getItemById } from 'actions';
+import { getItemById, repopulateItem } from 'actions';
 
 import 'less/Food.less';
 
@@ -85,49 +86,66 @@ const StyledFood = styled.div`
   }
 `;
 
-const FoodItem = (props) => {
-  const {
-    type,
-    position,
-    collected,
-    flipX,
-    id,
-    height,
-    width,
-    image,
-    inMenu,
-    fallTo,
-    parent,
-    onParent,
-  } = props;
-  const styleProps = { height, width, flipX };
-  const onParentItem = onParent && getItemById(parent, 'scenery');
-  const shake = onParentItem && onParentItem.shake && !fallTo ? 'shake' : '';
+class FoodItem extends Component {
+  constructor(props) {
+    super(props);
 
-  if (!inMenu) {
-    styleProps.top = position.y;
-    styleProps.left = position.x;
+    const { collected, lastCollected, id } = props;
+
+    if (collected && lastCollected) {
+      const canRepopulate = moment().isAfter(moment.unix(lastCollected).add(20, 'seconds'));
+
+      if (canRepopulate) {
+        repopulateItem(id, 'food');
+      }
+    }
   }
 
-  if (fallTo) {
-    styleProps.fallToX = fallTo.x;
-    styleProps.fallToY = fallTo.y;
-    styleProps.fallLeft = fallTo.x < position.x;
-  }
+  render() {
+    const {
+      type,
+      position,
+      collected,
+      flipX,
+      id,
+      height,
+      width,
+      image,
+      inMenu,
+      fallTo,
+      parent,
+      onParent,
+      lastCollected,
+    } = this.props;
+    const styleProps = { height, width, flipX };
+    const onParentItem = onParent && getItemById(parent, 'scenery');
+    const shake = onParentItem && onParentItem.shake && !fallTo ? 'shake' : '';
 
-  if (!inMenu && collected) {
-    return <span />;
-  }
+    if (!inMenu) {
+      styleProps.top = position.y;
+      styleProps.left = position.x;
+    }
 
-  return (
-    <StyledFood
-      className={`food ${type} food_index_${id} ${fallTo ? 'fallTo' : ''} ${shake} ${parent ? 'hasParent' : ''}`}
-      {...styleProps}
-    >
-      <img src={image} alt="Food" />
-    </StyledFood>
-  );
-};
+    if (fallTo) {
+      styleProps.fallToX = fallTo.x;
+      styleProps.fallToY = fallTo.y;
+      styleProps.fallLeft = fallTo.x < position.x;
+    }
+
+    if (collected && !inMenu) {
+      return <span />;
+    }
+
+    return (
+      <StyledFood
+        className={`food ${type} food_index_${id} ${fallTo ? 'fallTo' : ''} ${shake} ${parent ? 'hasParent' : ''}`}
+        {...styleProps}
+      >
+        <img src={image} alt="Food" />
+      </StyledFood>
+    );
+  }
+}
 
 export default FoodItem;
 

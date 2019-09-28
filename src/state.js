@@ -66,89 +66,130 @@ const fruits = [
 
 const foodItems = vegetables.concat(fruits);
 
-const state = new Baobab({
+const skills = [
+  {
+    name: 'dig',
+    description: 'You can use the Dig skill anywhere you see burrow holes, or buried produce. This will grant you access to new places and allow you to obtain new produce items.',
+  },
+  {
+    name: 'nudge',
+    description: 'You can use the Nudge skill to become friends with more submissive bunnies.',
+  },
+  {
+    name: 'binky',
+    description: 'You can use the Binky skill to win over sad buns and get them to become your friend.',
+  },
+  {
+    name: 'groom',
+    description: 'You can use the Groom skill to become friends with more dominant bunnies.',
+  },
+  {
+    name: 'stomp',
+    description: 'You can use the Stomp skill to shake produce off of certain trees or shrubs.',
+  },
+  {
+    name: 'zoom',
+    description: 'You can use the Zoom skill to rush past scary or questionable areas, which will allow you to explore new areas.',
+  },
+  {
+    name: 'jump',
+    description: 'You can use the Jump skill to get across gaps to unlock new areas to explore.',
+  },
+];
+
+const soundEffects = {
+  treeShake: TreeShake,
+  stomp: Stomp,
+  itemDrop: ItemDrop,
+  fall: Fall,
+  rustle: Rustle,
+  pickUp: PickUp,
+  dig: Dig,
+  squeak: Squeak,
+};
+
+const backgrounds = {
+  B0: 'Dirt',
+  B1: 'Grass',
+  B2: 'Grass2',
+  B3: 'Mud',
+};
+
+const bunnies = [
+  new Bunnies.Adrian(),
+  new Bunnies.Alice(),
+  new Bunnies.Cloud(),
+  new Bunnies.Cookie(),
+  new Bunnies.Davey(),
+  new Bunnies.Elise(),
+  new Bunnies.Lacey(),
+  new Bunnies.November(),
+  new Bunnies.Sebastian(),
+  new Bunnies.Simba(),
+  new Bunnies.Spencer(),
+  new Bunnies.Yuki(),
+];
+
+const defaultState = {
   hero: {
     position: { x: 700, y: 380 },
     height: 40,
     width: 40,
     lastDirection: 'right',
     disableMove: false,
-    abilities: monkey({
-      cursors: {
-        bunnies: ['bunnies'],
-      },
-      get({ bunnies }) {
-        const abilities = [];
-        _forEach(bunnies, (bunny) => {
-          if (bunny.hasCollected && bunny.giveSkill) {
-            abilities.push(bunny.giveSkill);
-          }
-        });
-
-        return abilities;
-      },
-    }),
   },
   heroCollisions: [],
-  skills: [
-    {
-      name: 'dig',
-      description: 'You can use the Dig skill anywhere you see burrow holes, or buried produce. This will grant you access to new places and allow you to obtain new produce items.',
-    },
-    {
-      name: 'nudge',
-      description: 'You can use the Nudge skill to become friends with more submissive bunnies.',
-    },
-    {
-      name: 'binky',
-      description: 'You can use the Binky skill to win over sad buns and get them to become your friend.',
-    },
-    {
-      name: 'groom',
-      description: 'You can use the Groom skill to become friends with more dominant bunnies.',
-    },
-    {
-      name: 'stomp',
-      description: 'You can use the Stomp skill to shake produce off of certain trees or shrubs.',
-    },
-    {
-      name: 'zoom',
-      description: 'You can use the Zoom skill to rush past scary or questionable areas, which will allow you to explore new areas.',
-    },
-    {
-      name: 'jump',
-      description: 'You can use the Jump skill to get across gaps to unlock new areas to explore.',
-    },
-  ],
+  skills,
   produceList: foodItems.map((foodItem) => {
     return {
       name: foodItem.replace(/ /g, ''),
       display: foodItem,
       count: 0,
       hasCollected: false,
+      lastCollected: null,
     };
   }),
-  bunnies: [
-    new Bunnies.Adrian(),
-    new Bunnies.Alice(),
-    new Bunnies.Cloud(),
-    new Bunnies.Cookie(),
-    new Bunnies.Davey(),
-    new Bunnies.Elise(),
-    new Bunnies.Lacey(),
-    new Bunnies.November(),
-    new Bunnies.Sebastian(),
-    new Bunnies.Simba(),
-    new Bunnies.Spencer(),
-    new Bunnies.Yuki(),
-  ],
-  itemQueue: [],
+  bunnies,
   movePixels: 20,
   popover: null,
   showMenu: true,
   gameStarted: false,
   activeTab: 1,
   tiles,
+  activeTile: { x: 6, y: 4 },
+  boardDimensions: {},
+  backgrounds,
+  gameVisible: true,
+  audioSettings: {
+    effects: {
+      volume: 1.0,
+      muted: false,
+    },
+    background: {
+      volume: 1.0,
+      muted: false,
+    },
+  },
+  soundEffects,
+};
+
+const heroAbilities = monkey({
+  cursors: {
+    bunnies: ['bunnies'],
+  },
+  get({ bunnies }) {
+    const abilities = [];
+    _forEach(bunnies, (bunny) => {
+      if (bunny.hasCollected && bunny.giveSkill) {
+        abilities.push(bunny.giveSkill);
+      }
+    });
+
+    return abilities;
+  },
+});
+
+const monkeys = {
   tile: monkey({
     cursors: {
       activeTile: ['activeTile'],
@@ -196,35 +237,13 @@ const state = new Baobab({
       );
     },
   }),
-  activeTile: { x: 1, y: 1 },
-  boardDimensions: {},
-  backgrounds: {
-    B0: 'Dirt',
-    B1: 'Grass',
-    B2: 'Grass2',
-    B3: 'Mud',
-  },
-  gameVisible: true,
-  audioSettings: {
-    effects: {
-      volume: 1.0,
-      muted: false,
-    },
-    background: {
-      volume: 1.0,
-      muted: false,
-    },
-  },
-  soundEffects: {
-    treeShake: TreeShake,
-    stomp: Stomp,
-    itemDrop: ItemDrop,
-    fall: Fall,
-    rustle: Rustle,
-    pickUp: PickUp,
-    dig: Dig,
-    squeak: Squeak,
-  },
-});
+};
+
+const savedGame = localStorage.getItem('savedGame');
+const parsed = savedGame ? JSON.parse(atob(savedGame)) : {};
+const stateData = { ...defaultState, ...parsed, ...monkeys };
+stateData.hero.abilities = heroAbilities;
+
+const state = new Baobab(stateData);
 
 export default state;

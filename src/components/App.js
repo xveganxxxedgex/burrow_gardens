@@ -4,7 +4,7 @@ import { root } from 'baobab-react/higher-order';
 import Board from 'components/Board';
 
 import tree from 'state';
-import { toggleGameVisibility } from 'actions';
+import { toggleGameVisibility, saveGame } from 'actions';
 
 import 'less/App.less';
 
@@ -12,6 +12,7 @@ import 'less/App.less';
 export default class App extends Component {
   componentDidMount() {
     window.addEventListener('visibilitychange', toggleGameVisibility, false);
+    window.addEventListener('beforeunload', saveGame);
   }
 
   componentWillUnmount() {

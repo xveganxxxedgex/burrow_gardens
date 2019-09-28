@@ -20,13 +20,13 @@ class FoodWrapper extends Component {
   }
 
   render() {
-    const { foodOnTile } = this.props;
+    const { foodOnTile, tile } = this.props;
 
     return (
       <div className="food-wrapper">
         {foodOnTile.map((item) => {
           return (
-            <FoodItem {...item} key={`food-${item.id}`} />
+            <FoodItem {...item} key={`food-${tile.x}_${tile.y}_${item.id}`} />
           );
         })}
       </div>
