@@ -46,6 +46,12 @@ export function changeMenuTab(activeTab) {
   tree.set('activeMenuTab', newTab);
 }
 
+export function toggleAllowSaving() {
+  const allowSaving = !tree.get('allowSaving');
+  tree.set('allowSaving', allowSaving);
+  localStorage.setItem('allowSaving', JSON.stringify(allowSaving));
+}
+
 export function toggleAudioMuted() {
   const backgroundMuted = tree.get(['audioSettings', 'background', 'muted']);
   const effectsMuted = tree.get(['audioSettings', 'effects', 'muted']);
@@ -1886,7 +1892,12 @@ export function removeBunnyCollisionWithHero(bunnyId) {
 
 export function saveGame() {
   const bunnies = tree.get('bunnies');
+  const allowSaving = tree.get('allowSaving');
   const bunniesInTransit = bunnies.filter(bunny => bunny.goingToTile);
+
+  if (!allowSaving) {
+    return;
+  }
 
   // Take all actively moving bunnies to their destination tile
   if (bunniesInTransit.length) {
@@ -1905,7 +1916,8 @@ export function saveGame() {
     'activeTile',
     'audioSettings',
     'bunnies',
-    'tiles'
+    'tiles',
+    'allowSaving'
   ];
   const keepState = { ..._pick(gameState, keepKeys) };
 

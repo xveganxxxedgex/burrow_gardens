@@ -5,7 +5,6 @@ import _orderBy from 'lodash/orderBy';
 
 const Bunnies = ({ bunnies }) => {
   const bunnyElements = _orderBy(bunnies, ['hasCollected', 'name'], ['desc', 'asc']).map((bunny) => {
-    // TODO: use actual bunny images
     return (
       <div key={`bunny_${bunny.name}`} className={`inventory-item-cell grid-cell ${bunny.hasCollected ? '' : 'disabled'}`}>
         <div className="inventory-item-cell-content flex flex-grow">

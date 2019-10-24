@@ -122,15 +122,19 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 ~~Create characters~~
 
+~~Create game state storage~~
+
+~~Maybe save state to session using store.js to let players continue~~
+
+~~Create character close up art~~
+
 Finalize produce placement on tiles
 
-Add art for various plant leaves, vines, trees, dirt mounds, etc
+Add art for various plant leaves, vines, trees, dirt mounds, tombstones, etc
 
 Add art/items for other scenery items like flowers, bridges, leaves, stumps, shrubs, etc
 
-Add various backgrounds like different grass, water, mud, rocks, etc
-
-Create character close up art
+Add various backgrounds like different grass, water, mud, rocks, cemetery, etc
 
 Maybe have some bunnies only join if you bring them a certain number of produce items
 
@@ -152,8 +156,4 @@ Add unit tests
 
 Maybe have alt state for food items for buried items so the entity doesn't go away, but it shows like an empty patch where the produce was
 
-Create game state storage
-
 Pause game state when browser is idle (see TODOs in code)
-
-Maybe save state to session using store.js to let players continue

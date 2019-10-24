@@ -18,6 +18,7 @@ import { changeMenuTab } from 'actions';
   allSkills: ['skills'],
   heroSkills: ['hero', 'abilities'],
   audioSettings: ['audioSettings'],
+  allowSaving: ['allowSaving']
 })
 class MenuTabs extends Component {
   static getWonGameContent() {
@@ -66,6 +67,7 @@ class MenuTabs extends Component {
       allSkills,
       heroSkills,
       audioSettings,
+      allowSaving,
     } = this.props;
 
     return (
@@ -84,7 +86,7 @@ class MenuTabs extends Component {
             <Skills allSkills={allSkills} heroSkills={heroSkills} />
           </Tab>
           <Tab eventKey={5} title="Settings">
-            <Settings audioSettings={audioSettings} />
+            <Settings audioSettings={audioSettings} allowSaving={allowSaving} />
           </Tab>
         </Tabs>
       </div>

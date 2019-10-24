@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Checkbox } from 'react-bootstrap';
 import styled from 'styled-components';
 
-import { setAudioVolume, toggleAudioTypeMute, toggleAudioMuted } from 'actions';
+import { setAudioVolume, toggleAudioTypeMute, toggleAudioMuted, toggleAllowSaving } from 'actions';
 
 const SettingsHeader = styled('h4')`
   display: flex;
@@ -31,6 +31,9 @@ const AudioSection = styled('div')`
 `;
 
 const SettingsWrapper = styled('div')`
+`;
+
+const AudioWrapper = styled('div')`
   display: flex;
   flex-wrap: wrap;
 `;
@@ -49,59 +52,73 @@ class Settings extends Component {
   }
 
   render() {
-    const { audioSettings: { background, effects } } = this.props;
+    const { audioSettings: { background, effects }, allowSaving } = this.props;
     return (
       <SettingsWrapper>
-        <MuteAllSection>
-          <SettingsHeader>
-            <span>Mute All</span>
-            <StyledCheckbox
-              checked={effects.muted && background.muted}
-              name="allAudio"
-              onChange={toggleAudioMuted}
+        <div>
+          <h1>General</h1>
+            <SettingsHeader>
+              <StyledCheckbox
+                checked={allowSaving}
+                name="allowSaving"
+                onChange={toggleAllowSaving}
+              />
+              <span>Save game on close</span>
+            </SettingsHeader>
+        </div>
+        <AudioWrapper>
+          <h1>Audio</h1>
+          <MuteAllSection>
+            <SettingsHeader>
+              <span>Mute All</span>
+              <StyledCheckbox
+                checked={effects.muted && background.muted}
+                name="allAudio"
+                onChange={toggleAudioMuted}
+              />
+            </SettingsHeader>
+          </MuteAllSection>
+          <AudioSection>
+            <SettingsHeader>
+              <span>Sound Effects</span>
+              <StyledCheckbox
+                checked={!effects.muted}
+                name="effects"
+                onChange={this.toggleAudio('effects')}
+              />
+            </SettingsHeader>
+            <strong>Volume:</strong>
+            <VolumeSlider
+              type="range"
+              value={effects.volume}
+              min={0.0}
+              max={1.0}
+              step={0.1}
+              disabled={effects.muted}
+              onChange={this.changeAudioSetting('effects')}
             />
-          </SettingsHeader>
-        </MuteAllSection>
-        <AudioSection>
-          <SettingsHeader>
-            <span>Sound Effects</span>
-            <StyledCheckbox
-              checked={effects.muted}
-              name="effects"
-              onChange={this.toggleAudio('effects')}
+          </AudioSection>
+          <AudioSection>
+            <SettingsHeader>
+              <span>Background Music</span>
+              <StyledCheckbox
+                checked={!background.muted}
+                name="background"
+                onChange={this.toggleAudio('background')}
+              />
+            </SettingsHeader>
+            <strong>Volume:</strong>
+            <VolumeSlider
+              type="range"
+              value={background.volume}
+              min={0.0}
+              max={1.0}
+              step={0.1}
+              disabled={background.muted}
+              onChange={this.changeAudioSetting('background')}
             />
-          </SettingsHeader>
-          <strong>Volume:</strong>
-          <VolumeSlider
-            type="range"
-            value={effects.volume}
-            min={0.0}
-            max={1.0}
-            step={0.1}
-            disabled={effects.muted}
-            onChange={this.changeAudioSetting('effects')}
-          />
-        </AudioSection>
-        <AudioSection>
-          <SettingsHeader>
-            <span>Background Music</span>
-            <StyledCheckbox
-              checked={background.muted}
-              name="background"
-              onChange={this.toggleAudio('background')}
-            />
-          </SettingsHeader>
-          <strong>Volume:</strong>
-          <VolumeSlider
-            type="range"
-            value={background.volume}
-            min={0.0}
-            max={1.0}
-            step={0.1}
-            disabled={background.muted}
-            onChange={this.changeAudioSetting('background')}
-          />
-        </AudioSection>
+          </AudioSection>
+        </AudioWrapper>
       </SettingsWrapper>
     );
   }

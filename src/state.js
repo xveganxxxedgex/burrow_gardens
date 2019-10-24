@@ -130,6 +130,14 @@ const bunnies = [
   new Bunnies.Yuki(),
 ];
 
+// If localStorage did not have a value, set it now
+if (!localStorage.getItem('allowSaving')) {
+  localStorage.setItem('allowSaving', 'true');
+}
+
+const canSave = localStorage.getItem('allowSaving');
+const allowSaving = canSave === 'true';
+
 const defaultState = {
   hero: {
     position: { x: 700, y: 380 },
@@ -155,8 +163,9 @@ const defaultState = {
   showMenu: true,
   gameStarted: false,
   activeTab: 1,
+  allowSaving,
   tiles,
-  activeTile: { x: 6, y: 4 },
+  activeTile: { x: 4, y: 3 },
   boardDimensions: {},
   backgrounds,
   gameVisible: true,
@@ -240,7 +249,7 @@ const monkeys = {
 };
 
 const savedGame = localStorage.getItem('savedGame');
-const parsed = savedGame ? JSON.parse(atob(savedGame)) : {};
+const parsed = allowSaving && savedGame ? JSON.parse(atob(savedGame)) : {};
 const stateData = { ...defaultState, ...parsed, ...monkeys };
 stateData.hero.abilities = heroAbilities;
 

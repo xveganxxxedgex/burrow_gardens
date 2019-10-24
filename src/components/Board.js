@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { branch } from 'baobab-react/higher-order';
 import { Popover } from 'react-bootstrap';
+import _debounce from 'lodash/debounce';
 
 import Hero from 'components/Characters/Hero';
 import MenuModal from 'components/MenuModal';
@@ -29,7 +30,7 @@ class Board extends Component {
   constructor(props, context) {
     super(props, context);
 
-    this.getBoardBounds = this.getBoardBounds.bind(this);
+    this.getBoardBounds = _debounce(this.getBoardBounds.bind(this), 500);
   }
 
   componentWillMount() {
@@ -54,9 +55,7 @@ class Board extends Component {
   }
 
   getBoardBounds() {
-    setTimeout(() => {
-      setBoardDimensions(this.board);
-    }, 1);
+    setBoardDimensions(this.board);
   }
 
   render() {

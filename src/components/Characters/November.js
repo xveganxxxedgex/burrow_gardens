@@ -14,9 +14,9 @@ import bunnyFlopLeftImg from 'images/bunnies/November/flop_left.png';
 import bunnyFlopRightImg from 'images/bunnies/November/flop_right.png';
 import bunnyFlopUpImg from 'images/bunnies/November/flop_up.png';
 import bunnyFlopDownImg from 'images/bunnies/November/flop_down.png';
+import bunnyCloseUpImg from 'images/bunnies/November/close_up.png';
 import * as constants from './constants';
 
-// TODO: use actual images
 export default class November {
   constructor() {
     this.name = 'November';
@@ -47,6 +47,7 @@ export default class November {
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
       flopDown: bunnyFlopDownImg,
+      closeup: bunnyCloseUpImg,
     };
   }
 }

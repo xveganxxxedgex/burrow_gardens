@@ -14,9 +14,9 @@ import bunnyFlopLeftImg from 'images/bunnies/Spencer/flop_left.png';
 import bunnyFlopRightImg from 'images/bunnies/Spencer/flop_right.png';
 import bunnyFlopUpImg from 'images/bunnies/Spencer/flop_up.png';
 import bunnyFlopDownImg from 'images/bunnies/Spencer/flop_down.png';
+import bunnyCloseUpImg from 'images/bunnies/Spencer/close_up.png';
 import * as constants from './constants';
 
-// TODO: use actual images
 export default class Spencer {
   constructor() {
     this.name = 'Spencer';
@@ -47,6 +47,7 @@ export default class Spencer {
       flopRight: bunnyFlopRightImg,
       flopUp: bunnyFlopUpImg,
       flopDown: bunnyFlopDownImg,
+      closeup: bunnyCloseUpImg,
     };
   }
 }
