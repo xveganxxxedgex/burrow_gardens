@@ -158,7 +158,6 @@ const defaultState = {
     };
   }),
   bunnies,
-  movePixels: 20,
   popover: null,
   showMenu: true,
   gameStarted: false,

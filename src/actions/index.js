@@ -1723,9 +1723,9 @@ export function moveEntityForward(
   goToTargetPosition,
 ) {
   const tile = tree.get('tile');
-  const movePixels = tree.get('movePixels');
 
   const { isHero } = character;
+  const movePixels = isHero ? characterConstants.HERO_MOVE_PIXELS : characterConstants.BUNNY_MOVE_PIXELS;
   const isOnXAxis = isXAxis(axis);
   const minLimit = isOnXAxis ? getMinBoardXLimit() : getMinBoardYLimit();
   const maxLimit = isOnXAxis ? getMaxBoardXLimit() : getMaxBoardYLimit();
@@ -1817,9 +1817,9 @@ export function moveEntityBack(
 ) {
   const { height: boardHeight, width: boardWidth } = tree.get('boardDimensions');
   const tile = tree.get('tile');
-  const movePixels = tree.get('movePixels');
 
   const { isHero } = character;
+  const movePixels = isHero ? characterConstants.HERO_MOVE_PIXELS : characterConstants.BUNNY_MOVE_PIXELS;
   const isOnXAxis = isXAxis(axis);
   const bunnyRect = findDOMNode(character).getBoundingClientRect();
   const minLimit = 0 - ((isOnXAxis ? bunnyRect.width : bunnyRect.height) / 2);

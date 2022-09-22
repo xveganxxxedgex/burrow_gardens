@@ -14,6 +14,10 @@ Use `keyboard controls` or `WASD` to move, `space` for action, and `i` to bring 
 
 [A live demo can be found here](https://xveganxxxedgex.github.io/burrow_gardens/), but the game is still under development and far from finished
 
+## Deploy
+
+To deploy latest changes to demo page, run: `git subtree push --prefix compile origin gh-pages`
+
 ## TODO
 
 ~~Create general movement/action functionality (arrow keys + space)~~

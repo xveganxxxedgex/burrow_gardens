@@ -190,7 +190,6 @@ class Hero extends Component {
    * @param {object} e - The key down event
    */
   setKeyDown(e) {
-    e.preventDefault();
     const { moving } = this.state;
     const keyEvent = Hero.getKeyEvent(e);
     const {
@@ -213,6 +212,8 @@ class Hero extends Component {
     if (!keyEvent) {
       return;
     }
+
+    e.preventDefault();
 
     // Player is toggling the inventory menu, or hitting escape to exit the menu
     if (keyEvent === 'inventory' || keyEvent === 'escape') {
