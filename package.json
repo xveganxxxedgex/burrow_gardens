@@ -11,7 +11,7 @@
   "dependencies": {
     "axios": "^0.19.0",
     "babel-polyfill": "^6.26.0",
-    "baobab": "^2.5.0",
+    "baobab": "^2.6.1",
     "baobab-react": "^3.0.0",
     "history": "^4.7.2",
     "howler": "^2.1.1",
